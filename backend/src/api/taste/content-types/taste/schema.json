@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tastes",
+  "info": {
+    "singularName": "taste",
+    "pluralName": "tastes",
+    "displayName": "taste",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product.product",
+      "mappedBy": "taste"
+    }
+  }
+}

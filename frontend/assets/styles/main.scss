@@ -1,0 +1,37 @@
+@use './fonts';
+
+.section {
+
+    margin: auto-clamp(25px, 50px) 0;
+}
+
+.container {
+    max-width: 1660px;
+    margin: 0 auto;
+    padding: 24px;
+    position: relative;
+
+    &.line-top {
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 24px;
+            width: calc(100% - 48px);
+            height: 1px;
+            background-color: #F1F3F6;
+        }
+    }
+}
+
+.h2 {
+    font-weight: 900;
+    font-size: auto-clamp(48px, 90px);
+}
+
+.card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 42px;
+}

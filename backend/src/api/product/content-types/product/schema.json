@@ -4,7 +4,8 @@
   "info": {
     "singularName": "product",
     "pluralName": "products",
-    "displayName": "product"
+    "displayName": "product",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -25,6 +26,34 @@
       "relation": "manyToOne",
       "target": "api::category.category",
       "inversedBy": "products"
+    },
+    "brend": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::brend.brend",
+      "inversedBy": "products"
+    },
+    "taste": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::taste.taste",
+      "inversedBy": "products"
+    },
+    "image": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "volumes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::volume.volume",
+      "mappedBy": "product"
     }
   }
 }

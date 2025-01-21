@@ -1,0 +1,38 @@
+@use "sass:math";
+@use "sass:string";
+
+// Переменные 
+$primary: #2E3346;
+$secondary: #F1F3F6;
+$gray: #A7ADBA;
+$accent: #ECE63C;
+$light: #F1F3F6;
+$transition: all 0.3s ease-in-out;
+
+// Миксины
+@mixin center() {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@mixin flex($direction: row, $justify: start, $align: stretch) {
+    display: flex;
+    flex-direction: $direction;
+    justify-content: $justify;
+    align-items: $align;
+}
+
+@mixin pseudo-element($element, $content: '') {
+    &::#{$element} {
+        content: $content;
+        @content;
+    }
+}
+
+// Функции
+@function auto-clamp($min, $max) {
+    $middle: math.div(($min + $max), 2px) * 1vw; // Корректное деление
+    @return string.unquote("clamp(#{$min}, #{$middle}, #{$max})");
+}
