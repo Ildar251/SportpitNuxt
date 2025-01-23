@@ -16,7 +16,7 @@ interface Product {
 // });
 
 import axios from 'axios'
-const { data, pending, error } = useAsyncData('modxApi', async () => {
+const { data, status } = useAsyncData('modxApi', async () => {
     const response = await axios.get('https://test.top-nnov.ru/api')
     return response.data
 });
@@ -24,18 +24,9 @@ const { data, pending, error } = useAsyncData('modxApi', async () => {
 </script>
 <template>
 
-    <div>
-        <h1>Данные из MODX API</h1>
-        <div v-if="pending">Загрузка...</div>
-        <div v-else-if="error">Ошибка: {{ error.message }}</div>
-        <ul v-else>
-            <li v-for="item in data" :key="item.id">
-                <h2>{{ item.pagetitle }}</h2>
-                <p>{{ item.introtext }}</p>
-            </li>
-        </ul>
+
+    <div v-if="status === 'pending'">Загрузка...</div>
+    <div class="card-list" v-else>
+        <Card v-for="product in data" :key="product.id" :product="product" />
     </div>
-    <!-- <div class="card-list" v-if="products">
-        <Card v-for="product in products" :key="product.id" :product="product" />
-    </div> -->
 </template>

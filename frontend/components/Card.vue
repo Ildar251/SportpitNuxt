@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 defineProps(['product'])
-const config = useRuntimeConfig()
+
 </script>
 
 <template>
     <div class="card">
         <div class="card__image">
-            <NuxtImg :src="config.public.strapiUrl + product.image.url" :alt="product.title" />
+
         </div>
         <div class="card__content">
-            <div class="card__brend">{{ product.brend.title }}</div>
-            <h3 class="card__title">{{ product.title }}</h3>
+            <div class="card__brend">{{ product.pagetitle }}</div>
+            <h3 class="card__title">{{ product.pagetitle }}</h3>
             <span class="card__price">{{ product.price }} ₽</span>
         </div>
 
