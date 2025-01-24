@@ -1,32 +1,28 @@
 <script lang="ts" setup>
-// Определяем интерфейс продукта
-interface Product {
-    id: number
-    title: string
-    price: number
-}
+const apiStore = useApiStore()
 
-// const { find } = useStrapi()
+onMounted(() => {
+    apiStore.fetchProducts()
+})
 
-
-// const { data: products } = await useAsyncData<Product[]>('products', async () => {
-//     const response = await find('products', { populate: '*' })
-//     console.log('Ответ от Strapi:', response)
-//     return response.data as Product[]
-// });
-
-import axios from 'axios'
-const { data, status } = useAsyncData('modxApi', async () => {
-    const response = await axios.get('https://test.top-nnov.ru/api')
-    return response.data
-});
-
+const products = computed(() => apiStore.products)
+console.log(apiStore.products)
 </script>
+
 <template>
-
-
-    <div v-if="status === 'pending'">Загрузка...</div>
+    <div v-if="apiStore.loading">Загрузка...</div>
     <div class="card-list" v-else>
-        <Card v-for="product in data" :key="product.id" :product="product" />
+        <Card v-for="product in products" :product="product" :key="product.id" />
     </div>
 </template>
+
+
+
+<style lang="scss" scoped>
+.card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 400px));
+    gap: 24px;
+    margin-top: 42px;
+}
+</style>

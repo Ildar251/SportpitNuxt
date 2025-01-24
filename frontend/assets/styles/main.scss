@@ -1,14 +1,48 @@
 @use './fonts';
 
-.section {
+body {
+    font-weight: 700;
+}
 
+html,
+body {
+    scrollbar-gutter: stable;
+}
+
+.section {
     margin: auto-clamp(25px, 50px) 0;
+
+    .section__header {
+        @include flex(row, space-between, flex-start);
+        gap: auto-clamp(25px, 50px);
+        padding-top: 32px;
+
+
+    }
+}
+
+.btn {
+    transition: $transition;
+
+    &.btn-more {
+        @include flex(row, center, center);
+        gap: auto-clamp(8px, 16px);
+        font-size: auto-clamp(20px, 24px);
+        font-weight: 700;
+        color: $color-gray;
+
+        .nuxt-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+    }
 }
 
 .container {
     max-width: 1660px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 0 24px;
     position: relative;
 
     &.line-top {
@@ -25,13 +59,30 @@
 }
 
 .h2 {
-    font-weight: 900;
+    font-weight: 700;
     font-size: auto-clamp(48px, 90px);
 }
 
-.card-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
-    margin-top: 42px;
+
+.nuxt-icon {
+    transition: $transition;
+    cursor: pointer;
+
+    &:hover {
+        color: $color-accent;
+    }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.w-full {
+    width: 100%;
 }

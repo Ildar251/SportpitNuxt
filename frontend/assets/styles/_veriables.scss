@@ -2,11 +2,11 @@
 @use "sass:string";
 
 // Переменные 
-$primary: #2E3346;
-$secondary: #F1F3F6;
-$gray: #A7ADBA;
-$accent: #ECE63C;
-$light: #F1F3F6;
+$color-primary: #2E3346;
+$color-accent: #007F73;
+$color-secondary: #FFF455;
+$color-gray: #A7ADBA;
+$color-light: #F1F3F6;
 $transition: all 0.3s ease-in-out;
 
 // Миксины
@@ -33,6 +33,7 @@ $transition: all 0.3s ease-in-out;
 
 // Функции
 @function auto-clamp($min, $max) {
-    $middle: math.div(($min + $max), 2px) * 1vw; // Корректное деление
+    $viewport-width: 1920px; // Ширина viewport, относительно которой будем считать vw
+    $middle: math.div($max, $viewport-width) * 100vw;
     @return string.unquote("clamp(#{$min}, #{$middle}, #{$max})");
 }

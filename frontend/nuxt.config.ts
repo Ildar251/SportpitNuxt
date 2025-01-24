@@ -1,15 +1,10 @@
 export default defineNuxtConfig({
 	compatibilityDate: '2024-11-01',
-	// devtools: { enabled: true },
-	modules: ['@nuxtjs/strapi', '@nuxt/image'],
-	strapi: {
-		url: process.env.STRAPI_URL || 'http://localhost:1337',
-		prefix: '/api',
-		version: 'v5',
-	},
+	devtools: { enabled: true },
+	modules: ['@nuxt/image', 'nuxt-icons', '@pinia/nuxt'],
 	runtimeConfig: {
 		public: {
-			strapiUrl: process.env.STRAPI_URL || 'http://localhost:1337'
+			apiUrl: process.env.apiUrl || 'http://localhost:1337'
 		}
 	},
 	css: ['~/assets/styles/default.scss', '~/assets/styles/main.scss'],
