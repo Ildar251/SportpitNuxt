@@ -1,16 +1,6 @@
 import axios from 'axios'
 import { defineStore } from 'pinia'
 
-interface Resource {
-    id: number
-    pagetitle: string
-    introtext: string
-    content: string
-    parent: number
-    parent_title: string | null
-    alias: string
-    uri: string
-}
 interface Products {
     id: number
     pagetitle: string
@@ -27,42 +17,45 @@ interface Products {
     volume?: string
 }
 
+interface Page {
+    id: number
+    title: string
+    alias: string
+    sections: string
+}
+
 export const useApiStore = defineStore('api', {
     state: () => ({
-        resources: [] as Resource[], // Все ресурсы
-        products: [] as Products[],  // Только товары
+        products: [] as Products[],
+        pages: [] as Page[],
         loading: false,
         error: null as string | null
     }),
 
     actions: {
-        // Загружает все ресурсы (если нужно)
-        async fetchResources() {
+        async fetchProducts() {
             this.loading = true
             try {
-                const response = await axios.get<Resource[]>(
-                    'https://test.top-nnov.ru/api?includeTVs=price,taste,sticker,image,volume'
+                const response = await axios.get<Products[]>(
+                    'https://test.top-nnov.ru/api/products'
                 )
-                this.resources = response.data
+                this.products = response.data
             } catch (err) {
-                this.error = 'Ошибка загрузки API'
+                this.error = 'Ошибка загрузки товаров'
             } finally {
                 this.loading = false
             }
         },
 
-        // Загружает только товары (исключает категории)
-        async fetchProducts() {
+        async fetchPages() {
             this.loading = true
             try {
-                const response = await axios.get<Resource[]>(
-                    'https://test.top-nnov.ru/api?parent=4&includeTVs=price,taste,sticker,image,volume'
+                const response = await axios.get<Page[]>(
+                    'https://test.top-nnov.ru/api/pages'
                 )
-
-                console.log(response.data)
-                this.products = response.data // Записываем в products, а не в resources
+                this.pages = response.data // Записываем страницы в store
             } catch (err) {
-                this.error = 'Ошибка загрузки товаров'
+                this.error = 'Ошибка загрузки страниц'
             } finally {
                 this.loading = false
             }
@@ -70,13 +63,12 @@ export const useApiStore = defineStore('api', {
     },
 
     getters: {
-        getResourceById: (state) => (id: number) => {
-            return state.resources.find(resource => resource.id === id) || null
-        },
-
-        // Получаем только загруженные товары
         getProducts: (state) => {
             return state.products
+        },
+
+        getPages: (state) => {
+            return state.pages
         }
     }
 })

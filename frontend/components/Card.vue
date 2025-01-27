@@ -26,7 +26,7 @@ const isHovered = ref(false)
 
 
 const activeIndex = ref(0)
-const volume = computed(() => product.volume ? product.volume.split(',') : [])
+const volume = computed(() => product.volume ? product.volume.split('||') : [])
 const onVolumeClick = (index: number) => {
     activeIndex.value = index
 };

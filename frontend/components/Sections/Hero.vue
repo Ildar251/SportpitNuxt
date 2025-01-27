@@ -68,7 +68,7 @@ onUnmounted(() => {
 .container {
     z-index: 4;
     width: 100%;
-    padding: 74px 0;
+    padding: 74px 20px;
 
     .h1 {
         font-size: 100px;
