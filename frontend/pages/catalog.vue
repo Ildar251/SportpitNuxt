@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePage } from '~/composables/usePage'
 
-const { sections, sectionMap, sectionsData } = usePage('index')
+const { sections, sectionMap, sectionsData } = usePage('catalog')
 </script>
 
 <template>

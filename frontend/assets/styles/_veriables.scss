@@ -3,11 +3,15 @@
 
 // Переменные 
 $color-primary: #2E3346;
-$color-accent: #007F73;
+$color-accent: #90D26D;
 $color-secondary: #FFF455;
 $color-gray: #A7ADBA;
+$color-orange: #FF9800;
+$color-red: #EB4D40;
+$color-white: #fff;
 $color-light: #F1F3F6;
 $transition: all 0.3s ease-in-out;
+$color-border: #E0E5F0;
 
 // Миксины
 @mixin center() {
@@ -33,7 +37,7 @@ $transition: all 0.3s ease-in-out;
 
 // Функции
 @function auto-clamp($min, $max) {
-    $viewport-width: 1920px; // Ширина viewport, относительно которой будем считать vw
+    $viewport-width: 1920px;
     $middle: math.div($max, $viewport-width) * 100vw;
     @return string.unquote("clamp(#{$min}, #{$middle}, #{$max})");
 }

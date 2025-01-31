@@ -1,9 +1,11 @@
 <script setup></script>
 <template>
-    <Header />
-    <main>
-        <NuxtPage />
-    </main>
-    <Footer />
+    <div class="wrapper">
+        <Header />
+        <main>
+            <NuxtPage />
+        </main>
+        <Footer />
+    </div>
 </template>
 <style lang="scss" scoped></style>
