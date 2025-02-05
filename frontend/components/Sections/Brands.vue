@@ -10,7 +10,7 @@ onMounted(() => {
 })
 
 const brands = computed(() => apiStore.brands)
-console.log(brands.value)
+
 </script>
 
 <template>

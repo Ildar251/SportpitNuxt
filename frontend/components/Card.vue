@@ -7,7 +7,6 @@ interface Product {
     parent: number
     category: string | null
     alias: string
-    uri: string
     price?: string
     brand?: string
     taste?: string
@@ -33,8 +32,14 @@ const activeIndex = ref(0)
 const volume = computed(() => product.volume ? product.volume.split('||') : [])
 const onVolumeClick = (index: number) => {
     activeIndex.value = index
-};
+}
 
+const apiStore = useApiStore()
+const brandTitle = computed(() => {
+    const brandId = Number(product.brand)
+    const brand = apiStore.brands.find(a => a.id === brandId)
+    return brand ? brand.title : 'Товар'
+})
 </script>
 
 <template>
@@ -57,10 +62,12 @@ const onVolumeClick = (index: number) => {
                     <NuxtIcon name="favorites" />
                 </div>
             </Transition>
-            <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy" height="320" />
+            <NuxtLink :to="'/products/' + product.alias">
+                <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy" height="320" />
+            </NuxtLink>
         </div>
         <div class="card__content">
-            <div class="card__brand">{{ product?.brand || 'Товар' }}</div>
+            <div class="card__brand">{{ brandTitle }}</div>
             <h3 class="card__title">{{ product.title }}</h3>
             <div class="card__taste">{{ product.taste }}</div>
             <span class="card__price">{{ product.price }} ₽</span>
@@ -72,10 +79,10 @@ const onVolumeClick = (index: number) => {
                         </div>
                     </div>
 
-                    <div class="add-to-cart">
+                    <button class="btn add-to-cart">
                         <span class="span-text">В корзину</span>
                         <NuxtIcon name="plus" />
-                    </div>
+                    </button>
                 </div>
             </Transition>
         </div>
@@ -193,7 +200,7 @@ const onVolumeClick = (index: number) => {
     .card__hovered {
         position: absolute;
         background-color: $color-light;
-        bottom: -125px;
+        bottom: -175px;
         left: 0;
         padding: 0 20px 20px;
         width: 100%;
@@ -212,23 +219,24 @@ const onVolumeClick = (index: number) => {
     }
 
     .add-to-cart {
-        margin-top: 42px;
-        @include flex(row, flex-end, center);
+        @include flex(row, center, center);
         width: 100%;
-        gap: 4px;
+        gap: 18px;
         cursor: pointer;
+        background-color: $color-accent;
+        font-weight: 700;
+        font-size: 26px;
+        padding: 27px;
+        margin-top: 42px;
+        transition: $transition;
 
-        .span-text {
-            transition: $transition;
+        .nuxt-icon {
+            transition: unset;
         }
-
 
         &:hover {
             color: $color-accent;
-
-            .nuxt-icon {
-                transform: scale(1.3);
-            }
+            background-color: $color-white;
         }
     }
 }
