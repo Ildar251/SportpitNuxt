@@ -119,3 +119,41 @@ a {
         color: $color-accent;
     }
 }
+
+.link {
+    font-size: 16px;
+    color: $color-gray;
+    position: relative;
+    transition: $transition;
+
+    &:hover {
+        color: $color-accent;
+    }
+
+    &::after {
+        content: '';
+        display: block;
+        width: 9px;
+        height: 9px;
+        background-image: url('@/public/images/link-arrow.svg');
+        position: absolute;
+        right: -10px;
+        top: -3px;
+        transition: $transition;
+    }
+
+    &:hover {
+        &::after {
+            transform: translate(3px, -3px)
+        }
+    }
+}
+
+.favorite {
+    width: 55px;
+    height: 55px;
+    @include flex(row, center, center);
+    border-radius: 50%;
+    background-color: $color-white;
+    cursor: pointer;
+}
