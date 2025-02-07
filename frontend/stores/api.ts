@@ -54,6 +54,8 @@ export const useApiStore = defineStore('api', {
 		brands: [] as Brands[],
 		loading: false,
 		error: null as string | null,
+		selectedBrands: [] as string[], // Выбранные бренды
+		selectedCategories: [] as string[], // Выбранные категории
 	}),
 
 	actions: {
@@ -126,6 +128,24 @@ export const useApiStore = defineStore('api', {
 				this.loading = false
 			}
 		},
+
+		filterProducts() {
+			return this.products.filter(product => {
+				const matchesBrand = this.selectedBrands.length === 0 || this.selectedBrands.includes(product.brand || '')
+				const matchesCategory = this.selectedCategories.length === 0 || this.selectedCategories.includes(product.category || '')
+				return matchesBrand && matchesCategory
+			})
+		},
+
+		// Установка выбранных брендов
+		setSelectedBrands(brands: string[]) {
+			this.selectedBrands = brands
+		},
+
+		// Установка выбранных категорий
+		setSelectedCategories(categories: string[]) {
+			this.selectedCategories = categories
+		},
 	},
 
 	getters: {
@@ -135,6 +155,37 @@ export const useApiStore = defineStore('api', {
 
 		getPages: state => {
 			return state.pages
+		},
+
+		// Получение уникальных брендов
+		uniqueBrands: (state) => {
+			const brands = new Set<string>()
+			state.products.forEach(product => {
+				if (product.brand) {
+					brands.add(product.brand)
+				}
+			})
+			return Array.from(brands)
+		},
+
+		// Получение уникальных категорий
+		uniqueCategories: (state) => {
+			const categories = new Set<string>()
+			state.products.forEach(product => {
+				if (product.category) {
+					categories.add(product.category)
+				}
+			})
+			return Array.from(categories)
+		},
+
+		// Получение отфильтрованных продуктов
+		filteredProducts: (state) => {
+			return state.products.filter(product => {
+				const matchesBrand = state.selectedBrands.length === 0 || state.selectedBrands.includes(product.brand || '')
+				const matchesCategory = state.selectedCategories.length === 0 || state.selectedCategories.includes(product.category || '')
+				return matchesBrand && matchesCategory
+			})
 		},
 	},
 })

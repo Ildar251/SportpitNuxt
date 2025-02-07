@@ -8,9 +8,7 @@ import { NuxtLink } from '#components'
 				<a href="" class="header__link link">telegram</a>
 				<a href="" class="header__link link">whatsapp</a>
 				<a href="" class="header__link link">vk</a>
-				<a href="mailto:info@nutrivery.ru" class="header__link link"
-					>info@nutrivery.ru</a
-				>
+				<a href="mailto:info@nutrivery.ru" class="header__link link">info@nutrivery.ru</a>
 			</div>
 
 			<a href="tel:+7 945 998-99-65" class="header__phone">
@@ -47,9 +45,7 @@ import { NuxtLink } from '#components'
 					<div class="burger burger_catalog">
 						<span></span>
 					</div>
-					<NuxtLink to="/catalog" class="header__menu-item"
-						><span>Каталог</span></NuxtLink
-					>
+					<NuxtLink to="/catalog" class="header__menu-item"><span>Каталог</span></NuxtLink>
 				</div>
 				<ul class="header__menu">
 					<li class="header__menu-item">
@@ -88,7 +84,7 @@ import { NuxtLink } from '#components'
 		justify-content: space-between;
 		align-items: center;
 
-		& > div:not(.header__items, .header__search) {
+		&>div:not(.header__items, .header__search) {
 			padding: 24px 0;
 		}
 
@@ -101,6 +97,17 @@ import { NuxtLink } from '#components'
 				background-color: $color-border;
 				position: absolute;
 				top: 0;
+				left: -50%;
+			}
+
+			&::after {
+				content: '';
+				display: block;
+				height: 2px;
+				width: 200%;
+				background-color: $color-border;
+				position: absolute;
+				bottom: 0;
 				left: -50%;
 			}
 
@@ -132,7 +139,7 @@ import { NuxtLink } from '#components'
 		display: flex;
 		font-size: 20px;
 
-		& > a {
+		&>a {
 			display: flex;
 			align-items: center;
 			gap: 20px;

@@ -55,5 +55,5 @@ export function usePage(alias: string) {
     })
 
 
-    return { sections, sectionMap, sectionsData }
+    return { sections, sectionMap, sectionsData, page: computed(() => apiStore.pages.find((p) => p.alias === alias)) }
 }
