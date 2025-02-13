@@ -12,7 +12,7 @@ const products = computed(() => props.filters ? apiStore.filteredProducts : apiS
 
 <template>
     <div v-if="apiStore.loading">Загрузка...</div>
-    <div :class="'card-list' + (filters ? ' card-list--filters' : '')" v-else>
+    <div :class="'card-list' + (filters ? ' card-list--filters' : '')" v-else v-auto-animate>
         <Card v-for="product in products" :product="product" :key="product.id" />
     </div>
 </template>
@@ -28,7 +28,7 @@ const products = computed(() => props.filters ? apiStore.filteredProducts : apiS
 }
 
 .card-list--filters {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     flex: 1;
 }
 </style>

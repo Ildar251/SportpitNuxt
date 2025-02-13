@@ -1,5 +1,9 @@
 <script lang="ts" setup>
 import { NuxtLink } from '#components'
+
+import { useModalStore } from '@/stores/modal'
+
+const modalStore = useModalStore()
 </script>
 <template>
 	<header class="header">
@@ -27,7 +31,7 @@ import { NuxtLink } from '#components'
 					<span>Корзина</span>
 				</NuxtLink>
 
-				<NuxtLink to="#" class="header__lk">
+				<NuxtLink to="#" class="header__lk" @click.prevent="modalStore.openAuthModal">
 					<NuxtIcon name="lk" />
 					<span>Личный кабинет</span>
 				</NuxtLink>

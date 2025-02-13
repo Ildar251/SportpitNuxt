@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
 	compatibilityDate: '2024-11-01',
 	devtools: { enabled: true },
-	modules: ['@nuxt/image', 'nuxt-icons', '@pinia/nuxt'],
+	modules: ['@nuxt/image', 'nuxt-icons', '@pinia/nuxt', '@formkit/auto-animate/nuxt'],
 	runtimeConfig: {
 		public: {
 			apiUrl: process.env.apiUrl || 'http://localhost:1337'

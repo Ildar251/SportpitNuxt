@@ -11,6 +11,110 @@ body {
     color: $color-primary;
 }
 
+/* Скрываем стандартный чекбокс */
+input[type="checkbox"] {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: #F1F3F7;
+    border-radius: 0px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out, border 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Активный чекбокс */
+input[type="checkbox"]:checked {
+    background: $color-orange;
+}
+
+/* Галочка (псевдоэлемент) */
+input[type="checkbox"]:checked::after {
+    content: "";
+    display: block;
+    width: 14px;
+    height: 11px;
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='11' viewBox='0 0 14 11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.5 5.41211L5 8.91211L12.5 1.41211' stroke='%232E3346' stroke-width='2'/%3E%3C/svg%3E%0A");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+
+
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+textarea {
+    width: 100%;
+    padding: 26px 42px;
+    font-size: 24px;
+    border: 2px solid #FCFCFC;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #FCFCFC;
+    color: $color-primary;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+textarea:focus {
+    border-color: $color-accent;
+    box-shadow: 0 0 8px $color-accent;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="number"]::placeholder,
+input[type="tel"]::placeholder,
+textarea::placeholder {
+    color: $color-primary;
+    font-weight: 700;
+}
+
+form>input:not(:first-child) {
+    margin-top: 8px;
+}
+
+
+button[type="submit"] {
+    @include flex(row, center, center);
+    width: 100%;
+    padding: 27px;
+    font-size: 26px;
+    font-weight: 600;
+    color: $color-primary;
+    background: $color-accent;
+    border: none;
+    cursor: pointer;
+    transition: $transition;
+    margin-top: 23px;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+        box-shadow: none;
+    }
+}
+
 .wrapper {
     display: flex;
     flex-direction: column;
@@ -28,8 +132,6 @@ body {
         @include flex(row, space-between, flex-start);
         gap: auto-clamp(25px, 50px);
         padding-top: 32px;
-
-
     }
 }
 
@@ -104,6 +206,17 @@ body {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
 .w-full {

@@ -4,11 +4,18 @@ defineProps<{ data?: { catalog_title?: string } }>()
 
 <template>
     <section class="section section-catalog" id="catalog">
-        <div class="container line-top  row">
+        <div class="container line-top row">
+
             <CatalogFilter />
             <CardList :filters="true" />
         </div>
     </section>
 </template>
 
-<style lang="scss"></style>
+<style lang="scss" scoped>
+.section-catalog {
+    .row {
+        gap: 80px;
+    }
+}
+</style>

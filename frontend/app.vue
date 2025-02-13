@@ -4,4 +4,6 @@
 
 <template>
   <NuxtLayout />
+  <AuthModal />
+  <Toaster />
 </template>

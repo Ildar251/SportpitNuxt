@@ -4,7 +4,7 @@ defineProps<{ data?: { catalog_title?: string } }>()
 
 <template>
     <section class="section section-catalog" id="catalog">
-        <div class="container line-top">
+        <div class="container line-top ">
             <div class="section__header">
                 <h2 class="h2">{{ data?.catalog_title || 'Каталог товаров' }}</h2>
 
@@ -13,10 +13,9 @@ defineProps<{ data?: { catalog_title?: string } }>()
                     <NuxtIcon name="arrow-right" />
                 </NuxtLink>
             </div>
-
             <CardList />
         </div>
     </section>
 </template>
 
-<style lang="scss"></style>
+<style lang="scss" scoped></style>

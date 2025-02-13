@@ -37,11 +37,6 @@ onMounted(async () => {
     }
 })
 
-const { getBrandTitle } = useBrand()
-const brandTitle = computed(() => {
-    const brandId = Number(product.value?.brand)
-    return getBrandTitle(brandId)
-})
 
 const activeIndex = ref(0)
 const volume = computed(() =>
@@ -60,7 +55,7 @@ const onVolumeClick = (index: number) => {
             </div>
             <div class="product__info">
                 <NuxtLink to="#" class="product__brand link">
-                    {{ brandTitle }}
+                    {{ product.brand }}
                 </NuxtLink>
                 <div class="product__info-main">
                     <div class="product__info-left">
