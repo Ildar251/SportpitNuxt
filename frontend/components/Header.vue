@@ -3,7 +3,14 @@ import { NuxtLink } from '#components'
 
 import { useModalStore } from '~/stores/useModalStore'
 
+const authStore = useAuthStore()
 const modalStore = useModalStore()
+
+const logout = () => {
+	authStore.logout()
+}
+
+console.log(authStore.apiToken)
 </script>
 <template>
 	<header class="header">
@@ -12,9 +19,7 @@ const modalStore = useModalStore()
 				<a href="" class="header__link link">telegram</a>
 				<a href="" class="header__link link">whatsapp</a>
 				<a href="" class="header__link link">vk</a>
-				<a href="mailto:info@nutrivery.ru" class="header__link link"
-					>info@nutrivery.ru</a
-				>
+				<a href="mailto:info@nutrivery.ru" class="header__link link">info@nutrivery.ru</a>
 			</div>
 
 			<a href="tel:+7 945 998-99-65" class="header__phone">
@@ -33,9 +38,15 @@ const modalStore = useModalStore()
 					<span>Корзина</span>
 				</NuxtLink>
 
-				<NuxtLink to="#" class="header__lk" @click.prevent="modalStore.open">
+				<NuxtLink v-if="!authStore.apiToken" to="#" class="header__lk" @click.prevent="modalStore.open">
 					<NuxtIcon name="lk" />
 					<span>Личный кабинет</span>
+				</NuxtLink>
+
+				<NuxtLink v-else class="header__lk">
+					<NuxtIcon name="lk" />
+					<span class="header__email">{{ authStore.user?.email }}</span>
+					<button class="header__logout" @click="logout">Выйти</button>
 				</NuxtLink>
 			</div>
 		</div>
@@ -51,9 +62,7 @@ const modalStore = useModalStore()
 					<div class="burger burger_catalog">
 						<span></span>
 					</div>
-					<NuxtLink to="/catalog" class="header__menu-item"
-						><span>Каталог</span></NuxtLink
-					>
+					<NuxtLink to="/catalog" class="header__menu-item"><span>Каталог</span></NuxtLink>
 				</div>
 				<ul class="header__menu">
 					<li class="header__menu-item">
@@ -92,7 +101,7 @@ const modalStore = useModalStore()
 		justify-content: space-between;
 		align-items: center;
 
-		& > div:not(.header__items, .header__search) {
+		&>div:not(.header__items, .header__search) {
 			padding: 24px 0;
 		}
 
@@ -147,7 +156,7 @@ const modalStore = useModalStore()
 		display: flex;
 		font-size: 20px;
 
-		& > a {
+		&>a {
 			display: flex;
 			align-items: center;
 			gap: 20px;
