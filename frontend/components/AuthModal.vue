@@ -67,7 +67,7 @@ const confirmRegistration = async () => {
         }}
       </h2>
 
-      <form v-if="authStep === 'login'" @submit.prevent="login">
+      <form v-if="authStep === 'login'" @submit.prevent="login" class="form">
         <input type="email" v-model="email" placeholder="E-mail" required />
         <input type="password" v-model="password" placeholder="Пароль" required />
         <button type="submit">Войти</button>
@@ -76,7 +76,7 @@ const confirmRegistration = async () => {
         </button>
       </form>
 
-      <form v-if="authStep === 'register'" @submit.prevent="register">
+      <form v-if="authStep === 'register'" @submit.prevent="register" class="form">
         <input type="text" v-model="fio" placeholder="ФИО" required />
         <input type="tel" v-model="phone" placeholder="Номер" required />
         <input type="email" v-model="email" placeholder="Почта" required />
@@ -88,7 +88,7 @@ const confirmRegistration = async () => {
         </button>
       </form>
 
-      <form v-if="authStep === 'confirm'" @submit.prevent="confirmRegistration">
+      <form v-if="authStep === 'confirm'" @submit.prevent="confirmRegistration" class="form">
         <input type="text" v-model="confirmationCode" placeholder="Код подтверждения" required />
         <input type="hidden" v-model="email" />
         <button type="submit">Подтвердить</button>

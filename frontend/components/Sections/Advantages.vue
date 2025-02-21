@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import 'swiper/css'
+import 'swiper/css/pagination'
+import { Pagination } from 'swiper/modules'
+import { Swiper, SwiperSlide } from 'swiper/vue'
 const props = defineProps<{ data?: { advantages_items?: string } }>()
 const config = useRuntimeConfig()
 
@@ -11,40 +15,50 @@ const advantages = computed(() => {
         return []
     }
 })
-console.log(advantages);
-
+console.log(advantages)
 </script>
 
 <template>
     <section class="section section-advantages" v-if="advantages.length">
         <div class="container advantage">
-            <div v-for="item in advantages" :key="item.MIGX_id" class="advantage__item">
-                <NuxtImg :src="config.public.apiUrl + item.image" :alt="item.title" class="advantage__image" />
-                <h3 class="advantage__title">{{ item.title }}</h3>
-            </div>
+            <Swiper :modules="[Pagination]" :breakpoints="{ 768: { slidesPerView: 4 }, 1440: { slidesPerView: 4 } }"
+                :spaceBetween="20" :slidesPerView="1.2" :pagination="{ clickable: true }" class="advantage-slider">
+                <SwiperSlide v-for="item in advantages" :key="item.MIGX_id" class="advantage__item">
+                    <NuxtImg :src="config.public.apiUrl + item.image" :alt="item.title" class="advantage__image" />
+                    <h3 class="advantage__title">{{ item.title }}</h3>
+                </SwiperSlide>
+            </Swiper>
         </div>
     </section>
 </template>
 
 <style lang="scss" scoped>
 .advantage {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    @include flex(row, space-between, center);
+    gap: 20px;
     max-width: 1570px;
 
     .advantage__item {
-        display: flex;
-        align-items: center;
+        @include flex(row, flex-start, center);
         gap: 24px;
         position: relative;
+
+        .advantage__image {
+            width: 30%;
+        }
+
+        .advantage__title {
+            flex: 1;
+        }
 
         &::before {
             content: '';
             display: block;
-            width: 24px;
-            height: 24px;
+            width: auto-clamp(12px, 24px);
+            height: auto-clamp(12px, 24px);
             background-image: url('@/assets/images/star.svg');
+            background-size: cover;
+            background-repeat: no-repeat;
             position: absolute;
         }
 

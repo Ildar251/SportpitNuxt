@@ -1,10 +1,13 @@
 <script lang="ts" setup>
-defineProps<{ page?: { title?: string } }>()
+defineProps<{
+    page?: { title?: string }
+    noInfoTitle?: boolean
+}>()
 </script>
 
 <template>
     <section>
-        <div class="container">
+        <div class="container" v-if="!noInfoTitle">
             <h1 class="h1 page-title">{{ page?.title }}</h1>
         </div>
 

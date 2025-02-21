@@ -119,18 +119,18 @@ import { NuxtIcon, NuxtLink } from '#components'
 
     .footer__nav {
         border-top: 2px solid $color-border;
-        margin-top: 120px;
+        margin-top: auto-clamp(60px, 120px);
         @include flex(row, space-between, flex-start);
 
 
         .footer__column {
             @include flex(column, flex-start, flex-start);
             gap: 6px;
-            padding: 42px;
+            padding: auto-clamp(22px, 42px);
             position: relative;
 
             .footer__link {
-                font-size: 31px;
+                font-size: auto-clamp(22px, 32px);
             }
 
             &:not(:first-child)::before {
@@ -146,17 +146,17 @@ import { NuxtIcon, NuxtLink } from '#components'
             }
 
             .h3 {
-                font-size: 38px;
+                font-size: auto-clamp(22px, 38px);
                 font-weight: 700;
-                margin-bottom: 42px
+                margin-bottom: auto-clamp(24px, 42px)
             }
 
             .footer__list {
                 @include flex(column, flex-start, flex-start);
-                gap: 24px;
+                gap: auto-clamp(12px, 24px);
 
                 .footer__list-item {
-                    font-size: 22px;
+                    font-size: auto-clamp(16px, 22px);
                     color: $color-gray;
                 }
             }
@@ -168,7 +168,7 @@ import { NuxtIcon, NuxtLink } from '#components'
         gap: auto-clamp(20px, 40px);
 
         .footer__link {
-            font-size: 38px;
+            font-size: auto-clamp(22px, 38px);
             position: relative;
 
             &::after {
@@ -179,8 +179,8 @@ import { NuxtIcon, NuxtLink } from '#components'
                 background-image: url('../public/images/link-arrow.svg');
                 background-size: cover;
                 position: absolute;
-                right: -10px;
-                top: -3px;
+                right: calc(auto-clamp(15px, 10px) * -1);
+                top: calc(auto-clamp(10px, 3px) * -1);
                 transition: $transition;
             }
 

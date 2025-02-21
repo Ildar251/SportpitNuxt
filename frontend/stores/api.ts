@@ -42,6 +42,7 @@ interface Brands {
 	id: number
 	title: string
 	alias: string
+	description: string
 	tvFields: Record<string, any>
 }
 

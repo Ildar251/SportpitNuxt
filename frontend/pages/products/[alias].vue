@@ -48,55 +48,55 @@ const onVolumeClick = (index: number) => {
 </script>
 
 <template>
-    <section class="section section-product" v-if="product">
-        <div class="container product">
-            <div class="product__image">
-                <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420" />
-            </div>
-            <div class="product__info">
-                <NuxtLink to="#" class="product__brand link">
-                    {{ product.brand }}
-                </NuxtLink>
-                <div class="product__info-main">
-                    <div class="product__info-left">
-                        <h1 class="h1">{{ product.title }} {{ product.taste }}</h1>
-                        <p class="product__description">{{ product.description }}</p>
-                    </div>
-                    <div class="product__info-right">
-                        <div class="product__info-favorite favorite">
-                            <NuxtIcon name="favorites" />
+    <main>
+        <section class="section section-product" v-if="product">
+            <div class="container product">
+                <div class="product__image">
+                    <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420" />
+                </div>
+                <div class="product__info">
+                    <NuxtLink to="#" class="product__brand link">
+                        {{ product.brand }}
+                    </NuxtLink>
+                    <div class="product__info-main">
+                        <div class="product__info-left">
+                            <h1 class="h1">{{ product.title }} {{ product.taste }}</h1>
+                            <p class="product__description">{{ product.description }}</p>
+                        </div>
+                        <div class="product__info-right">
+                            <div class="product__info-favorite favorite">
+                                <NuxtIcon name="favorites" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="product__volume product__info-block">
-                    <h3 class="h3">Объём</h3>
-                    <div class="row">
-                        <div :class="'product__volume-item' +
-                            (index === activeIndex ? ' product__volume-item--active' : '')
-                            " v-for="(volume, index) in volume" :key="index" @click="onVolumeClick(index)">
-                            {{ volume }} мл
+                    <div class="product__volume product__info-block">
+                        <h3 class="h3">Объём</h3>
+                        <div class="row">
+                            <div :class="'product__volume-item' +
+                                (index === activeIndex ? ' product__volume-item--active' : '')
+                                " v-for="(volume, index) in volume" :key="index" @click="onVolumeClick(index)">
+                                {{ volume }} мл
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
-                <div class="product__taste product__info-block">
-                    <h3 class="h3">Вкус</h3>
-                    <div class="row">
-                        <div :class="'product__taste-item' +
+                    <div class="product__taste product__info-block">
+                        <h3 class="h3">Вкус</h3>
+                        <div class="row">
+                            <!-- <div :class="'product__taste-item' +
                             (index === activeIndex ? ' product__taste-item--active' : '')
                             " v-for="(taste, index) in taste" :key="index" @click="onTasteClick(index)">
                             {{ taste }} мл
+                        </div> -->
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-    <div v-else>
-        <p>Продукт не найден</p>
-    </div>
+        </section>
+    </main>
+
 </template>
 
 <style lang="scss" scoped>

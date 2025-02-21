@@ -1,28 +1,38 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+
 defineProps<{ data?: { hero_text?: string; hero_image?: string } }>()
 
-const scrollY = ref(0)
-
-const handleScroll = () => {
-    scrollY.value = window.scrollY
-}
-
 onMounted(() => {
-    window.addEventListener('scroll', handleScroll)
-})
+    window.addEventListener("preloadComplete", () => {
+        // Анимация для h1
+        gsap.fromTo('.h1',
+            { opacity: 0, y: 50 },
+            { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }
+        )
 
-onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
+        // Анимация для btn-more
+        gsap.fromTo('.btn-more',
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 1, ease: 'power3.out', delay: 0.5 }
+        )
+
+        // Анимация для layer2
+        gsap.fromTo('.layer2',
+            { x: 100, y: 100, opacity: 0 },
+            { x: 0, y: 0, opacity: 1, duration: 1.5, ease: 'power3.out', delay: 0.2 }
+        )
+    })
 })
 </script>
 
 <template>
     <section class="section-hero">
-        <div class="parallax-layer layer1" :style="{ transform: `translateY(${scrollY * 0.2}px)` }"></div>
-        <div class="parallax-layer layer2" :style="{ transform: `translateX(${scrollY * 0.1}px)` }"></div>
-        <div class="parallax-layer layer3" :style="{ transform: `translateY(${scrollY * 0.1}px)` }"></div>
+        <div class="parallax-layer layer1"></div>
+        <div class="parallax-layer layer2"></div>
+        <div class="parallax-layer layer3"></div>
 
-        <div class="container" :style="{ transform: `translate(${scrollY * -0.2}px, ${scrollY * -0.05}px)` }">
+        <div class="container">
             <h1 class="h1">
                 {{ data?.hero_text || 'Заголовок по умолчанию' }}
             </h1>
@@ -35,12 +45,11 @@ onUnmounted(() => {
     </section>
 </template>
 
-
 <style lang="scss" scoped>
 .section-hero {
     @include flex(row, flex-start, flex-start);
     position: relative;
-    height: 100vh;
+    height: calc(100svh - 120px);
     max-height: 640px;
     overflow: hidden;
     color: white;
@@ -77,12 +86,12 @@ onUnmounted(() => {
     @include flex(column, stretch, stretch);
     z-index: 4;
     width: 100%;
-    padding: 74px 20px;
+    padding-top: auto-clamp(37px, 74px);
+    padding-bottom: auto-clamp(37px, 74px);
     height: 100%;
 
-
     .h1 {
-        font-size: 100px;
+        font-size: auto-clamp(60px, 100px);
         font-weight: 700;
         max-width: 520px;
         line-height: 1;

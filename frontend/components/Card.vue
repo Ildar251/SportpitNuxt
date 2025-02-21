@@ -40,7 +40,7 @@ const onVolumeClick = (index: number) => {
 <template>
     <div :class="'card' + (isHovered ? ' card--hover' : '')" @mouseover="isHovered = true"
         @mouseleave="isHovered = false">
-        <div class="card__image">
+        <NuxtLink :to="'/products/' + product.alias" class="card__image">
             <Transition name="fade">
                 <div class="card__sticker" v-if="stickers && !isHovered">
                     <div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
@@ -56,10 +56,9 @@ const onVolumeClick = (index: number) => {
                     <NuxtIcon name="favorites" />
                 </div>
             </Transition>
-            <NuxtLink :to="'/products/' + product.alias">
-                <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy" />
-            </NuxtLink>
-        </div>
+            <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy"
+                class="card__img" />
+        </NuxtLink>
         <div class="card__content">
             <div class="card__brand">{{ product.brand || 'Товар' }}</div>
             <h3 class="card__title">{{ product.title }}</h3>
@@ -98,6 +97,10 @@ const onVolumeClick = (index: number) => {
         background-color: $color-light;
     }
 
+    .card__img {
+        max-height: 100%
+    }
+
     .card__volume {
         @include flex(row, flex-start, center);
         gap: 8px;
@@ -125,7 +128,7 @@ const onVolumeClick = (index: number) => {
 
     .card__image {
         @include flex(column, flex-end, center);
-        height: 320px;
+        height: auto-clamp(260px, 320px);
     }
 
     .card__sticker {
@@ -213,8 +216,8 @@ const onVolumeClick = (index: number) => {
         cursor: pointer;
         background-color: $color-accent;
         font-weight: 700;
-        font-size: 26px;
-        padding: 27px;
+        font-size: auto-clamp(20px, 26px);
+        padding: auto-clamp(20px, 27px);
         margin-top: 42px;
         transition: $transition;
 

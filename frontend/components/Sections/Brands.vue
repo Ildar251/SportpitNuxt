@@ -27,7 +27,7 @@ const brands = computed(() => apiStore.brands)
         </div>
 
         <div class="container brands">
-            <NuxtLink :to="'/' + brand.alias" v-for="brand in brands" :key="brand.id" class="brands__item">
+            <NuxtLink :to="`/${brand.alias}`" v-for="brand in brands" :key="brand.id" class="brands__item">
                 <h3 class="h3 brands__title">{{ brand.title }}</h3>
                 <div class="brands__logo">
                     <NuxtImg :src="config.public.apiUrl + brand.tvFields.brand_logo" :alt="brand.title" />
@@ -40,8 +40,8 @@ const brands = computed(() => apiStore.brands)
 <style lang="scss" scoped>
 .brands {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 400px));
-    grid-template-rows: 400px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-auto-rows: 370px;
     gap: 24px;
     margin-top: 42px;
 
@@ -51,8 +51,6 @@ const brands = computed(() => apiStore.brands)
         height: 100%;
         background-color: $color-light;
         transition: $transition;
-
-
 
         &:hover {
             background-color: $color-primary;

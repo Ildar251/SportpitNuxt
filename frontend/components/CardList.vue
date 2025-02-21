@@ -22,7 +22,7 @@ const products = computed(() => props.filters ? apiStore.filteredProducts : apiS
 <style lang="scss" scoped>
 .card-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 400px));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
     margin-top: 42px;
 }

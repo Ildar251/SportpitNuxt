@@ -29,7 +29,7 @@ export function usePage(alias: string) {
 
         // Преобразуем "SectionsHero" → "Hero" и "SectionsCatalog" → "Catalog"
         const formattedSections = sectionNames.map((section) =>
-            section.replace(/^Sections/, '')
+            section.replace(/^Section/, '')
         )
 
         // 🔥 Теперь мы приводим API title к тому же формату, что и в sections

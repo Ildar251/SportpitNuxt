@@ -2,9 +2,11 @@ export default defineNuxtConfig({
 	compatibilityDate: '2024-11-01',
 	devtools: { enabled: true },
 	modules: ['@nuxt/image', 'nuxt-icons', '@pinia/nuxt', '@formkit/auto-animate/nuxt'],
+
 	runtimeConfig: {
 		public: {
-			apiUrl: process.env.apiUrl || 'http://localhost:1337'
+			apiUrl: process.env.apiUrl || 'http://localhost:1337',
+			yandexMapsApiKey: process.env.YANDEX_MAPS_API_KEY
 		}
 	},
 	css: ['~/assets/styles/default.scss', '~/assets/styles/main.scss'],
@@ -17,8 +19,7 @@ export default defineNuxtConfig({
 			}
 		}
 	},
-	image: {
-		domains: ['localhost', 'localhost:1337'],
-		provider: 'ipx'
-	}
+	app: {
+		pageTransition: { name: 'page', mode: 'out-in' }
+	},
 })
