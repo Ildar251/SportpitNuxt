@@ -52,6 +52,7 @@ console.log(advantages)
 
         .advantage__image {
             width: 30%;
+            max-width: 100px;
         }
 
         .advantage__title {
