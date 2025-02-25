@@ -15,7 +15,7 @@
                         <input type="text" placeholder="Ваше имя" />
                         <input type="tel" placeholder="Ваш телефон" />
                         <input type="text" placeholder="Ваша компания" />
-                        <button type="submit">Отправить</button>
+                        <button class="btn" type="submit">Отправить</button>
                     </form>
                 </div>
             </div>
@@ -92,6 +92,11 @@
 
             button {
                 max-width: auto-clamp(320px, 420px);
+
+                &:hover {
+                    background-color: $color-white;
+                    color: $color-accent;
+                }
             }
         }
     }
