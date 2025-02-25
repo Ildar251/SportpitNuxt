@@ -12,17 +12,17 @@ body {
 }
 
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: $color-white;
+    background: $color-gray;
 }
 
 ::-webkit-scrollbar-thumb {
     background-color: $color-accent;
-    border-radius: 20px;
-    border: 2px solid $color-white;
+    border-radius: 15px;
+    border: 0px solid $color-white;
 }
 
 /* Скрываем стандартный чекбокс */
@@ -217,10 +217,11 @@ button[type="submit"] {
     opacity: 0;
 }
 
-.swiper {
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
+.swiper-pagination-bullet {
+    width: 25px;
+    height: 3px;
 }
+
 
 .wrapper {
     display: flex;
@@ -240,6 +241,10 @@ button[type="submit"] {
         @include flex(row, space-between, flex-start);
         gap: auto-clamp(25px, 50px);
         padding-top: 32px;
+
+        @media screen and (max-width: 768px) {
+            align-items: center;
+        }
     }
 }
 
@@ -270,6 +275,28 @@ button[type="submit"] {
             .nuxt-icon {
                 transform: translate(3px, -3px)
             }
+        }
+    }
+
+    &.add-to-cart {
+        @include flex(row, center, center);
+        width: 100%;
+        gap: 18px;
+        cursor: pointer;
+        background-color: $color-accent;
+        font-weight: 700;
+        font-size: auto-clamp(20px, 26px);
+        padding: auto-clamp(20px, 27px);
+        margin-top: 42px;
+        transition: $transition;
+
+        .nuxt-icon {
+            transition: unset;
+        }
+
+        &:hover {
+            color: $color-accent;
+            background-color: $color-white;
         }
     }
 }
@@ -303,7 +330,7 @@ button[type="submit"] {
 
 .h2 {
     font-weight: 700;
-    font-size: auto-clamp(48px, 90px);
+    font-size: auto-clamp(36px, 90px);
 }
 
 

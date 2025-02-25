@@ -95,6 +95,7 @@ const onVolumeClick = (index: number) => {
 
     &--hover {
         background-color: $color-light;
+        z-index: 2;
     }
 
     .card__img {
@@ -209,26 +210,6 @@ const onVolumeClick = (index: number) => {
         top: 20px;
     }
 
-    .add-to-cart {
-        @include flex(row, center, center);
-        width: 100%;
-        gap: 18px;
-        cursor: pointer;
-        background-color: $color-accent;
-        font-weight: 700;
-        font-size: auto-clamp(20px, 26px);
-        padding: auto-clamp(20px, 27px);
-        margin-top: 42px;
-        transition: $transition;
 
-        .nuxt-icon {
-            transition: unset;
-        }
-
-        &:hover {
-            color: $color-accent;
-            background-color: $color-white;
-        }
-    }
 }
 </style>

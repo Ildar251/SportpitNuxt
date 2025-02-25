@@ -66,6 +66,14 @@
 </template>
 
 <style lang="scss" scoped>
+.section-about {
+    .container {
+        @media screen and (max-width: 768px) {
+            padding: 0;
+        }
+    }
+}
+
 .about {
     background-color: #000;
     position: relative;
@@ -102,6 +110,11 @@
         display: grid;
         grid-template-columns: 1fr 2fr 1fr;
         padding: 0 auto-clamp(30px, 67px);
+        gap: 20px;
+
+        @media screen and (max-width: 768px) {
+            grid-template-columns: 1fr;
+        }
 
         .h2 {
             font-size: auto-clamp(20px, 24px);
@@ -128,15 +141,29 @@
             border-top: 2px solid $color-light;
             margin-top: auto-clamp(60px, 140px);
             width: 100%;
+            gap: 20px;
+
+            @media screen and (max-width: 768px) {
+                grid-template-columns: 1fr 1.8fr;
+            }
 
             .about__link {
                 @include flex(column, flex-start, flex-start);
+
+                @media screen and (max-width: 768px) {
+                    grid-column: span 2;
+                }
             }
 
             .link {
                 display: inline-block;
                 font-size: auto-clamp(20px, 34px);
                 margin-top: 20px;
+
+                @media screen and (max-width: 768px) {
+                    font-size: 30px;
+                    color: $color-white;
+                }
             }
 
             .about__image {
@@ -152,6 +179,10 @@
                     position: absolute;
                     left: 0;
                     top: 0;
+
+                    @media screen and (max-width: 768px) {
+                        display: none;
+                    }
                 }
             }
 
@@ -168,9 +199,10 @@
         @include flex(column, center, center);
         gap: 0;
         width: 100%;
-        font-size: auto-clamp(70px, 124px);
+        font-size: auto-clamp(36px, 124px);
         overflow: hidden;
         transition: 0.3s ease background-color, 0.3s ease color;
+        text-align: center;
 
         &:hover {
             background-color: $color-orange;
@@ -178,7 +210,7 @@
         }
 
         span {
-            margin-bottom: calc(auto-clamp(25px, 50px) * -1);
+            margin-bottom: calc(auto-clamp(15px, 50px) * -1);
         }
     }
 }

@@ -1,6 +1,14 @@
 @use "sass:math";
 @use "sass:string";
 
+:root {
+    --swiper-theme-color: #90D26D !important;
+    --swiper-pagination-bottom: -35px !important;
+    --swiper-pagination-bullet-width: 20px !important;
+    --swiper-pagination-bullet-height: 3px !important;
+    --swiper-pagination-bullet-border-radius: 2px !important;
+}
+
 // Переменные 
 $color-primary: #2E3346;
 $color-accent: #90D26D;

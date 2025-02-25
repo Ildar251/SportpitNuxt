@@ -12,6 +12,7 @@ interface Product {
     category: string | null
     alias: string
     price?: string
+    price_old?: string
     brand?: string
     taste?: string
     sticker?: string
@@ -81,7 +82,6 @@ const onVolumeClick = (index: number) => {
                         </div>
                     </div>
 
-
                     <div class="product__taste product__info-block">
                         <h3 class="h3">Вкус</h3>
                         <div class="row">
@@ -91,6 +91,28 @@ const onVolumeClick = (index: number) => {
                             {{ taste }} мл
                         </div> -->
                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="product__price">
+                            <span class="price">{{ product.price }} ₽</span>
+                            <span class="price-old">{{ product.price_old }} ₽</span>
+                        </div>
+                        <div class="product__price-info">
+                            <NuxtIcon name="warning" />
+                            <div>
+                                <h4 class="h4">Указана розничная цена.</h4>
+                                <span>Авторизуйтесь на сайте, чтобы увидеть оптовые цены.</span>
+                                <span class="warning">Минимальная сумма заказа 10 000 ₽</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <button class="btn add-to-cart">
+                            <span class="span-text">В корзину</span>
+                            <NuxtIcon name="plus" />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -102,7 +124,11 @@ const onVolumeClick = (index: number) => {
 <style lang="scss" scoped>
 .product {
     @include flex(row, space-between, flex-start);
-    gap: 64px;
+    gap: auto-clamp(32px, 64px);
+
+    @media screen and (max-width: 768px) {
+        @include flex(column, center, center);
+    }
 
     .h1 {
         font-size: auto-clamp(24px, 50px);
@@ -112,9 +138,9 @@ const onVolumeClick = (index: number) => {
     .product__image {
         @include flex(row, center, center);
         background-color: $color-light;
-        padding: 80px;
+        padding: auto-clamp(40px, 80px);
         width: 100%;
-        max-width: 580px;
+        max-width: auto-clamp(290px, 580px);
     }
 
     .product__info {
@@ -155,11 +181,11 @@ const onVolumeClick = (index: number) => {
         }
 
         .h3 {
-            font-size: 24px;
+            font-size: auto-clamp(18px, 24px);
         }
 
         .product__info-block {
-            margin-top: 120px;
+            margin-top: auto-clamp(60px, 120px);
             border-top: 2px solid $color-border;
             padding-top: 15px;
 
@@ -171,10 +197,11 @@ const onVolumeClick = (index: number) => {
 
                 .product__volume-item {
                     cursor: pointer;
-                    padding: 26px 72px;
+                    padding: auto-clamp(13px, 26px) auto-clamp(36px, 72px);
                     transition: $transition;
                     background-color: $color-light;
                     font-size: 20px;
+                    white-space: nowrap;
 
                     &:hover {
                         transform: translateY(-5px);
@@ -189,6 +216,104 @@ const onVolumeClick = (index: number) => {
         }
 
 
+    }
+
+    .product__price {
+        @include flex(row, center, center);
+        background-color: $color-orange;
+        padding: auto-clamp(12px, 25px) auto-clamp(7px, 14px) auto-clamp(12px, 25px) auto-clamp(32px, 64px);
+        position: relative;
+        flex: 1;
+        white-space: nowrap;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: -25px;
+            width: 50px;
+            background-color: $color-orange;
+            transform: skewX(-20deg);
+            z-index: -1;
+        }
+
+        .price {
+            font-size: auto-clamp(24px, 70px);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .price-old {
+            font-size: auto-clamp(16px, 24px);
+            font-weight: 700;
+            margin-left: auto-clamp(10px, 20px);
+            color: $color-white;
+            position: relative;
+            line-height: 1;
+            height: 100%;
+
+            &::after {
+                content: '';
+                display: block;
+                width: 100%;
+                height: 2px;
+                background-color: currentColor;
+                position: absolute;
+                top: auto-clamp(5px, 10px);
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-25deg);
+                transform-origin: center;
+            }
+        }
+
+
+    }
+
+    .product__price-info {
+        @include flex(row, flex-start, flex-start);
+        gap: 10px;
+        background-color: $color-light;
+        margin-left: 60px;
+        position: relative;
+        padding: auto-clamp(10px, 20px);
+        flex: 3;
+
+        .nuxt-icon {
+            font-size: auto-clamp(12px, 24px);
+            margin-top: 5px;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -25px;
+            width: 50px;
+            background-color: $color-light;
+            transform: skewX(-20deg);
+            z-index: -1;
+        }
+
+        .h4 {
+            font-size: auto-clamp(10px, 20px);
+        }
+
+        .h4+span {
+            font-size: auto-clamp(10px, 16px);
+            color: $color-gray;
+            font-weight: 400;
+            display: inline-block;
+        }
+
+        .warning {
+            display: inline-block;
+            margin-top: auto-clamp(10px, 20px);
+            font-size: auto-clamp(12px, 18px);
+            color: $color-red;
+            font-weight: 400;
+        }
     }
 }
 </style>

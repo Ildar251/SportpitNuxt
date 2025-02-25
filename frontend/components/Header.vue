@@ -76,7 +76,7 @@ onMounted(() => {
 		<div class="container container__bottom">
 			<div class="header__logo">
 				<NuxtLink to="/">
-					<NuxtImg src="../public/images/logo.svg" alt="logo" />
+					<NuxtImg src="/images/logo.svg" alt="logo" />
 				</NuxtLink>
 			</div>
 

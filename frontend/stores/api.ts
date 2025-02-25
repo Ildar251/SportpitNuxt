@@ -11,6 +11,7 @@ interface Products {
 	alias: string
 	uri: string
 	price?: string
+	price_old?: string
 	taste?: string
 	sticker?: string
 	image?: string

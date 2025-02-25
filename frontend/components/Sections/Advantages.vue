@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import 'swiper/css'
 import 'swiper/css/pagination'
-import { Pagination } from 'swiper/modules'
+import { Autoplay, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 const props = defineProps<{ data?: { advantages_items?: string } }>()
 const config = useRuntimeConfig()
@@ -21,8 +21,10 @@ console.log(advantages)
 <template>
     <section class="section section-advantages" v-if="advantages.length">
         <div class="container advantage">
-            <Swiper :modules="[Pagination]" :breakpoints="{ 768: { slidesPerView: 4 }, 1440: { slidesPerView: 4 } }"
-                :spaceBetween="20" :slidesPerView="1.2" :pagination="{ clickable: true }" class="advantage-slider">
+            <Swiper :modules="[Pagination, Autoplay]"
+                :breakpoints="{ 512: { slidesPerView: 2 }, 768: { slidesPerView: 3 }, 1440: { slidesPerView: 4 } }"
+                :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }"
+                :autoplay="{ delay: 2500, disableOnInteraction: false }" :speed="1000" class="advantage-slider">
                 <SwiperSlide v-for="item in advantages" :key="item.MIGX_id" class="advantage__item">
                     <NuxtImg :src="config.public.apiUrl + item.image" :alt="item.title" class="advantage__image" />
                     <h3 class="advantage__title">{{ item.title }}</h3>
@@ -37,6 +39,11 @@ console.log(advantages)
     @include flex(row, space-between, center);
     gap: 20px;
     max-width: 1570px;
+
+    .swiper {
+        width: 100%;
+        overflow: visible !important;
+    }
 
     .advantage__item {
         @include flex(row, flex-start, center);

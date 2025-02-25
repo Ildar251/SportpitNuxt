@@ -55,7 +55,7 @@ const confirmRegistration = async () => {
   <div v-if="modalStore.isOpen" class="modal">
     <div class="modal__content">
       <NuxtLink to="/">
-        <NuxtImg src="../public/images/logo.svg" alt="logo" width="260" />
+        <NuxtImg src="/images/logo.svg" alt="logo" width="260" />
       </NuxtLink>
       <h2>
         {{

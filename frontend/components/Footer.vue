@@ -7,7 +7,7 @@ import { NuxtIcon, NuxtLink } from '#components'
     <footer class="footer">
         <div class="container">
             <div class="footer__top">
-                <NuxtImg src="../public/images/logo_light.svg" alt="logo" width="260" />
+                <NuxtImg src="/images/logo_light.svg" alt="logo" width="260" />
 
                 <div class="footer__contacts">
                     <a href="" class="footer__link">telegram</a>
@@ -87,7 +87,7 @@ import { NuxtIcon, NuxtLink } from '#components'
                 </div>
 
                 <NuxtLink to="/" class="footer__info">
-                    <NuxtImg src="../public/images/topmarka.svg" alt="topmarka" />
+                    <NuxtImg src="/images/topmarka.svg" alt="topmarka" />
                     <span>Создание сайта</span>
                 </NuxtLink>
             </div>
@@ -97,12 +97,18 @@ import { NuxtIcon, NuxtLink } from '#components'
 
 <style lang="scss" scoped>
 .footer {
-    padding: 72px 0;
+    padding: auto-clamp(40px, 72px) 0;
     background-color: $color-primary;
     color: $color-white;
 
     .footer__top {
         @include flex(row, space-between, center);
+
+        @media screen and (max-width: 768px) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 40px;
+        }
     }
 
     .footer__bottom {
@@ -111,9 +117,23 @@ import { NuxtIcon, NuxtLink } from '#components'
         padding-top: 26px;
         color: $color-gray;
 
+        @media screen and (max-width: 768px) {
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start;
+            border-top: 0px solid $color-border;
+        }
+
         .footer__bottom-left {
             @include flex(row, space-between, center);
             gap: 24px;
+
+            @media screen and (max-width: 768px) {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+
         }
     }
 
@@ -121,6 +141,12 @@ import { NuxtIcon, NuxtLink } from '#components'
         border-top: 2px solid $color-border;
         margin-top: auto-clamp(60px, 120px);
         @include flex(row, space-between, flex-start);
+        flex-wrap: wrap;
+
+        @media screen and (max-width: 768px) {
+            border-top: 0 solid $color-border;
+            gap: 20px;
+        }
 
 
         .footer__column {
@@ -128,6 +154,10 @@ import { NuxtIcon, NuxtLink } from '#components'
             gap: 6px;
             padding: auto-clamp(22px, 42px);
             position: relative;
+
+            @media screen and (max-width: 768px) {
+                padding: 0;
+            }
 
             .footer__link {
                 font-size: auto-clamp(22px, 32px);
@@ -143,6 +173,10 @@ import { NuxtIcon, NuxtLink } from '#components'
                 position: absolute;
                 top: 0;
                 left: 0;
+
+                @media screen and (max-width: 768px) {
+                    display: none;
+                }
             }
 
             .h3 {
@@ -176,7 +210,7 @@ import { NuxtIcon, NuxtLink } from '#components'
                 display: block;
                 width: 13px;
                 height: 13px;
-                background-image: url('../public/images/link-arrow.svg');
+                background-image: url('/images/link-arrow.svg');
                 background-size: cover;
                 position: absolute;
                 right: calc(auto-clamp(15px, 10px) * -1);

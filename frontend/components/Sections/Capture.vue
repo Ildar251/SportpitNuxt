@@ -25,6 +25,14 @@
 
 
 <style lang="scss" scoped>
+.section-capture {
+    .container {
+        @media screen and (max-width: 768px) {
+            padding: 0;
+        }
+    }
+}
+
 .capture {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -32,8 +40,10 @@
     gap: 20px;
     color: $color-white;
 
+
     @media screen and (max-width: 1024px) {
         grid-template-columns: 1fr;
+
     }
 
     .capture__image {
@@ -55,16 +65,18 @@
     .capture__form {
         @include flex(column, flex-start, flex-start);
         background-color: $color-primary;
-        flex: 1;
         height: auto;
         margin-top: 62px;
-        padding: auto-clamp(36px, 72px) auto-clamp(60px, 120px);
+        padding: auto-clamp(36px, 72px) auto-clamp(30px, 120px);
         background-image: url(/images/capture_bg.png);
         background-repeat: no-repeat;
         background-position: center right 40px;
 
         @media screen and (max-width: 1024px) {
             margin-top: 0px;
+            background-image: url('/public/images/bg_capture_mobile.jpg');
+            background-size: cover;
+            background-position: center;
         }
 
         .h2 {

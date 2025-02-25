@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import 'swiper/css'
+import 'swiper/css/pagination'
+import { Autoplay, Pagination } from 'swiper/modules'
+import { Swiper, SwiperSlide } from 'swiper/vue'
 defineProps<{ data?: { brands_title?: string } }>()
 
 const config = useRuntimeConfig()
@@ -27,28 +31,33 @@ const brands = computed(() => apiStore.brands)
         </div>
 
         <div class="container brands">
-            <NuxtLink :to="`/${brand.alias}`" v-for="brand in brands" :key="brand.id" class="brands__item">
-                <h3 class="h3 brands__title">{{ brand.title }}</h3>
-                <div class="brands__logo">
-                    <NuxtImg :src="config.public.apiUrl + brand.tvFields.brand_logo" :alt="brand.title" />
-                </div>
-            </NuxtLink>
+            <Swiper :modules="[Pagination, Autoplay]"
+                :breakpoints="{ 512: { slidesPerView: 2 }, 768: { slidesPerView: 3 }, 1440: { slidesPerView: 4 } }"
+                :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }"
+                :autoplay="{ delay: 2500, disableOnInteraction: false }" :speed="1000" class="brands-slider">
+                <SwiperSlide v-for="brand in brands" :key="brand.id" class="brands__item">
+                    <h3 class="h3 brands__title">{{ brand.title }}</h3>
+                    <div class="brands__logo">
+                        <NuxtImg :src="config.public.apiUrl + brand.tvFields.brand_logo" :alt="brand.title" />
+                    </div>
+                </SwiperSlide>
+            </Swiper>
         </div>
     </section>
 </template>
 
 <style lang="scss" scoped>
 .brands {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    grid-auto-rows: 370px;
-    gap: 24px;
     margin-top: 42px;
+
+    .swiper {
+        overflow: visible !important
+    }
 
     .brands__item {
         @include flex(column, flex-start, flex-start);
         padding: 20px;
-        height: 100%;
+        aspect-ratio: 1 / 1;
         background-color: $color-light;
         transition: $transition;
 
@@ -77,6 +86,10 @@ const brands = computed(() => apiStore.brands)
 
         .brands__logo {
             margin-top: auto;
+
+            @media screen and (max-width: 768px) {
+                max-width: 50%;
+            }
         }
     }
 }
