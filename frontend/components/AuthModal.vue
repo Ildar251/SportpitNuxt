@@ -1,176 +1,212 @@
 <script setup lang="ts">
-import { NuxtImg } from '#components'
+import { useAuthStore } from '@/stores/authStore'
 import { useModalStore } from '@/stores/useModalStore'
-import { ref } from 'vue'
+import { useField, useForm } from 'vee-validate'
 import { toast } from 'vue3-toastify'
-
+import * as yup from 'yup'
 const modalStore = useModalStore()
 const authStore = useAuthStore()
-
 const authStep = ref<'login' | 'register' | 'confirm'>('login')
+
+// Схемы валидации
+const loginSchema = yup.object({
+  email: yup.string().email('Некорректный email').required('Обязательное поле'),
+  password: yup.string().min(6, 'Минимум 6 символов').required('Обязательное поле'),
+})
+
+const registerSchema = yup.object({
+  fio: yup.string().min(2, 'Некорректное ФИО').required('Введите ФИО'),
+  phone: yup.string().transform((value) => value.replace(/\D/g, '')).matches(/^\+?\d{11,12}$/, 'Некорректный номер').required('Введите телефон'),
+  email: yup.string().email('Некорректный email').required('Обязательное поле'),
+  password: yup.string().min(6, 'Минимум 6 символов').required('Обязательное поле'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Пароли не совпадают')
+    .required('Подтвердите пароль'),
+})
+
+const confirmSchema = yup.object({
+  confirmationCode: yup.string().required('Введите код подтверждения'),
+})
+
+// Выбираем нужную схему в зависимости от шага
+const validationSchema = computed(() => {
+  return authStep.value === 'login'
+    ? loginSchema
+    : authStep.value === 'register'
+      ? registerSchema
+      : confirmSchema
+})
+
+// Инициализация формы
+const { handleSubmit, errors } = useForm({ validationSchema })
+
+// Поля формы
+const { value: email } = useField<string>('email')
+const { value: password } = useField<string>('password')
+const { value: fio } = useField<string>('fio')
+const { value: phone } = useField<string>('phone')
+const { value: confirmPassword } = useField<string>('confirmPassword')
+const { value: confirmationCode } = useField<string>('confirmationCode')
+
+// Обработчики отправки
+const login = handleSubmit(async (values) => {
+  try {
+    await authStore.login(values.email, values.password)
+    modalStore.close()
+  } catch {
+    toast.error('Ошибка входа', { autoClose: 3000 })
+  }
+})
+
+const register = handleSubmit(async (values) => {
+  try {
+    await authStore.register(values.fio, values.phone, values.email, values.password)
+    authStep.value = 'confirm'
+  } catch {
+    toast.error('Ошибка регистрации', { autoClose: 3000 })
+  }
+})
+
+const confirmRegistration = handleSubmit(async (values) => {
+  try {
+    await authStore.confirmEmail(values.confirmationCode)
+    modalStore.close()
+  } catch {
+    toast.error('Ошибка подтверждения email', { autoClose: 3000 })
+  }
+})
+
 const changeStep = (step: 'login' | 'register' | 'confirm') => {
   authStep.value = step
   authStore.error = null
 }
-const email = ref('')
-const password = ref('')
-const fio = ref('')
-const phone = ref('')
-const confirmPassword = ref('')
-const confirmationCode = ref('')
-
-const login = async () => {
-  try {
-    await authStore.login(email.value, password.value)
-    modalStore.close() // Закрываем модалку после успешного входа
-  } catch (error) {
-    toast.error('Ошибка входа', { autoClose: 3000 })
-  }
-}
-
-const register = async () => {
-  if (password.value !== confirmPassword.value) {
-    toast.error('Пароли не совпадают', { autoClose: 3000 })
-    return
-  }
-  try {
-    await authStore.register(fio.value, phone.value, email.value, password.value)
-    authStep.value = 'confirm'
-  } catch (error) {
-    toast.error('Ошибка регистрации', { autoClose: 3000 })
-  }
-}
-
-const confirmRegistration = async () => {
-  try {
-    await authStore.confirmEmail(confirmationCode.value, email.value) // Передаем email
-    modalStore.close() // Закрываем модалку после успешного подтверждения
-  } catch (error) {
-    toast.error('Ошибка подтверждения email', { autoClose: 3000 })
-  }
-}
 </script>
 
 <template>
-  <div v-if="modalStore.isOpen" class="modal">
-    <div class="modal__content">
-      <NuxtLink to="/">
+  <Transition name="fade">
+    <div v-if="modalStore.isOpen" class="modal">
+
+      <div class="modal__content">
         <NuxtImg src="/images/logo.svg" alt="logo" width="260" />
-      </NuxtLink>
-      <h2>
-        {{
-          authStep === 'login'
-            ? 'Вход'
-            : authStep === 'register'
-              ? 'Регистрация'
-              : 'Подтверждение'
-        }}
-      </h2>
+        <Transition name="slide-up" mode="out-in">
+          <h2 class="h2" v-if="authStep === 'login'">Вход</h2>
+          <h2 class="h2" v-else-if="authStep === 'confirm'">Подтвердите email</h2>
+          <h2 class="h2" v-else-if="authStep === 'register'">Регистрация</h2>
+        </Transition>
 
-      <form v-if="authStep === 'login'" @submit.prevent="login" class="form">
-        <input type="email" v-model="email" placeholder="E-mail" required />
-        <input type="password" v-model="password" placeholder="Пароль" required />
-        <button type="submit">Войти</button>
-        <button type="button" @click="changeStep('register')">
-          Зарегистрироваться
+        <Transition name="slide-up" mode="out-in">
+          <form class="form" v-if="authStep === 'login'" @submit="login">
+            <UiInput v-model="email" type="email" placeholder="E-mail" :error="errors.email" />
+            <UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
+            <button type="submit">Войти</button>
+            <div class="modal__link"><span>Ещё нет аккаунта?</span> <span class="link"
+                @click="changeStep('register')">Зарегистрироваться</span></div>
+          </form>
+
+          <form class="form" v-else-if="authStep === 'register'" @submit="register" autocomplete="off">
+            <UiInput v-model="fio" type="text" placeholder="ФИО" :error="errors.fio" />
+            <UiInput v-model="phone" mask="+7 (###) ###-##-##" type="tel" placeholder="Номер" :error="errors.phone" />
+            <UiInput v-model="email" type="email" placeholder="Почта" :error="errors.email" />
+            <UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
+            <UiInput v-model="confirmPassword" type="password" placeholder="Подтверждение пароля"
+              :error="errors.confirmPassword" />
+            <button type="submit">Зарегистрироваться</button>
+            <span class="modal__policy">Создавая аккаунт, принимаю условия <NuxtLink to="/policy">политики</NuxtLink> и
+              <NuxtLink to="/policy">
+                пользовательского
+                соглашения</NuxtLink>
+            </span>
+            <div class="modal__link"><span>Уже есть аккаунт?</span> <span class="link"
+                @click="changeStep('login')">Войти</span></div>
+          </form>
+
+          <form class="form" v-else-if="authStep === 'confirm'" @submit="confirmRegistration" autocomplete="off">
+            <UiInput v-model="confirmationCode" type="text" placeholder="Код подтверждения"
+              :error="errors.confirmationCode" />
+            <button type="submit">Подтвердить</button>
+          </form>
+        </Transition>
+        <button @click="modalStore.close" class="modal__close">
+          <NuxtIcon name="close" />
         </button>
-      </form>
-
-      <form v-if="authStep === 'register'" @submit.prevent="register" class="form">
-        <input type="text" v-model="fio" placeholder="ФИО" required />
-        <input type="tel" v-model="phone" placeholder="Номер" required />
-        <input type="email" v-model="email" placeholder="Почта" required />
-        <input type="password" v-model="password" placeholder="Пароль" required />
-        <input type="password" v-model="confirmPassword" placeholder="Подтверждение пароля" required />
-        <button type="submit">Зарегистрироваться</button>
-        <button type="button" @click="changeStep('login')">
-          Уже есть аккаунт? Войти
-        </button>
-      </form>
-
-      <form v-if="authStep === 'confirm'" @submit.prevent="confirmRegistration" class="form">
-        <input type="text" v-model="confirmationCode" placeholder="Код подтверждения" required />
-        <input type="hidden" v-model="email" />
-        <button type="submit">Подтвердить</button>
-      </form>
-
-      <button @click="modalStore.close">Закрыть</button>
+      </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <style scoped lang="scss">
+.modal__link {
+  margin-top: 30px;
+  @include flex(row, space-between, center);
+  width: 100%;
+  color: $color-primary;
+  cursor: pointer;
+
+  .link {
+    font-size: 16px;
+
+    &:not(:hover) {
+      color: inherit;
+    }
+  }
+
+}
+
+.modal__policy {
+  display: inline-block;
+  margin-top: 30px;
+  color: $color-gray;
+
+  a {
+    text-decoration: underline;
+  }
+}
+
 .modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 101;
-}
-
-.modal__overlay {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-form {
-  margin-top: 20px;
-}
-
-.modal__content {
-  @include flex(column, flex-start, center);
   background: $color-white;
-  padding: 40px 20px;
+  color: $color-primary;
+  padding: 40px 30px;
   position: relative;
   max-width: 600px;
+  width: 100%;
+  overflow: hidden;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 120;
+  transition: $transition;
+
+  .modal__content {
+    width: 100%;
+    @include flex(column, center, center);
+  }
 
   h2 {
     font-size: 42px;
-    margin-top: 72px;
+    margin-top: 32px;
   }
 
-  .error-message {
-    color: red;
-    margin-top: 10px;
-  }
-
-  .success-message {
-    color: green;
-    margin-top: 10px;
-  }
-
-  .modal__actions {
+  .form {
     margin-top: 20px;
-    text-align: center;
+    width: 100%;
+
+    &>.input-field:not(:first-child) {
+      margin-top: 12px;
+    }
   }
 
-  .modal__actions button {
-    background: none;
-    color: #4caf50;
-    border: none;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-
-  label {
-    margin-top: 10px;
-    font-size: 14px;
-  }
 }
 
 .modal__close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 20px;
+  right: 20px;
   border: none;
   background: none;
   font-size: 24px;
   cursor: pointer;
+  color: $color-primary;
 }
 </style>

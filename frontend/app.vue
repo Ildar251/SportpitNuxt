@@ -12,6 +12,7 @@ const authStore = useAuthStore()
 
     <AuthModal />
     <Preload />
+    <Overlay />
     <Footer />
   </div>
 </template>

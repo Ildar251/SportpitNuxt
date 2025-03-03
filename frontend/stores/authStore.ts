@@ -75,13 +75,13 @@ export const useAuthStore = defineStore('auth', {
 			}
 		},
 
-		async confirmEmail(code: string, email: string): Promise<void> {
+		async confirmEmail(code: string): Promise<void> {
 			this.loading = true
 			this.error = null
 			try {
 				const response = await axios.post<{ api_token: string }>(
 					'https://test.top-nnov.ru/api/confirm',
-					new URLSearchParams({ code, email }),
+					new URLSearchParams({ code }),
 					{
 						withCredentials: true,
 						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

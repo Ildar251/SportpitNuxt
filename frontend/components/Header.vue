@@ -207,7 +207,6 @@ onMounted(() => {
 		</Transition>
 	</header>
 
-	<div v-if="mobileMenuStore.isOpen" class="overlay" @click="mobileMenuStore.close"></div>
 </template>
 
 <style lang="scss" scoped>
@@ -275,10 +274,7 @@ onMounted(() => {
 	}
 
 	.header__phone {
-		display: flex;
-		align-items: center;
-		gap: auto-clamp(16px, 16px);
-		font-size: auto-clamp(16px, 32px);
+		font-size: auto-clamp(16px, 26px);
 
 		span:not(.nuxt-icon) {
 			transition: $transition;

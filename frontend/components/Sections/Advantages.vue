@@ -38,7 +38,6 @@ console.log(advantages)
 .advantage {
     @include flex(row, space-between, center);
     gap: 20px;
-    max-width: 1570px;
 
     .swiper {
         width: 100%;
