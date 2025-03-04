@@ -49,6 +49,8 @@ const { value: phone } = useField<string>('phone')
 const { value: confirmPassword } = useField<string>('confirmPassword')
 const { value: confirmationCode } = useField<string>('confirmationCode')
 
+const registeredEmail = ref('')
+
 // Обработчики отправки
 const login = handleSubmit(async (values) => {
   try {
@@ -62,6 +64,9 @@ const login = handleSubmit(async (values) => {
 const register = handleSubmit(async (values) => {
   try {
     await authStore.register(values.fio, values.phone, values.email, values.password)
+    registeredEmail.value = values.email
+    console.log(registeredEmail.value)
+
     authStep.value = 'confirm'
   } catch {
     toast.error('Ошибка регистрации', { autoClose: 3000 })
@@ -70,7 +75,7 @@ const register = handleSubmit(async (values) => {
 
 const confirmRegistration = handleSubmit(async (values) => {
   try {
-    await authStore.confirmEmail(values.confirmationCode)
+    await authStore.confirmEmail(registeredEmail.value, values.confirmationCode)
     modalStore.close()
   } catch {
     toast.error('Ошибка подтверждения email', { autoClose: 3000 })
@@ -104,7 +109,7 @@ const changeStep = (step: 'login' | 'register' | 'confirm') => {
                 @click="changeStep('register')">Зарегистрироваться</span></div>
           </form>
 
-          <form class="form" v-else-if="authStep === 'register'" @submit="register" autocomplete="off">
+          <form class="form" v-else-if="authStep === 'register'" @submit="register">
             <UiInput v-model="fio" type="text" placeholder="ФИО" :error="errors.fio" />
             <UiInput v-model="phone" mask="+7 (###) ###-##-##" type="tel" placeholder="Номер" :error="errors.phone" />
             <UiInput v-model="email" type="email" placeholder="Почта" :error="errors.email" />
@@ -121,7 +126,8 @@ const changeStep = (step: 'login' | 'register' | 'confirm') => {
                 @click="changeStep('login')">Войти</span></div>
           </form>
 
-          <form class="form" v-else-if="authStep === 'confirm'" @submit="confirmRegistration" autocomplete="off">
+          <form class="form" v-else-if="authStep === 'confirm'" @submit="confirmRegistration">
+            <UiInput v-model="registeredEmail" type="hidden" />
             <UiInput v-model="confirmationCode" type="text" placeholder="Код подтверждения"
               :error="errors.confirmationCode" />
             <button type="submit">Подтвердить</button>
