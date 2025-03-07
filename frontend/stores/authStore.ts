@@ -3,9 +3,11 @@ import { defineStore } from 'pinia'
 import { toast } from 'vue3-toastify'
 
 interface User {
-	fio: string
+	name: string
+	surname: string
 	phone: string
 	email: string
+	inn: string
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -52,15 +54,13 @@ export const useAuthStore = defineStore('auth', {
 			}
 		},
 
-
-
-		async register(fio: string, phone: string, email: string, password: string) {
+		async register(surname: string, name: string, phone: string, email: string, password: string, inn: string) {
 			this.loading = true
 			this.error = null
 			try {
 				await axios.post(
 					'https://test.top-nnov.ru/api/register',
-					new URLSearchParams({ fio, phone, email, password }),
+					new URLSearchParams({ surname, name, phone, email, password, inn }),
 					{
 						withCredentials: true,
 						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

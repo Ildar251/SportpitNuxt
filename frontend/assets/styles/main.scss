@@ -56,11 +56,11 @@ input[type="checkbox"]:checked::after {
 
 // .form:not(.form-dark) {
 
-//     input[type="text"],
-//     input[type="email"],
-//     input[type="password"],
-//     input[type="number"],
-//     input[type="tel"],
+//     input[type=text],
+//     input[type=email],
+//     input[type=password],
+//     input[type=number],
+//     input[type=tel],
 //     textarea {
 //         width: 100%;
 //         padding: 18px 32px;
@@ -72,21 +72,21 @@ input[type="checkbox"]:checked::after {
 //         color: $color-primary;
 //     }
 
-//     input[type="text"]:focus,
-//     input[type="email"]:focus,
-//     input[type="password"]:focus,
-//     input[type="number"]:focus,
-//     input[type="tel"]:focus,
+//     input[type=text]:focus,
+//     input[type=email]:focus,
+//     input[type=password]:focus,
+//     input[type=number]:focus,
+//     input[type=tel]:focus,
 //     textarea:focus {
 //         border-color: $color-accent;
 //         box-shadow: 0 0 8px $color-accent;
 //     }
 
-//     input[type="text"]::placeholder,
-//     input[type="email"]::placeholder,
-//     input[type="password"]::placeholder,
-//     input[type="number"]::placeholder,
-//     input[type="tel"]::placeholder,
+//     input[type=text]::placeholder,
+//     input[type=email]::placeholder,
+//     input[type=password]::placeholder,
+//     input[type=number]::placeholder,
+//     input[type=tel]::placeholder,
 //     textarea::placeholder {
 //         color: $color-primary;
 //         font-weight: 700;
@@ -101,11 +101,11 @@ input[type="checkbox"]:checked::after {
 
 .form {
 
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    input[type="tel"],
+    input[type=text],
+    input[type=email],
+    input[type=password],
+    input[type=number],
+    input[type=tel],
     textarea {
         width: 100%;
         padding: 26px 0px 12px;
@@ -118,20 +118,20 @@ input[type="checkbox"]:checked::after {
         color: inherit;
     }
 
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="password"]:focus,
-    input[type="number"]:focus,
-    input[type="tel"]:focus,
+    input[type=text]:focus,
+    input[type=email]:focus,
+    input[type=password]:focus,
+    input[type=number]:focus,
+    input[type=tel]:focus,
     textarea:focus {
         border-color: $color-accent;
     }
 
-    input[type="text"]::placeholder,
-    input[type="email"]::placeholder,
-    input[type="password"]::placeholder,
-    input[type="number"]::placeholder,
-    input[type="tel"]::placeholder,
+    input[type=text]::placeholder,
+    input[type=email]::placeholder,
+    input[type=password]::placeholder,
+    input[type=number]::placeholder,
+    input[type=tel]::placeholder,
     textarea::placeholder {
         color: inherit;
     }
@@ -144,7 +144,7 @@ input[type="checkbox"]:checked::after {
         -webkit-text-fill-color: $color-primary !important;
     }
 
-    button[type="submit"] {
+    button[type=submit] {
         @include flex(row, center, center);
         width: 100%;
         padding: 23px;
@@ -155,7 +155,6 @@ input[type="checkbox"]:checked::after {
         border: none;
         cursor: pointer;
         transition: $transition;
-        margin-top: 42px;
 
         &:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -315,6 +314,12 @@ input[type="checkbox"]:checked::after {
 .btn {
     cursor: pointer;
 
+    span {
+        &:not(.nuxt-icon) {
+            transition: $transition;
+        }
+    }
+
     &.btn-more {
         @include flex(row, center, flex-start);
         gap: auto-clamp(8px, 16px);
@@ -322,11 +327,6 @@ input[type="checkbox"]:checked::after {
         font-weight: 700;
         color: $color-gray;
 
-        span {
-            &:not(.nuxt-icon) {
-                transition: $transition;
-            }
-        }
 
         .nuxt-icon {
             width: 18px;
@@ -342,7 +342,8 @@ input[type="checkbox"]:checked::after {
         }
     }
 
-    &.add-to-cart {
+    &.add-to-cart,
+    &.btn-auth {
         @include flex(row, center, center);
         width: 100%;
         gap: 18px;
@@ -497,9 +498,8 @@ a {
 }
 
 .page-title {
-    font-size: 140px;
-    margin-left: -10px;
-    margin-top: 42px;
+    font-size: auto-clamp(36px, 140px);
+    margin-top: auto-clamp(20px, 42px);
 }
 
 
@@ -537,5 +537,46 @@ a {
 
     &:hover {
         background: #f0f0f0;
+    }
+}
+
+
+
+.modal {
+    .modal__close {
+        position: absolute;
+        top: 70px;
+        right: 70px;
+        border: none;
+        background: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: $color-primary;
+    }
+
+    .modal__link {
+        margin-top: 30px;
+        @include flex(row, space-between, center);
+        width: 100%;
+        color: $color-primary;
+        cursor: pointer;
+
+        .link {
+            font-size: 16px;
+
+            &:not(:hover) {
+                color: inherit;
+            }
+        }
+
+    }
+
+    .modal__policy {
+        display: inline-block;
+        color: $color-gray;
+
+        a {
+            text-decoration: underline;
+        }
     }
 }

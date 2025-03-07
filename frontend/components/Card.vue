@@ -1,4 +1,30 @@
 <script lang="ts" setup>
+import { useCartStore } from '@/stores/useCartStore'
+
+const cartStore = useCartStore()
+const selectedVolume = computed(() => volume.value[activeIndex.value] || '')
+
+const addToCart = () => {
+    cartStore.addToCart({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        volume: selectedVolume.value,
+        quantity: 1,
+    })
+}
+
+const toggleFavorite = () => {
+    cartStore.toggleFavorite({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        volume: selectedVolume.value,
+        quantity: 1,
+    })
+}
 interface Product {
     id: number
     title: string
@@ -52,7 +78,7 @@ const onVolumeClick = (index: number) => {
                 </div>
             </Transition>
             <Transition name="fade">
-                <div v-if="isHovered" class="card__favorite favorite">
+                <div v-if="isHovered" class="card__favorite favorite" @click="toggleFavorite">
                     <NuxtIcon name="favorites" />
                 </div>
             </Transition>
@@ -74,7 +100,7 @@ const onVolumeClick = (index: number) => {
                         </div>
                     </div>
 
-                    <button class="btn add-to-cart">
+                    <button class="btn add-to-cart" @click="addToCart">
                         <span class="span-text">В корзину</span>
                         <NuxtIcon name="plus" />
                     </button>

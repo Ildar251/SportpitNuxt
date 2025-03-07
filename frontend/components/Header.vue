@@ -26,7 +26,6 @@ watch(() => mobileMenuStore.isOpen, (isOpen) => {
 
 onMounted(() => {
 	window.addEventListener("preloadComplete", () => {
-
 		gsap.fromTo('.header',
 			{ opacity: 0, y: -60 },
 			{ opacity: 1, y: 0, duration: 1, ease: 'power3.out' }
@@ -45,31 +44,30 @@ onMounted(() => {
 			</div>
 
 			<a href="tel:+7 945 998-99-65" class="header__phone">
-				<NuxtIcon name="phone" />
+				<NuxtIcon name="phone" filled />
 				<span>+7 945 998-99-65</span>
 			</a>
 
 			<div class="header__items">
 				<NuxtLink to="#" class="header__favorites">
-					<NuxtIcon name="favorites" />
+					<NuxtIcon name="favorites" filled />
 					<span class="header__favorites-count">0</span>
 				</NuxtLink>
 
 				<NuxtLink to="#" class="header__cart">
-					<NuxtIcon name="cart" />
+					<NuxtIcon name="cart" filled />
 					<span>Корзина</span>
 				</NuxtLink>
 
 				<NuxtLink v-if="!authStore.apiToken" to="#" class="header__lk" @click.prevent="modalStore.open">
-					<NuxtIcon name="lk" />
+					<NuxtIcon name="lk" filled />
 					<span class="full-text">Личный кабинет</span>
 					<span class="short-text">ЛК</span>
 				</NuxtLink>
 
-				<NuxtLink v-else class="header__lk">
-					<NuxtIcon name="lk" />
+				<NuxtLink v-else class="header__lk" to="/lk">
+					<NuxtIcon name="lk" filled />
 					<span class="header__email">{{ authStore.user?.email }}</span>
-					<button class="header__logout" @click="logout">Выйти</button>
 				</NuxtLink>
 			</div>
 		</div>

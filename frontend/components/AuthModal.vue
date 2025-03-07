@@ -15,7 +15,8 @@ const loginSchema = yup.object({
 })
 
 const registerSchema = yup.object({
-  fio: yup.string().min(2, 'Некорректное ФИО').required('Введите ФИО'),
+  surname: yup.string().min(2, 'Некорректная фамилия').required('Заполните фамилию'),
+  name: yup.string().min(2, 'Некорректное имя').required('Заполните имя'),
   phone: yup.string().transform((value) => value.replace(/\D/g, '')).matches(/^\+?\d{11,12}$/, 'Некорректный номер').required('Введите телефон'),
   email: yup.string().email('Некорректный email').required('Обязательное поле'),
   password: yup.string().min(6, 'Минимум 6 символов').required('Обязательное поле'),
@@ -44,10 +45,12 @@ const { handleSubmit, errors } = useForm({ validationSchema })
 // Поля формы
 const { value: email } = useField<string>('email')
 const { value: password } = useField<string>('password')
-const { value: fio } = useField<string>('fio')
+const { value: surname } = useField<string>('surname')
+const { value: name } = useField<string>('name')
 const { value: phone } = useField<string>('phone')
 const { value: confirmPassword } = useField<string>('confirmPassword')
 const { value: confirmationCode } = useField<string>('confirmationCode')
+const { value: inn } = useField<string>('inn')
 
 const registeredEmail = ref('')
 
@@ -63,9 +66,8 @@ const login = handleSubmit(async (values) => {
 
 const register = handleSubmit(async (values) => {
   try {
-    await authStore.register(values.fio, values.phone, values.email, values.password)
+    await authStore.register(values.name, values.surname, values.phone, values.email, values.password, values.inn)
     registeredEmail.value = values.email
-    console.log(registeredEmail.value)
 
     authStep.value = 'confirm'
   } catch {
@@ -76,6 +78,7 @@ const register = handleSubmit(async (values) => {
 const confirmRegistration = handleSubmit(async (values) => {
   try {
     await authStore.confirmEmail(registeredEmail.value, values.confirmationCode)
+    authStep.value = 'login'
     modalStore.close()
   } catch {
     toast.error('Ошибка подтверждения email', { autoClose: 3000 })
@@ -86,47 +89,70 @@ const changeStep = (step: 'login' | 'register' | 'confirm') => {
   authStep.value = step
   authStore.error = null
 }
+
+const tabs = [
+  { id: 'fizical', label: 'Физическое лицо' },
+  { id: 'legal', label: 'Юридическое лицо' }
+]
+
+const activeTab = ref(tabs[0].id)
 </script>
 
 <template>
   <Transition name="fade">
-    <div v-if="modalStore.isOpen" class="modal">
+    <div v-if="modalStore.isOpen" class="modal modal-auth">
 
-      <div class="modal__content">
-        <NuxtImg src="/images/logo.svg" alt="logo" width="260" />
-        <Transition name="slide-up" mode="out-in">
-          <h2 class="h2" v-if="authStep === 'login'">Вход</h2>
-          <h2 class="h2" v-else-if="authStep === 'confirm'">Подтвердите email</h2>
-          <h2 class="h2" v-else-if="authStep === 'register'">Регистрация</h2>
-        </Transition>
+      <div class="modal__content ">
+        <div class="modal__left">
+          <NuxtImg src="/images/logo.svg" alt="logo" width="320" />
+          <h2 class="h2">Личный кабинет</h2>
+
+          <NuxtImg src="/images/auth-img.jpg" alt="img" width="380" class="modal__img" />
+        </div>
 
         <Transition name="slide-up" mode="out-in">
           <form class="form" v-if="authStep === 'login'" @submit="login">
+            <h2 class="h2">Авторизация</h2>
             <UiInput v-model="email" type="email" placeholder="E-mail" :error="errors.email" />
             <UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
-            <button type="submit">Войти</button>
+            <button type="submit">Войти в аккаунт</button>
             <div class="modal__link"><span>Ещё нет аккаунта?</span> <span class="link"
                 @click="changeStep('register')">Зарегистрироваться</span></div>
           </form>
 
           <form class="form" v-else-if="authStep === 'register'" @submit="register">
-            <UiInput v-model="fio" type="text" placeholder="ФИО" :error="errors.fio" />
-            <UiInput v-model="phone" mask="+7 (###) ###-##-##" type="tel" placeholder="Номер" :error="errors.phone" />
-            <UiInput v-model="email" type="email" placeholder="Почта" :error="errors.email" />
-            <UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
-            <UiInput v-model="confirmPassword" type="password" placeholder="Подтверждение пароля"
-              :error="errors.confirmPassword" />
-            <button type="submit">Зарегистрироваться</button>
-            <span class="modal__policy">Создавая аккаунт, принимаю условия <NuxtLink to="/policy">политики</NuxtLink> и
-              <NuxtLink to="/policy">
-                пользовательского
-                соглашения</NuxtLink>
-            </span>
+            <h2 class="h2">Регистрация</h2>
+            <UiTabs v-model="activeTab" :tabsClass="'tabs-lk'" :tabs="tabs" />
+            <div class="form__grid">
+              <UiInput v-model="surname" type="text" placeholder="Фамилия" :error="errors.surname" />
+              <UiInput v-model="name" type="text" placeholder="Имя" :error="errors.name" />
+              <UiInput v-model="phone" mask="+7 (###) ###-##-##" type="tel" placeholder="Номер" :error="errors.phone" />
+              <UiInput v-model="email" type="email" placeholder="Почта" :error="errors.email" />
+              <UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
+              <UiInput v-model="confirmPassword" type="password" placeholder="Подтверждение пароля"
+                :error="errors.confirmPassword" />
+              <Transition name="slide-down">
+                <UiInput v-model="inn" type="password" placeholder="Инн" v-if="activeTab === 'legal'"
+                  :error="errors.inn" />
+              </Transition>
+            </div>
+
+            <div class="modal__bottom">
+              <button type="submit">Зарегистрироваться</button>
+              <span class="modal__policy">Создавая аккаунт, принимаю условия <NuxtLink to="/policy">политики</NuxtLink>
+                и
+                <NuxtLink to="/policy">
+                  пользовательского
+                  соглашения</NuxtLink>
+              </span>
+            </div>
+
             <div class="modal__link"><span>Уже есть аккаунт?</span> <span class="link"
                 @click="changeStep('login')">Войти</span></div>
           </form>
 
           <form class="form" v-else-if="authStep === 'confirm'" @submit="confirmRegistration">
+            <h2 class="h2">Подтвердите email</h2>
             <UiInput v-model="registeredEmail" type="hidden" />
             <UiInput v-model="confirmationCode" type="text" placeholder="Код подтверждения"
               :error="errors.confirmationCode" />
@@ -142,77 +168,78 @@ const changeStep = (step: 'login' | 'register' | 'confirm') => {
 </template>
 
 <style scoped lang="scss">
-.modal__link {
-  margin-top: 30px;
-  @include flex(row, space-between, center);
-  width: 100%;
-  color: $color-primary;
-  cursor: pointer;
-
-  .link {
-    font-size: 16px;
-
-    &:not(:hover) {
-      color: inherit;
-    }
-  }
-
-}
-
-.modal__policy {
-  display: inline-block;
-  margin-top: 30px;
-  color: $color-gray;
-
-  a {
-    text-decoration: underline;
-  }
-}
-
 .modal {
-  background: $color-white;
-  color: $color-primary;
-  padding: 40px 30px;
-  position: relative;
-  max-width: 600px;
-  width: 100%;
-  overflow: hidden;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 120;
-  transition: $transition;
-
-  .modal__content {
+  &.modal-auth {
+    background: $color-white;
+    color: $color-primary;
+    padding: 72px;
+    position: relative;
+    max-width: 1400px;
     width: 100%;
-    @include flex(column, center, center);
-  }
+    overflow: hidden;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 120;
+    transition: $transition;
 
-  h2 {
-    font-size: 42px;
-    margin-top: 32px;
-  }
+    .modal__content {
+      width: 100%;
+      @include flex(row, center, stretch);
+      gap: 84px;
 
-  .form {
-    margin-top: 20px;
-    width: 100%;
+      .modal__left {
+        @include flex(column, center, center);
+        position: relative;
 
-    &>.input-field:not(:first-child) {
-      margin-top: 12px;
+        .h2 {
+          margin-top: 24px;
+        }
+
+        &::after {
+          content: '';
+          display: block;
+          width: 2px;
+          height: 100%;
+          background-color: $color-border;
+          position: absolute;
+          right: -42px;
+        }
+
+        .modal__img {
+          margin-top: 60px;
+        }
+      }
+    }
+
+    .tabs {
+      margin: 42px 0;
+    }
+
+    .h2 {
+      font-size: 40px;
+    }
+
+    .form {
+      flex: 1;
+      @include flex(column, stretch, stretch);
+      height: auto;
+
+      .form__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 42px;
+        margin-bottom: 42px;
+      }
+
+      .modal__bottom {
+        @include flex(row, space-between, center);
+        margin-top: auto;
+        gap: 44px;
+      }
     }
   }
 
-}
-
-.modal__close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  border: none;
-  background: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: $color-primary;
 }
 </style>
