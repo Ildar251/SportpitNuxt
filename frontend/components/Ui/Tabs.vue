@@ -16,7 +16,7 @@ const setActiveTab = (tabId: string) => {
     <div :class="'tabs ' + props.tabsClass">
         <div v-for="tab in props.tabs" :key="tab.id" :class="'tabs__item ' + (modelValue === tab.id ? 'active' : '')"
             @click="setActiveTab(tab.id)">
-            <NuxtIcon v-if="tab.icon" :name="tab.icon" filled />
+            <NuxtIcon v-if="tab.icon" :name="tab.icon" />
             <span>{{ tab.label }}</span>
         </div>
     </div>
@@ -40,6 +40,10 @@ const setActiveTab = (tabId: string) => {
         background-color: #FCFCFC;
         transition: $transition;
         cursor: pointer;
+
+        &:hover {
+            color: $color-accent;
+        }
     }
 
     .tabs__item.active {

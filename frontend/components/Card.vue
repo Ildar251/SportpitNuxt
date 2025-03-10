@@ -1,30 +1,25 @@
 <script lang="ts" setup>
-import { useCartStore } from '@/stores/useCartStore'
+import { useCartStore } from '@/stores/cartStore'
+import { useFavoriteStore } from '@/stores/favoritesStore'
 
 const cartStore = useCartStore()
-const selectedVolume = computed(() => volume.value[activeIndex.value] || '')
+const favoriteStore = useFavoriteStore()
 
 const addToCart = () => {
     cartStore.addToCart({
         id: product.id,
         title: product.title,
-        price: product.price,
+        price: product.price!,
         image: product.image,
-        volume: selectedVolume.value,
         quantity: 1,
     })
 }
 
 const toggleFavorite = () => {
-    cartStore.toggleFavorite({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        image: product.image,
-        volume: selectedVolume.value,
-        quantity: 1,
-    })
+    favoriteStore.toggleFavorite(product.id)
 }
+
+
 interface Product {
     id: number
     title: string
@@ -64,9 +59,9 @@ const onVolumeClick = (index: number) => {
 </script>
 
 <template>
-    <div :class="'card' + (isHovered ? ' card--hover' : '')" @mouseover="isHovered = true"
-        @mouseleave="isHovered = false">
-        <NuxtLink :to="'/products/' + product.alias" class="card__image">
+    <NuxtLink :to="'/products/' + product.alias" :class="'card' + (isHovered ? ' card--hover' : '')"
+        @mouseover="isHovered = true" @mouseleave="isHovered = false">
+        <div class="card__image">
             <Transition name="fade">
                 <div class="card__sticker" v-if="stickers && !isHovered">
                     <div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
@@ -78,13 +73,15 @@ const onVolumeClick = (index: number) => {
                 </div>
             </Transition>
             <Transition name="fade">
-                <div v-if="isHovered" class="card__favorite favorite" @click="toggleFavorite">
+                <div v-if="isHovered"
+                    :class="'card__favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+                    @click="toggleFavorite">
                     <NuxtIcon name="favorites" />
                 </div>
             </Transition>
             <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy"
                 class="card__img" />
-        </NuxtLink>
+        </div>
         <div class="card__content">
             <div class="card__brand">{{ product.brand || 'Товар' }}</div>
             <h3 class="card__title">{{ product.title }}</h3>
@@ -107,7 +104,7 @@ const onVolumeClick = (index: number) => {
                 </div>
             </Transition>
         </div>
-    </div>
+    </NuxtLink>
 </template>
 
 <style lang="scss" scoped>

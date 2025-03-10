@@ -44,29 +44,29 @@ onMounted(() => {
 			</div>
 
 			<a href="tel:+7 945 998-99-65" class="header__phone">
-				<NuxtIcon name="phone" filled />
+				<NuxtIcon name="phone" />
 				<span>+7 945 998-99-65</span>
 			</a>
 
 			<div class="header__items">
 				<NuxtLink to="#" class="header__favorites">
-					<NuxtIcon name="favorites" filled />
+					<NuxtIcon name="favorites" />
 					<span class="header__favorites-count">0</span>
 				</NuxtLink>
 
-				<NuxtLink to="#" class="header__cart">
-					<NuxtIcon name="cart" filled />
+				<NuxtLink to="/lk" class="header__cart">
+					<NuxtIcon name="cart" />
 					<span>Корзина</span>
 				</NuxtLink>
 
 				<NuxtLink v-if="!authStore.apiToken" to="#" class="header__lk" @click.prevent="modalStore.open">
-					<NuxtIcon name="lk" filled />
+					<NuxtIcon name="lk" />
 					<span class="full-text">Личный кабинет</span>
 					<span class="short-text">ЛК</span>
 				</NuxtLink>
 
 				<NuxtLink v-else class="header__lk" to="/lk">
-					<NuxtIcon name="lk" filled />
+					<NuxtIcon name="lk" />
 					<span class="header__email">{{ authStore.user?.email }}</span>
 				</NuxtLink>
 			</div>

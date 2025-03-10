@@ -311,6 +311,12 @@ input[type="checkbox"]:checked::after {
     }
 }
 
+
+
+.nuxt-icon *:not([fill="none"]) {
+    fill: currentColor;
+}
+
 .btn {
     cursor: pointer;
 
@@ -491,6 +497,10 @@ a {
     border-radius: 50%;
     background-color: $color-white;
     cursor: pointer;
+
+    &--active {
+        background-color: $color-accent;
+    }
 }
 
 .row {

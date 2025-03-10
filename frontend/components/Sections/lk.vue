@@ -1,12 +1,18 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/authStore'
+import { useCartStore } from '@/stores/cartStore'
+import { useFavoriteStore } from '@/stores/favoritesStore'
+
 const authStore = useAuthStore()
-const modalStore = useModalStore()
+const cartStore = useCartStore()
+const favoritesStore = useFavoriteStore()
+
 const tabs = [
     { id: 'personal-data', label: 'Личные данные', icon: 'user' },
     { id: 'order-history', label: 'История покупок', icon: 'history' },
     { id: 'loyalty-program', label: 'Программа лояльности', icon: 'loyalty' },
-    { id: 'favorites', label: 'Избранное', icon: 'favorites' },
-    { id: 'cart', label: 'Корзина', icon: 'cart' },
+    { id: 'favorites', label: `Избранное`, icon: 'favorites' },
+    { id: 'cart', label: `Корзина (${cartStore.items.length})`, icon: 'cart' },
     { id: 'support', label: 'Поддержка', icon: 'support' },
 ]
 const activeTab = ref(tabs[0].id)
@@ -24,53 +30,49 @@ const activeTab = ref(tabs[0].id)
                             <div v-else>
                                 <h2 class="h2">Личные данные</h2>
                                 <div class="personal__info">
-                                    <div class="personal__info-item">
-                                        {{ authStore.user?.name }}
-                                    </div>
-                                    <div class="personal__info-item">
-                                        {{ authStore.user?.surname }}
-                                    </div>
-                                    <div class="personal__info-item">
-                                        {{ authStore.user?.phone }}
-                                    </div>
-                                    <div class="personal__info-item">
-                                        {{ authStore.user?.email }}
-                                    </div>
-                                    <div class="personal__info-item">
-                                        {{ authStore.user?.inn }}
-                                    </div>
+                                    <div class="personal__info-item">{{ authStore.user?.name }}</div>
+                                    <div class="personal__info-item">{{ authStore.user?.surname }}</div>
+                                    <div class="personal__info-item">{{ authStore.user?.phone }}</div>
+                                    <div class="personal__info-item">{{ authStore.user?.email }}</div>
+                                    <div class="personal__info-item">{{ authStore.user?.inn }}</div>
                                 </div>
-
                                 <div class="btn logout" @click="authStore.logout">
                                     <NuxtIcon name="logout" />
                                     <span>Выйти из аккаунта</span>
                                 </div>
                             </div>
                         </div>
+
                         <div v-else-if="activeTab === 'order-history'" class="lk__content-item">
                             <LkNoAuth v-if="!authStore.apiToken" />
                             <div v-else>
                                 <h2 class="h2">История покупок</h2>
                             </div>
                         </div>
+
                         <div v-else-if="activeTab === 'loyalty-program'" class="lk__content-item">
                             <LkNoAuth v-if="!authStore.apiToken" />
                             <div v-else>
                                 <h2 class="h2">Программа лояльности</h2>
                             </div>
                         </div>
+
                         <div v-else-if="activeTab === 'favorites'" class="lk__content-item">
                             <LkNoAuth v-if="!authStore.apiToken" />
                             <div v-else>
                                 <h2 class="h2">Избранное</h2>
+                                <LkFavorites />
                             </div>
                         </div>
+
                         <div v-else-if="activeTab === 'cart'" class="lk__content-item">
                             <LkNoAuth v-if="!authStore.apiToken" />
                             <div v-else>
                                 <h2 class="h2">Корзина</h2>
+                                <LkCart />
                             </div>
                         </div>
+
                         <div v-else-if="activeTab === 'support'" class="lk__content-item">
                             <LkNoAuth v-if="!authStore.apiToken" />
                             <div v-else>
@@ -83,6 +85,7 @@ const activeTab = ref(tabs[0].id)
         </div>
     </section>
 </template>
+
 
 <style lang="scss" scoped>
 .lk {
@@ -111,31 +114,6 @@ const activeTab = ref(tabs[0].id)
             inset: 42px;
         }
 
-        .lk__noAuth {
-            @include flex(row, space-between, center);
-            gap: 32px;
-            background-color: #FCFCFC;
-            padding: 42px;
-
-            .lk__noAuth-text {
-                @include flex(row, flex-start, center);
-                gap: 12px;
-
-                .nuxt-icon {
-                    font-size: 24px;
-                }
-
-                .h4 {
-                    font-size: 20px;
-                }
-            }
-
-            .btn {
-                margin-top: 0;
-                max-width: 360px;
-                width: 100%;
-            }
-        }
 
         .personal__info {
             display: grid;
