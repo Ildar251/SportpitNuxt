@@ -41,6 +41,10 @@ const setActiveTab = (tabId: string) => {
         transition: $transition;
         cursor: pointer;
 
+        .nuxt-icon {
+            transition: none;
+        }
+
         &:hover {
             color: $color-accent;
         }

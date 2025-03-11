@@ -11,12 +11,14 @@ const addToCart = () => {
         title: product.title,
         price: product.price!,
         image: product.image,
+        volume: volume.value[activeIndex.value],
         quantity: 1,
     })
 }
 
 const toggleFavorite = () => {
-    favoriteStore.toggleFavorite(product.id)
+    favoriteStore.toggleFavorite(product)
+    console.log(favoriteStore.isFavorite(8))
 }
 
 
@@ -56,6 +58,8 @@ const onVolumeClick = (index: number) => {
     activeIndex.value = index
 }
 
+
+
 </script>
 
 <template>
@@ -63,7 +67,7 @@ const onVolumeClick = (index: number) => {
         @mouseover="isHovered = true" @mouseleave="isHovered = false">
         <div class="card__image">
             <Transition name="fade">
-                <div class="card__sticker" v-if="stickers && !isHovered">
+                <div class="card__sticker" v-if="stickers">
                     <div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
                         <NuxtIcon name="new" v-if="sticker === 'new'" />
                         <NuxtIcon name="hit" v-if="sticker === 'hit'" />
@@ -73,9 +77,8 @@ const onVolumeClick = (index: number) => {
                 </div>
             </Transition>
             <Transition name="fade">
-                <div v-if="isHovered"
-                    :class="'card__favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
-                    @click="toggleFavorite">
+                <div :class="'card__favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+                    @click.prevent.stop="toggleFavorite">
                     <NuxtIcon name="favorites" />
                 </div>
             </Transition>

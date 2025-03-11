@@ -11,7 +11,7 @@ const tabs = [
     { id: 'personal-data', label: 'Личные данные', icon: 'user' },
     { id: 'order-history', label: 'История покупок', icon: 'history' },
     { id: 'loyalty-program', label: 'Программа лояльности', icon: 'loyalty' },
-    { id: 'favorites', label: `Избранное`, icon: 'favorites' },
+    { id: 'favorites', label: `Избранное`, icon: 'favorites-head' },
     { id: 'cart', label: `Корзина (${cartStore.items.length})`, icon: 'cart' },
     { id: 'support', label: 'Поддержка', icon: 'support' },
 ]

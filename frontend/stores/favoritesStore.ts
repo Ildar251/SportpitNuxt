@@ -1,3 +1,5 @@
+import { useAuthStore } from '@/stores/authStore'
+import axios from 'axios'
 import { defineStore } from 'pinia'
 
 export const useFavoriteStore = defineStore('favorite', {
@@ -27,6 +29,32 @@ export const useFavoriteStore = defineStore('favorite', {
         },
         isFavorite(productId: number) {
             return this.items.some((item) => item.id === productId)
+        },
+
+        async syncFavorites() {
+            const authStore = useAuthStore()
+            if (!authStore.apiToken) return
+
+            try {
+                // Отправляем локальные избранные товары на сервер
+                if (this.items.length) {
+                    await axios.post(
+                        'https://test.top-nnov.ru/api/favorites/sync',
+                        { favorites: this.items },
+                        { headers: { Authorization: `Bearer ${authStore.apiToken}` } }
+                    )
+                    localStorage.removeItem('favorites') // Очистка после синхронизации
+                }
+
+                // Загружаем избранное с сервера
+                const response = await axios.get('https://test.top-nnov.ru/api/favorites', {
+                    headers: { Authorization: `Bearer ${authStore.apiToken}` },
+                })
+                this.items = response.data
+                this.saveFavorites()
+            } catch (error) {
+                console.error('Ошибка синхронизации избранного', error)
+            }
         },
     },
 })

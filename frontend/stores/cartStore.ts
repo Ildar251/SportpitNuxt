@@ -1,3 +1,5 @@
+import { useAuthStore } from '@/stores/authStore'
+import axios from 'axios'
 import { defineStore } from 'pinia'
 
 export const useCartStore = defineStore('cart', {
@@ -34,6 +36,32 @@ export const useCartStore = defineStore('cart', {
             if (item && quantity > 0) {
                 item.quantity = quantity
                 this.saveCart()
+            }
+        },
+
+        async syncCart() {
+            const authStore = useAuthStore()
+            if (!authStore.apiToken) return
+
+            try {
+                // Отправляем локальные товары на сервер
+                if (this.items.length) {
+                    await axios.post(
+                        'https://test.top-nnov.ru/api/cart/sync',
+                        { cart: this.items },
+                        { headers: { Authorization: `Bearer ${authStore.apiToken}` } }
+                    )
+                    localStorage.removeItem('cart') // Очистка после синхронизации
+                }
+
+                // Загружаем актуальную корзину с сервера
+                const response = await axios.get('https://test.top-nnov.ru/api/cart', {
+                    headers: { Authorization: `Bearer ${authStore.apiToken}` },
+                })
+                this.items = response.data
+                this.saveCart()
+            } catch (error) {
+                console.error('Ошибка синхронизации корзины', error)
             }
         },
     },

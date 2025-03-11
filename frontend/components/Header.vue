@@ -50,7 +50,7 @@ onMounted(() => {
 
 			<div class="header__items">
 				<NuxtLink to="#" class="header__favorites">
-					<NuxtIcon name="favorites" />
+					<NuxtIcon name="favorites-head" />
 					<span class="header__favorites-count">0</span>
 				</NuxtLink>
 
