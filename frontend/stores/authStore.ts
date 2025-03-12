@@ -29,6 +29,7 @@ export const useAuthStore = defineStore('auth', {
 					}
 				)
 				this.user = response.data
+				localStorage.setItem('user', JSON.stringify(response.data))
 			} catch (err) {
 				console.error('Ошибка загрузки профиля', err)
 			}
@@ -47,9 +48,15 @@ export const useAuthStore = defineStore('auth', {
 					}
 				)
 				this.apiToken = response.data.api_token
-				axios.defaults.headers.common[
-					'Authorization'
-				] = `Bearer ${this.apiToken}`
+
+				// Проверяем, что apiToken не равен null перед сохранением
+				if (this.apiToken) {
+					localStorage.setItem('apiToken', this.apiToken)
+					axios.defaults.headers.common[
+						'Authorization'
+					] = `Bearer ${this.apiToken}`
+				}
+
 				await this.fetchProfile()
 
 				// Синхронизация корзины и избранного
@@ -113,6 +120,7 @@ export const useAuthStore = defineStore('auth', {
 					}
 				)
 				this.apiToken = response.data.api_token
+				localStorage.setItem('apiToken', this.apiToken)
 				axios.defaults.headers.common[
 					'Authorization'
 				] = `Bearer ${this.apiToken}`
@@ -131,15 +139,29 @@ export const useAuthStore = defineStore('auth', {
 		async logout() {
 			this.apiToken = null
 			this.user = null
+			localStorage.removeItem('apiToken')
+			localStorage.removeItem('user')
 			delete axios.defaults.headers.common['Authorization']
 
-			// Загружаем корзину и избранное обратно в `localStorage`
+			// Загружаем корзину и избранное обратно в localStorage
 			const cartStore = useCartStore()
 			const favoritesStore = useFavoriteStore()
 			cartStore.loadCart()
 			favoritesStore.loadFavorites()
 
 			toast.info('Вы вышли из аккаунта', { autoClose: 3000 })
+		},
+
+		initialize() {
+			const apiToken = localStorage.getItem('apiToken')
+			const user = localStorage.getItem('user')
+			if (apiToken) {
+				this.apiToken = apiToken
+				axios.defaults.headers.common['Authorization'] = `Bearer ${apiToken}`
+			}
+			if (user) {
+				this.user = JSON.parse(user)
+			}
 		},
 	},
 })
