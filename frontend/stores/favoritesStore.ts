@@ -1,16 +1,18 @@
 import { useAuthStore } from '@/stores/authStore'
+import type { FavoriteProduct } from '@/types/product'
 import axios from 'axios'
 import { defineStore } from 'pinia'
+import { toast } from 'vue3-toastify'
 
 export const useFavoriteStore = defineStore('favorite', {
     state: () => ({
-        items: [] as any[],
+        items: [] as FavoriteProduct[],
     }),
     actions: {
         loadFavorites() {
             if (import.meta.client) {
                 const favoritesData = localStorage.getItem('favorites')
-                this.items = favoritesData ? JSON.parse(favoritesData) : []
+                this.items = favoritesData ? JSON.parse(favoritesData) as FavoriteProduct[] : []
             }
         },
         saveFavorites() {
@@ -18,12 +20,12 @@ export const useFavoriteStore = defineStore('favorite', {
                 localStorage.setItem('favorites', JSON.stringify(this.items))
             }
         },
-        toggleFavorite(product: any) {
+        toggleFavorite(product: FavoriteProduct) {
             const existingIndex = this.items.findIndex((item) => item.id === product.id)
             if (existingIndex !== -1) {
-                this.items.splice(existingIndex, 1) // Удаляем из избранного
+                this.items.splice(existingIndex, 1)
             } else {
-                this.items.push(product) // Добавляем в избранное
+                this.items.push(product)
             }
             this.saveFavorites()
         },
@@ -36,25 +38,56 @@ export const useFavoriteStore = defineStore('favorite', {
             if (!authStore.apiToken) return
 
             try {
-                // Отправляем локальные избранные товары на сервер
-                if (this.items.length) {
-                    await axios.post(
-                        'https://test.top-nnov.ru/api/favorites/sync',
-                        { favorites: this.items },
-                        { headers: { Authorization: `Bearer ${authStore.apiToken}` } }
-                    )
-                    localStorage.removeItem('favorites') // Очистка после синхронизации
-                }
+                const localFavorites = [...this.items]
 
-                // Загружаем избранное с сервера
-                const response = await axios.get('https://test.top-nnov.ru/api/favorites', {
+                const serverResponse = await axios.get('https://test.top-nnov.ru/api/favorites', {
                     headers: { Authorization: `Bearer ${authStore.apiToken}` },
                 })
-                this.items = response.data
+                console.log('Server favorites response:', serverResponse.data)
+                const serverFavorites = serverResponse.data.favorites || []
+
+                const mergedFavorites = this.mergeFavorites(serverFavorites, localFavorites)
+
+                await axios.post(
+                    'https://test.top-nnov.ru/api/favorites/sync',
+                    { favorites: mergedFavorites.map(item => item.id) },
+                    { headers: { Authorization: `Bearer ${authStore.apiToken}` } }
+                )
+
+                this.items = mergedFavorites
                 this.saveFavorites()
             } catch (error) {
                 console.error('Ошибка синхронизации избранного', error)
+                toast.error('Не удалось синхронизировать избранное', { autoClose: 3000 })
             }
+        },
+
+        mergeFavorites(serverFavorites: any, localFavorites: FavoriteProduct[]): FavoriteProduct[] {
+            let serverItems: FavoriteProduct[] = []
+            if (Array.isArray(serverFavorites)) {
+                serverItems = serverFavorites.map(id => ({
+                    id: parseInt(id as string),
+                    title: '',
+                    price: 0,
+                    image: '',
+                    volume: 0,
+                }))
+            }
+
+            const merged: FavoriteProduct[] = []
+            localFavorites.forEach(localItem => {
+                if (!merged.find(m => m.id === localItem.id)) {
+                    merged.push({ ...localItem })
+                }
+            })
+
+            serverItems.forEach(serverItem => {
+                if (!merged.find(m => m.id === serverItem.id)) {
+                    merged.push(serverItem)
+                }
+            })
+
+            return merged
         },
     },
 })

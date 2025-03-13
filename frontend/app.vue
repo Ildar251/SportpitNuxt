@@ -2,6 +2,17 @@
 import { useAuthStore } from '~/stores/authStore'
 const authStore = useAuthStore()
 
+import { useCartStore } from '@/stores/cartStore'
+import { useFavoriteStore } from '@/stores/favoritesStore'
+import { onMounted } from 'vue'
+
+const cartStore = useCartStore()
+const favoriteStore = useFavoriteStore()
+
+onMounted(() => {
+  cartStore.loadCart()
+  favoriteStore.loadFavorites()
+})
 </script>
 
 <template>

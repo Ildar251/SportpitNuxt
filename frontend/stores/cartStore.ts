@@ -1,16 +1,18 @@
 import { useAuthStore } from '@/stores/authStore'
+import type { Product } from '@/types/product'
 import axios from 'axios'
 import { defineStore } from 'pinia'
+import { toast } from 'vue3-toastify'
 
 export const useCartStore = defineStore('cart', {
     state: () => ({
-        items: [] as any[],
+        items: [] as Product[],
     }),
     actions: {
         loadCart() {
             if (import.meta.client) {
                 const cartData = localStorage.getItem('cart')
-                this.items = cartData ? JSON.parse(cartData) : []
+                this.items = cartData ? JSON.parse(cartData) as Product[] : []
             }
         },
         saveCart() {
@@ -18,7 +20,7 @@ export const useCartStore = defineStore('cart', {
                 localStorage.setItem('cart', JSON.stringify(this.items))
             }
         },
-        addToCart(product: any) {
+        addToCart(product: Product) {
             const existing = this.items.find((item) => item.id === product.id)
             if (existing) {
                 existing.quantity++
@@ -44,25 +46,68 @@ export const useCartStore = defineStore('cart', {
             if (!authStore.apiToken) return
 
             try {
-                // Отправляем локальные товары на сервер
-                if (this.items.length) {
-                    await axios.post(
-                        'https://test.top-nnov.ru/api/cart/sync',
-                        { cart: this.items },
-                        { headers: { Authorization: `Bearer ${authStore.apiToken}` } }
-                    )
-                    localStorage.removeItem('cart') // Очистка после синхронизации
-                }
+                const localCart = [...this.items]
 
-                // Загружаем актуальную корзину с сервера
-                const response = await axios.get('https://test.top-nnov.ru/api/cart', {
+                const serverResponse = await axios.get('https://test.top-nnov.ru/api/cart', {
                     headers: { Authorization: `Bearer ${authStore.apiToken}` },
                 })
-                this.items = response.data
+                console.log('Server cart response:', serverResponse.data)
+                const serverCart = serverResponse.data.cart || []
+
+                const mergedCart = this.mergeCarts(serverCart, localCart)
+
+                await axios.post(
+                    'https://test.top-nnov.ru/api/cart/sync',
+                    { cart: mergedCart },
+                    { headers: { Authorization: `Bearer ${authStore.apiToken}` } }
+                )
+
+                this.items = mergedCart
                 this.saveCart()
             } catch (error) {
                 console.error('Ошибка синхронизации корзины', error)
+                toast.error('Не удалось синхронизировать корзину', { autoClose: 3000 })
             }
+        },
+
+        mergeCarts(serverCart: any, localCart: Product[]): Product[] {
+            let serverItems: Product[] = []
+            if (Array.isArray(serverCart)) {
+                serverItems = serverCart.map(item => ({
+                    id: item.id,
+                    quantity: item.quantity || 1,
+                    title: item.title || '',
+                    price: item.price || 0,
+                    image: item.image || '',
+                    volume: item.volume || 0,
+                }))
+            } else if (serverCart && typeof serverCart === 'object') {
+                serverItems = Object.entries(serverCart).map(([id, quantity]) => ({
+                    id: parseInt(id),
+                    quantity: parseInt(quantity as string) || 1,
+                    title: '',
+                    price: 0,
+                    image: '',
+                    volume: 0,
+                }))
+            }
+
+            const merged: Product[] = []
+            localCart.forEach(localItem => {
+                const serverItem = serverItems.find(s => s.id === localItem.id)
+                merged.push({
+                    ...localItem,
+                    quantity: serverItem ? Math.max(serverItem.quantity, localItem.quantity) : localItem.quantity,
+                })
+            })
+
+            serverItems.forEach(serverItem => {
+                if (!merged.find(m => m.id === serverItem.id)) {
+                    merged.push(serverItem)
+                }
+            })
+
+            return merged
         },
     },
 })

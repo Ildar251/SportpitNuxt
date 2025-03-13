@@ -53,52 +53,6 @@ input[type="checkbox"]:checked::after {
     background-position: center;
 }
 
-
-// .form:not(.form-dark) {
-
-//     input[type=text],
-//     input[type=email],
-//     input[type=password],
-//     input[type=number],
-//     input[type=tel],
-//     textarea {
-//         width: 100%;
-//         padding: 18px 32px;
-//         font-size: 20px;
-//         border: 2px solid #FCFCFC;
-//         outline: none;
-//         transition: border-color 0.3s ease, box-shadow 0.3s ease;
-//         background-color: #FCFCFC;
-//         color: $color-primary;
-//     }
-
-//     input[type=text]:focus,
-//     input[type=email]:focus,
-//     input[type=password]:focus,
-//     input[type=number]:focus,
-//     input[type=tel]:focus,
-//     textarea:focus {
-//         border-color: $color-accent;
-//         box-shadow: 0 0 8px $color-accent;
-//     }
-
-//     input[type=text]::placeholder,
-//     input[type=email]::placeholder,
-//     input[type=password]::placeholder,
-//     input[type=number]::placeholder,
-//     input[type=tel]::placeholder,
-//     textarea::placeholder {
-//         color: $color-primary;
-//         font-weight: 700;
-//     }
-
-//     &>.input-field:not(:first-child) {
-//         margin-top: 8px;
-//     }
-// }
-
-
-
 .form {
 
     input[type=text],
@@ -109,7 +63,7 @@ input[type="checkbox"]:checked::after {
     textarea {
         width: 100%;
         padding: 26px 0px 12px;
-        font-size: 20px;
+        font-size: auto-clamp(16px, 20px);
         border: none;
         border-bottom: 2px solid $color-border;
         outline: none;
@@ -148,7 +102,7 @@ input[type="checkbox"]:checked::after {
         @include flex(row, center, center);
         width: 100%;
         padding: 23px;
-        font-size: 22px;
+        font-size: auto-clamp(18px, 22px);
         font-weight: 600;
         color: $color-primary;
         background: $color-accent;
@@ -559,8 +513,8 @@ a {
 .modal {
     .modal__close {
         position: absolute;
-        top: 70px;
-        right: 70px;
+        top: auto-clamp(34px, 72px);
+        right: auto-clamp(34px, 72px);
         border: none;
         background: none;
         font-size: 24px;
@@ -588,6 +542,7 @@ a {
     .modal__policy {
         display: inline-block;
         color: $color-gray;
+        font-size: auto-clamp(14px, 16px);
 
         a {
             text-decoration: underline;

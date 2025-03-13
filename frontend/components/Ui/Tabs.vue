@@ -32,9 +32,9 @@ const setActiveTab = (tabId: string) => {
         @include flex(row, flex-start, center);
         gap: 24px;
         width: 100%;
-        height: 80px;
-        padding: 24px 42px;
-        font-size: 24px;
+        height: auto-clamp(58px, 80px);
+        padding: auto-clamp(16px, 24px) auto-clamp(24px, 42px);
+        font-size: auto-clamp(16px, 24px);
         font-weight: 700;
         border-right: 4px solid transparent;
         background-color: #FCFCFC;

@@ -111,13 +111,15 @@ const activeTab = ref(tabs[0].id)
         </div>
 
         <Transition name="slide-up" mode="out-in">
-          <form class="form" v-if="authStep === 'login'" @submit="login">
+          <form class="form form--auth" v-if="authStep === 'login'" @submit="login">
             <h2 class="h2">Авторизация</h2>
             <UiInput v-model="email" type="email" placeholder="E-mail" :error="errors.email" />
             <UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
-            <button type="submit">Войти в аккаунт</button>
-            <div class="modal__link"><span>Ещё нет аккаунта?</span> <span class="link"
-                @click="changeStep('register')">Зарегистрироваться</span></div>
+            <div class="form__elems">
+              <button type="submit">Войти в аккаунт</button>
+              <div class="modal__link"><span>Ещё нет аккаунта?</span> <span class="link"
+                  @click="changeStep('register')">Зарегистрироваться</span></div>
+            </div>
           </form>
 
           <form class="form" v-else-if="authStep === 'register'" @submit="register">
@@ -172,10 +174,10 @@ const activeTab = ref(tabs[0].id)
   &.modal-auth {
     background: $color-white;
     color: $color-primary;
-    padding: 72px;
+    padding: auto-clamp(34px, 72px);
     position: relative;
     max-width: 1400px;
-    width: 100%;
+    width: 90%;
     overflow: hidden;
     position: fixed;
     top: 50%;
@@ -192,9 +194,11 @@ const activeTab = ref(tabs[0].id)
       .modal__left {
         @include flex(column, center, center);
         position: relative;
+        flex: 1;
 
         .h2 {
           margin-top: 24px;
+          margin-bottom: 0;
         }
 
         &::after {
@@ -208,35 +212,44 @@ const activeTab = ref(tabs[0].id)
         }
 
         .modal__img {
-          margin-top: 60px;
+          margin-top: auto-clamp(30px, 60px);
         }
       }
     }
 
     .tabs {
-      margin: 42px 0;
+      margin-bottom: auto-clamp(24px, 42px);
     }
 
     .h2 {
-      font-size: 40px;
+      font-size: auto-clamp(24px, 42px);
+      margin-bottom: auto-clamp(24px, 42px);
     }
 
     .form {
-      flex: 1;
+      flex: 2;
       @include flex(column, stretch, stretch);
       height: auto;
+
+      &--auth {
+        gap: auto-clamp(24px, 42px);
+      }
+
+      .form__elems {
+        margin-top: auto-clamp(24px, 42px);
+      }
 
       .form__grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 42px;
-        margin-bottom: 42px;
+        gap: auto-clamp(24px, 42px);
+        margin-bottom: auto-clamp(24px, 42px);
       }
 
       .modal__bottom {
         @include flex(row, space-between, center);
         margin-top: auto;
-        gap: 44px;
+        gap: auto-clamp(24px, 42px);
       }
     }
   }
