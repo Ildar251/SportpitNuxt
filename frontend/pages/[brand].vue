@@ -21,10 +21,10 @@ onMounted(() => {
 
 <template>
     <main>
-        <section class="section section-brand">
+        <section class="section section-hero">
             <div class="container">
-                <div v-if="brand" class="brand-hero"
-                    :style="`background-image: url(${config.public.apiUrl + brand.tvFields.brand_bg});`">
+                <div v-if="brand" class="hero"
+                    :style="`background-image: url(${config.public.apiUrl + brand.tvFields.info_bg});`">
                     <h1 class="h1">{{ brand.title }}</h1>
                     <div class="brand__description">
                         <div class="text">
@@ -32,7 +32,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="brand__logo">
-                        <NuxtImg :src="config.public.apiUrl + brand.tvFields.brand_logo" :alt="brand.title" />
+                        <NuxtImg :src="config.public.apiUrl + brand.tvFields.info_logo" :alt="brand.title" />
                     </div>
                 </div>
             </div>
@@ -46,11 +46,11 @@ onMounted(() => {
 
 
 <style lang="scss" scoped>
-.section-brand {
+.section-hero {
     margin-top: auto-clamp(25px, 50px);
 }
 
-.brand-hero {
+.hero {
     padding: auto-clamp(30px, 72px);
     color: $color-white;
     min-height: auto-clamp(300px, 560px);

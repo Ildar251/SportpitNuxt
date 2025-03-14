@@ -54,7 +54,7 @@ onMounted(() => {
 					<span class="header__favorites-count">0</span>
 				</NuxtLink>
 
-				<NuxtLink to="/lk" class="header__cart">
+				<NuxtLink to="/lk?tab=cart" class="header__cart">
 					<NuxtIcon name="cart" />
 					<span>Корзина</span>
 				</NuxtLink>
@@ -94,7 +94,7 @@ onMounted(() => {
 						<NuxtLink to="/catalog"><span>Акции</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
-						<NuxtLink to="/catalog"><span>Компания</span></NuxtLink>
+						<NuxtLink to="/about"><span>Компания</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
 						<NuxtLink to="/catalog"><span>Партнёрам</span></NuxtLink>

@@ -80,8 +80,8 @@ const toggleFavorite = () => {
 					<NuxtIcon name="favorites" />
 				</div>
 			</Transition>
-			<NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy"
-				class="card__img" />
+			<NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy" class="card__img"
+				placeholder="./images/box.svg" />
 		</div>
 		<div class="card__content">
 			<div class="card__brand">{{ product.brand || 'Товар' }}</div>
@@ -97,10 +97,22 @@ const toggleFavorite = () => {
 							{{ volume }} мл
 						</div>
 					</div>
-					<button class="btn add-to-cart" @click.prevent.stop="addToCart">
-						<span class="span-text">В корзину</span>
-						<NuxtIcon name="plus" />
-					</button>
+					<div class="button-wrapper">
+						<Transition name="slide-up">
+							<button v-if="!cartStore.isInCart(product.id)" class="btn add-to-cart"
+								@click.prevent.stop="addToCart">
+								<span class="span-text">В корзину</span>
+								<NuxtIcon name="plus" />
+							</button>
+
+							<button v-else class="btn delete-from-cart"
+								@click.prevent.stop="cartStore.removeFromCart(product.id)">
+								<NuxtIcon name="delete" />
+							</button>
+						</Transition>
+					</div>
+
+
 				</div>
 			</Transition>
 		</div>
@@ -108,6 +120,32 @@ const toggleFavorite = () => {
 </template>
 
 <style lang="scss" scoped>
+.button-wrapper {
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 100px;
+}
+
+button {
+	position: absolute;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+	transition: all 0.25s ease-out;
+}
+
+.slide-up-enter-from {
+	opacity: 0;
+	transform: translateY(30px);
+}
+
+.slide-up-leave-to {
+	opacity: 0;
+	transform: translateY(-30px);
+}
+
 .card {
 	@include flex(column, center, center);
 	gap: 25px;
@@ -189,6 +227,7 @@ const toggleFavorite = () => {
 	.card__content {
 		@include flex(column, flex-start, flex-start);
 		width: 100%;
+		position: relative;
 	}
 
 	.card__taste {
@@ -222,9 +261,9 @@ const toggleFavorite = () => {
 		position: absolute;
 		background-color: $color-light;
 		bottom: -175px;
-		left: 0;
+		left: -20px;
 		padding: 0 20px 20px;
-		width: 100%;
+		width: calc(100% + 40px);
 	}
 
 	.card__favorite {

@@ -8,12 +8,11 @@ const cartStore = useCartStore()
 <template>
     <div>
         <div v-if="cartStore.items.length === 0">Корзина пуста</div>
-        <div class="cart-list" v-else>
+        <div class="cart-list" v-else v-auto-animate>
             <div v-for="product in cartStore.items" :key="product.id" class="cart-item">
                 <div class="cart-item__image">
-                    <NuxtImg v-if="product.image" :src="config.public.apiUrl + product.image"
+                    <NuxtImg placeholder="./images/box.svg" :src="config.public.apiUrl + product.image"
                         :alt="product.title || 'Товар'" />
-                    <NuxtImg v-else src="/placeholder.png" alt="Нет изображения" />
                 </div>
 
                 <div class="cart-item__info">

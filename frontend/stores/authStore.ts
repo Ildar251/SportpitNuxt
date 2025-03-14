@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', {
 	state: () => ({
 		user: null as User | null,
 		apiToken: null as string | null,
-		loading: false,
+		loading: true,
 		error: null as string | null,
 	}),
 
@@ -142,6 +142,7 @@ export const useAuthStore = defineStore('auth', {
 			localStorage.removeItem('apiToken')
 			localStorage.removeItem('user')
 			delete axios.defaults.headers.common['Authorization']
+			console.log(this.apiToken)
 
 			// Загружаем корзину и избранное обратно в localStorage
 			const cartStore = useCartStore()
@@ -153,15 +154,18 @@ export const useAuthStore = defineStore('auth', {
 		},
 
 		initialize() {
+			this.loading = true
 			const apiToken = localStorage.getItem('apiToken')
 			const user = localStorage.getItem('user')
 			if (apiToken) {
 				this.apiToken = apiToken
 				axios.defaults.headers.common['Authorization'] = `Bearer ${apiToken}`
+				this.fetchProfile()
 			}
 			if (user) {
 				this.user = JSON.parse(user)
 			}
+			this.loading = false
 		},
 	},
 })

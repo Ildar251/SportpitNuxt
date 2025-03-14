@@ -6,70 +6,62 @@ import { useFavoriteStore } from '@/stores/favoritesStore'
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const favoritesStore = useFavoriteStore()
-
+const cartItemCount = computed(() => cartStore.items.length)
+const favoriteItemCount = computed(() => favoritesStore.items.length)
 const tabs = [
 	{ id: 'personal-data', label: 'Личные данные', icon: 'user' },
 	{ id: 'order-history', label: 'История покупок', icon: 'history' },
 	{ id: 'loyalty-program', label: 'Программа лояльности', icon: 'loyalty' },
-	{ id: 'favorites', label: `Избранное`, icon: 'favorites-head' },
-	{ id: 'cart', label: `Корзина (${cartStore.items.length})`, icon: 'cart' },
+	{ id: 'favorites', label: `Избранное (${favoriteItemCount.value})`, icon: 'favorites-head' },
+	{ id: 'cart', label: `Корзина (${cartItemCount.value})`, icon: 'cart' },
 	{ id: 'support', label: 'Поддержка', icon: 'support' },
 ]
-const activeTab = ref(tabs[0].id)
+const route = useRoute()
+const activeTab = ref(route.query.tab === 'cart' ? 'cart' : tabs[0].id)
+
+const contentRef = ref<HTMLElement | null>(null)
+const currentHeight = ref('auto')
+
+watch(activeTab, async () => {
+	await nextTick() // Ждём ререндер нового контента
+	if (contentRef.value) {
+		const newHeight = contentRef.value.scrollHeight + 'px'
+		currentHeight.value = newHeight
+	}
+})
+const isInitialized = ref(false)
+
+onMounted(async () => {
+	await authStore.initialize()
+	isInitialized.value = true
+});
+
 </script>
 
 <template>
-	<section class="section section-lk">
+	<section class="section section-lk" v-if="isInitialized">
 		<div class="container">
 			<div class="lk">
 				<UiTabs v-model="activeTab" :tabsClass="'tabs-lk'" :tabs="tabs" />
-				<div class="lk__content">
-					<Transition name="slide-right">
-						<div
-							v-if="activeTab === 'personal-data'"
-							class="lk__content-item active"
-						>
+
+				<div ref="contentRef" class="lk__content" :style="{ height: currentHeight }">
+					<Transition name="slide-right-absolute">
+						<div v-if="activeTab === 'personal-data'" class="lk__content-item active">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">Личные данные</h2>
-								<div class="personal__info">
-									<div class="personal__info-item">
-										{{ authStore.user?.name }}
-									</div>
-									<div class="personal__info-item">
-										{{ authStore.user?.surname }}
-									</div>
-									<div class="personal__info-item">
-										{{ authStore.user?.phone }}
-									</div>
-									<div class="personal__info-item">
-										{{ authStore.user?.email }}
-									</div>
-									<div class="personal__info-item">
-										{{ authStore.user?.inn }}
-									</div>
-								</div>
-								<div class="btn logout" @click="authStore.logout">
-									<NuxtIcon name="logout" />
-									<span>Выйти из аккаунта</span>
-								</div>
+								<LkUser />
 							</div>
 						</div>
 
-						<div
-							v-else-if="activeTab === 'order-history'"
-							class="lk__content-item"
-						>
+						<div v-else-if="activeTab === 'order-history'" class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">История покупок</h2>
 							</div>
 						</div>
 
-						<div
-							v-else-if="activeTab === 'loyalty-program'"
-							class="lk__content-item"
-						>
+						<div v-else-if="activeTab === 'loyalty-program'" class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">Программа лояльности</h2>
@@ -118,7 +110,8 @@ const activeTab = ref(tabs[0].id)
 		flex: 1;
 		padding: 42px 0px 0px 42px;
 		position: relative;
-		min-height: 500px;
+		overflow: hidden;
+		transition: height 0.4s ease-in-out;
 
 		.h2 {
 			margin-bottom: 42px;
@@ -126,35 +119,26 @@ const activeTab = ref(tabs[0].id)
 		}
 
 		.lk__content-item {
-			position: absolute;
-			inset: 42px;
-		}
-
-		.personal__info {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			gap: 40px;
-
-			&-item {
-				padding: 26px 42px;
-				background-color: #fcfcfc;
-				font-size: 24px;
-				flex: 1;
-			}
-		}
-
-		.logout {
-			@include flex(row, flex-start, center);
-			gap: 12px;
-			margin-top: 42px;
-			font-size: 20px;
-			color: $color-gray;
-			cursor: pointer;
-
-			&:hover {
-				color: $color-accent;
-			}
+			width: 100%;
 		}
 	}
+}
+
+
+.slide-right-absolute-enter-active,
+.slide-right-absolute-leave-active {
+	transition: transform 0.4s ease-in-out, opacity 0.3s ease;
+	position: absolute;
+}
+
+.slide-right-absolute-enter-from {
+	transform: translateX(100%);
+	opacity: 0;
+	position: absolute;
+}
+
+.slide-right-absolute-leave-to {
+	transform: translateX(100%);
+	opacity: 0;
 }
 </style>

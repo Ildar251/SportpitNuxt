@@ -11,9 +11,9 @@ const favoriteStore = useFavoriteStore()
             <Card v-for="product in favoriteStore.items" :key="product.id" :product="{
                 id: product.id,
                 title: product.title || 'Без названия',
-                price: product.price !== undefined ? String(product.price) : undefined, // Приводим число к строке
+                price: product.price !== undefined ? String(product.price) : undefined,
                 image: product.image || '',
-                volume: product.volume !== undefined ? String(product.volume) : '', // Уже строка
+                volume: product.volume !== undefined ? String(product.volume) : '',
                 description: '',
                 content: '',
                 parent: 0,
@@ -23,3 +23,12 @@ const favoriteStore = useFavoriteStore()
         </div>
     </div>
 </template>
+
+<style lang="scss" scoped>
+.card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 42px;
+}
+</style>

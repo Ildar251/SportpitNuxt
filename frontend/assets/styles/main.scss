@@ -173,6 +173,8 @@ input[type="checkbox"]:checked::after {
     opacity: 0;
 }
 
+
+
 .slide-left-enter-active,
 .slide-left-leave-active {
     transition: transform 0.4s ease-in-out, opacity 0.3s ease;
@@ -309,6 +311,25 @@ input[type="checkbox"]:checked::after {
         gap: 18px;
         cursor: pointer;
         background-color: $color-accent;
+        font-weight: 700;
+        font-size: auto-clamp(20px, 26px);
+        padding: auto-clamp(20px, 27px);
+        margin-top: 42px;
+        transition: background-color 0.3s ease;
+
+
+        &:hover {
+            color: $color-accent;
+            background-color: $color-white;
+        }
+    }
+
+    &.delete-from-cart {
+        @include flex(row, center, center);
+        width: 100%;
+        gap: 18px;
+        cursor: pointer;
+        background-color: $color-red;
         font-weight: 700;
         font-size: auto-clamp(20px, 26px);
         padding: auto-clamp(20px, 27px);
