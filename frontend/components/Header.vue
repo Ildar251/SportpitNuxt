@@ -16,17 +16,21 @@ const logout = () => {
 	authStore.logout()
 }
 
-watch(() => mobileMenuStore.isOpen, (isOpen) => {
-	if (isOpen) {
-		document.body.classList.add('no-scroll')
-	} else {
-		document.body.classList.remove('no-scroll')
+watch(
+	() => mobileMenuStore.isOpen,
+	isOpen => {
+		if (isOpen) {
+			document.body.classList.add('no-scroll')
+		} else {
+			document.body.classList.remove('no-scroll')
+		}
 	}
-})
+)
 
 onMounted(() => {
-	window.addEventListener("preloadComplete", () => {
-		gsap.fromTo('.header',
+	window.addEventListener('preloadComplete', () => {
+		gsap.fromTo(
+			'.header',
 			{ opacity: 0, y: -60 },
 			{ opacity: 1, y: 0, duration: 1, ease: 'power3.out' }
 		)
@@ -40,7 +44,9 @@ onMounted(() => {
 				<a href="" class="header__link link">telegram</a>
 				<a href="" class="header__link link">whatsapp</a>
 				<a href="" class="header__link link">vk</a>
-				<a href="mailto:info@nutrivery.ru" class="header__link link">info@nutrivery.ru</a>
+				<a href="mailto:info@nutrivery.ru" class="header__link link"
+					>info@nutrivery.ru</a
+				>
 			</div>
 
 			<a href="tel:+7 945 998-99-65" class="header__phone">
@@ -59,7 +65,12 @@ onMounted(() => {
 					<span>Корзина</span>
 				</NuxtLink>
 
-				<NuxtLink v-if="!authStore.apiToken" to="#" class="header__lk" @click.prevent="modalStore.open">
+				<NuxtLink
+					v-if="!authStore.apiToken"
+					to="#"
+					class="header__lk"
+					@click.prevent="modalStore.open"
+				>
 					<NuxtIcon name="lk" />
 					<span class="full-text">Личный кабинет</span>
 					<span class="short-text">ЛК</span>
@@ -80,18 +91,23 @@ onMounted(() => {
 
 			<nav class="header__nav">
 				<div class="header__catalog">
-					<div :class="'burger burger_catalog' + (menuStore.isOpen ? ' open' : '')" @click="menuStore.toggle">
+					<div
+						:class="'burger burger_catalog' + (menuStore.isOpen ? ' open' : '')"
+						@click="menuStore.toggle"
+					>
 						<div class="icon-left"></div>
 						<div class="icon-right"></div>
 					</div>
-					<NuxtLink to="/catalog" class="header__menu-item"><span>Каталог</span></NuxtLink>
+					<NuxtLink to="/catalog" class="header__menu-item"
+						><span>Каталог</span></NuxtLink
+					>
 				</div>
 				<ul class="header__menu">
 					<li class="header__menu-item">
 						<NuxtLink to="/catalog"><span>Бренды</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
-						<NuxtLink to="/catalog"><span>Акции</span></NuxtLink>
+						<NuxtLink to="/stocks"><span>Акции</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
 						<NuxtLink to="/about"><span>Компания</span></NuxtLink>
@@ -114,8 +130,12 @@ onMounted(() => {
 				</NuxtLink>
 			</div>
 
-			<div :class="'burger burger_mobile' + (mobileMenuStore.isOpen ? ' open' : '')"
-				@click="mobileMenuStore.toggle">
+			<div
+				:class="
+					'burger burger_mobile' + (mobileMenuStore.isOpen ? ' open' : '')
+				"
+				@click="mobileMenuStore.toggle"
+			>
 				<div class="icon-left"></div>
 				<div class="icon-right"></div>
 			</div>
@@ -168,33 +188,38 @@ onMounted(() => {
 					<nav class="header__nav-mobile">
 						<ul class="header__menu">
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Бренды</span>
-									<NuxtIcon name="arrow-right" />
-								</NuxtLink>
-
-							</li>
-							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Акции</span>
+								<NuxtLink to="/catalog"
+									><span>Бренды</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Компания</span>
+								<NuxtLink to="/catalog"
+									><span>Акции</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Партнёрам</span>
+								<NuxtLink to="/catalog"
+									><span>Компания</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>CTM</span>
+								<NuxtLink to="/catalog"
+									><span>Партнёрам</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/contacts"><span>Контакты</span>
+								<NuxtLink to="/catalog"
+									><span>CTM</span>
+									<NuxtIcon name="arrow-right" />
+								</NuxtLink>
+							</li>
+							<li class="header__menu-item">
+								<NuxtLink to="/contacts"
+									><span>Контакты</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
@@ -204,7 +229,6 @@ onMounted(() => {
 			</div>
 		</Transition>
 	</header>
-
 </template>
 
 <style lang="scss" scoped>
@@ -234,7 +258,7 @@ onMounted(() => {
 			align-items: center;
 		}
 
-		&>div:not(.header__items, .header__search) {
+		& > div:not(.header__items, .header__search) {
 			padding: auto-clamp(12px, 24px) 0;
 		}
 
@@ -293,7 +317,7 @@ onMounted(() => {
 		display: flex;
 		font-size: auto-clamp(16px, 20px);
 
-		&>a {
+		& > a {
 			display: flex;
 			align-items: center;
 			gap: auto-clamp(10px, 20px);
@@ -346,7 +370,6 @@ onMounted(() => {
 			display: none;
 		}
 
-
 		.header__catalog {
 			@include flex(row, space-between, center);
 			gap: auto-clamp(20px, 42px);
@@ -363,8 +386,6 @@ onMounted(() => {
 			margin-bottom: 0;
 			padding: 0 auto-clamp(16px, 70px);
 
-
-
 			&-item {
 				font-weight: 700;
 				font-size: auto-clamp(14px, 20px);
@@ -377,13 +398,11 @@ onMounted(() => {
 		}
 	}
 
-
 	.header__nav-mobile {
 		width: 100%;
 		padding-top: 24px;
 
 		.header__menu-item {
-
 			a {
 				@include flex(row, space-between, center);
 				font-size: 32px;
@@ -434,7 +453,7 @@ onMounted(() => {
 				width: 15px;
 				height: 2px;
 				background-color: $color-gray;
-				content: "";
+				content: '';
 				top: -10px;
 			}
 
@@ -444,7 +463,7 @@ onMounted(() => {
 				width: 15px;
 				height: 2px;
 				background-color: $color-gray;
-				content: "";
+				content: '';
 				top: 10px;
 			}
 
@@ -468,7 +487,7 @@ onMounted(() => {
 				width: 15px;
 				height: 2px;
 				background-color: $color-gray;
-				content: "";
+				content: '';
 				top: -10px;
 			}
 
@@ -478,7 +497,7 @@ onMounted(() => {
 				width: 15px;
 				height: 2px;
 				background-color: $color-gray;
-				content: "";
+				content: '';
 				top: 10px;
 			}
 		}

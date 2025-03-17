@@ -47,6 +47,14 @@ interface Brands {
 	tvFields: Record<string, any>
 }
 
+interface Stocks {
+	id: number
+	title: string
+	alias: string
+	description: string
+	tvFields: Record<string, any>
+}
+
 export const useApiStore = defineStore('api', {
 	state: () => ({
 		products: [] as Products[],
@@ -54,6 +62,7 @@ export const useApiStore = defineStore('api', {
 		sections: [] as Section[],
 		categories: [] as Categories[],
 		brands: [] as Brands[],
+		stocks: [] as Stocks[],
 		loading: false,
 		error: null as string | null,
 		selectedBrands: [] as string[], // Выбранные бренды
@@ -131,10 +140,28 @@ export const useApiStore = defineStore('api', {
 			}
 		},
 
+		async fetchStocks() {
+			this.loading = true
+			try {
+				const response = await axios.get<Stocks[]>(
+					'https://test.top-nnov.ru/api/stocks'
+				)
+				this.stocks = response.data
+			} catch (err) {
+				this.error = 'Ошибка загрузки секций'
+			} finally {
+				this.loading = false
+			}
+		},
+
 		filterProducts() {
 			return this.products.filter(product => {
-				const matchesBrand = this.selectedBrands.length === 0 || this.selectedBrands.includes(product.brand || '')
-				const matchesCategory = this.selectedCategories.length === 0 || this.selectedCategories.includes(product.category || '')
+				const matchesBrand =
+					this.selectedBrands.length === 0 ||
+					this.selectedBrands.includes(product.brand || '')
+				const matchesCategory =
+					this.selectedCategories.length === 0 ||
+					this.selectedCategories.includes(product.category || '')
 				return matchesBrand && matchesCategory
 			})
 		},
@@ -160,7 +187,7 @@ export const useApiStore = defineStore('api', {
 		},
 
 		// Получение уникальных брендов
-		uniqueBrands: (state) => {
+		uniqueBrands: state => {
 			const brands = new Set<string>()
 			state.products.forEach(product => {
 				if (product.brand) {
@@ -171,7 +198,7 @@ export const useApiStore = defineStore('api', {
 		},
 
 		// Получение уникальных категорий
-		uniqueCategories: (state) => {
+		uniqueCategories: state => {
 			const categories = new Set<string>()
 			state.products.forEach(product => {
 				if (product.category) {
@@ -182,10 +209,14 @@ export const useApiStore = defineStore('api', {
 		},
 
 		// Получение отфильтрованных продуктов
-		filteredProducts: (state) => {
+		filteredProducts: state => {
 			return state.products.filter(product => {
-				const matchesBrand = state.selectedBrands.length === 0 || state.selectedBrands.includes(product.brand || '')
-				const matchesCategory = state.selectedCategories.length === 0 || state.selectedCategories.includes(product.category || '')
+				const matchesBrand =
+					state.selectedBrands.length === 0 ||
+					state.selectedBrands.includes(product.brand || '')
+				const matchesCategory =
+					state.selectedCategories.length === 0 ||
+					state.selectedCategories.includes(product.category || '')
 				return matchesBrand && matchesCategory
 			})
 		},

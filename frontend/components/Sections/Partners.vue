@@ -3,24 +3,32 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import { Autoplay, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-defineProps<{ data?: { brands_title?: string } }>()
-
+const props = defineProps<{
+	data?: { partners_items?: string; partners_title?: string }
+}>()
 const config = useRuntimeConfig()
 
-const apiStore = useApiStore()
+// Парсим JSON, если поле существует
+const partners = computed(() => {
+	try {
+		console.log(props.data?.partners_items)
 
-onMounted(() => {
-	apiStore.fetchBrands()
+		return props.data?.partners_items
+			? JSON.parse(props.data.partners_items)
+			: []
+	} catch (error) {
+		console.error('❌ Ошибка парсинга MIGX-поля partners_items:', error)
+		return []
+	}
 })
-
-const brands = computed(() => apiStore.brands)
+console.log(partners)
 </script>
 
 <template>
-	<section class="section section-brands">
+	<section class="section section-partners" v-if="partners.length">
 		<div class="container line-top">
 			<div class="section__header">
-				<h2 class="h2">{{ data?.brands_title || 'Бренды' }}</h2>
+				<h2 class="h2">{{ data?.partners_title || 'Партнеры' }}</h2>
 
 				<NuxtLink to="/catalog" class="btn btn-more">
 					<span>Смотреть все</span>
@@ -29,7 +37,7 @@ const brands = computed(() => apiStore.brands)
 			</div>
 		</div>
 
-		<div class="container brands">
+		<div class="container partners">
 			<Swiper
 				:modules="[Pagination, Autoplay]"
 				:breakpoints="{
@@ -42,18 +50,19 @@ const brands = computed(() => apiStore.brands)
 				:pagination="{ clickable: true }"
 				:autoplay="{ delay: 2500, disableOnInteraction: false }"
 				:speed="1000"
-				class="brands-slider"
+				class="partners-slider"
 			>
-				<SwiperSlide v-for="brand in brands" :key="brand.id">
-					<NuxtLink :to="`${brand.alias}`" class="brands__item">
-						<h3 class="h3 brands__title">{{ brand.title }}</h3>
-						<div class="brands__logo">
+				<SwiperSlide v-for="item in partners" :key="item.MIGX_id">
+					<div class="partners__item">
+						<h3 class="h3 partners__title">{{ item.title }}</h3>
+						<div class="partners__logo">
 							<NuxtImg
-								:src="config.public.apiUrl + brand.tvFields.info_logo"
-								:alt="brand.title"
+								:src="config.public.apiUrl + item.logo"
+								:alt="item.title"
 							/>
 						</div>
-					</NuxtLink>
+						<div class="text">{{ item.text }}</div>
+					</div>
 				</SwiperSlide>
 			</Swiper>
 		</div>
@@ -61,34 +70,34 @@ const brands = computed(() => apiStore.brands)
 </template>
 
 <style lang="scss" scoped>
-.brands {
+.partners {
 	margin-top: 42px;
 
 	.swiper {
 		overflow: visible !important;
 	}
 
-	.brands__item {
+	.partners__item {
 		@include flex(column, flex-start, flex-start);
 		padding: 20px;
-		aspect-ratio: 1 / 1;
 		background-color: $color-light;
 		transition: $transition;
+		width: 100%;
 
 		&:hover {
 			background-color: $color-primary;
 			color: $color-white;
 
-			.brands__title {
+			.partners__title {
 				color: $color-white;
 			}
 
-			.brands__logo {
+			.partners__logo {
 				filter: brightness(0) invert(1);
 			}
 		}
 
-		.brands__title {
+		.partners__title {
 			font-size: 24px;
 			font-weight: 700;
 			color: $color-primary;
@@ -98,12 +107,22 @@ const brands = computed(() => apiStore.brands)
 			margin-bottom: 20px;
 		}
 
-		.brands__logo {
+		.partners__logo {
 			margin-top: auto;
+			text-align: center;
+			margin: 0 auto;
 
 			@media screen and (max-width: 768px) {
 				max-width: 50%;
 			}
+		}
+
+		.text {
+			text-align: center;
+			margin: 0 auto;
+			margin-top: 24px;
+			font-size: 16px;
+			color: $color-gray;
 		}
 	}
 }

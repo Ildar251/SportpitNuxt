@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { usePage } from '~/composables/usePage'
-const { sections, sectionMap, sectionsData, page } = usePage('about')
+const { sections, sectionMap, sectionsData, page } = usePage('stocks')
 </script>
 
 <template>
@@ -11,7 +11,6 @@ const { sections, sectionMap, sectionsData, page } = usePage('about')
 			:is="sectionMap[section]"
 			:key="section"
 			:data="sectionsData[section]"
-			:noInfoTitle="true"
 		/>
 	</main>
 </template>
