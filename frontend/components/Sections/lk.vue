@@ -23,7 +23,7 @@ const contentRef = ref<HTMLElement | null>(null)
 const currentHeight = ref('auto')
 
 watch(activeTab, async () => {
-	await nextTick() // Ждём ререндер нового контента
+	await nextTick()
 	if (contentRef.value) {
 		const newHeight = contentRef.value.scrollHeight + 'px'
 		currentHeight.value = newHeight

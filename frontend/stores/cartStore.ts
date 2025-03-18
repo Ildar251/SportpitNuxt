@@ -8,6 +8,14 @@ export const useCartStore = defineStore('cart', {
     state: () => ({
         items: [] as Product[],
     }),
+
+    getters: {
+        totalPrice: (state) => {
+            return state.items.reduce((total, item) => {
+                return total + (item.price || 0) * item.quantity
+            }, 0)
+        },
+    },
     actions: {
         loadCart() {
             if (import.meta.client) {
@@ -38,12 +46,16 @@ export const useCartStore = defineStore('cart', {
             if (item && quantity > 0) {
                 item.quantity = quantity
                 this.saveCart()
+            } else if (item && quantity <= 0) {
+                this.removeFromCart(productId) // Удаляем товар, если количество становится 0
             }
         },
 
         isInCart(productId: number) {
             return this.items.some((item) => item.id === productId)
         },
+
+
 
         async syncCart() {
             const authStore = useAuthStore()
@@ -113,5 +125,10 @@ export const useCartStore = defineStore('cart', {
 
             return merged
         },
+
+        clearCart() {
+            this.items = []
+            this.saveCart()
+        }
     },
 })

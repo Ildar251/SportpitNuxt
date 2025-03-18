@@ -167,5 +167,9 @@ export const useAuthStore = defineStore('auth', {
 			}
 			this.loading = false
 		},
+
+		isAuthenticated() {
+			return this.apiToken !== null
+		}
 	},
 })

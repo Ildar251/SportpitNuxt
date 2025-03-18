@@ -23,6 +23,16 @@ const setActiveTab = (tabId: string) => {
 </template>
 
 <style lang="scss" scoped>
+.checkout {
+    .tabs {
+        margin-bottom: 24px;
+
+        .tabs__item {
+            height: auto-clamp(80px, 140px);
+        }
+    }
+}
+
 .tabs {
     @include flex(row, flex-start, flex-start);
     gap: 12px;
