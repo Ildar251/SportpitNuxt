@@ -18,7 +18,7 @@ const stocks = computed(() => apiStore.stocks)
 	<section class="section section-stocks">
 		<div class="container stocks">
 			<NuxtLink
-				:to="`${stock.alias}`"
+				:to="'/stocks/' + stock.alias"
 				class="stocks__item"
 				v-for="stock in stocks"
 				:key="stock.id"
@@ -44,7 +44,7 @@ const stocks = computed(() => apiStore.stocks)
 
 	&__item {
 		@include flex(column, space-between, flex-start);
-		height: 300px;
+		height: auto-clamp(300px, 520px);
 		padding: 42px;
 		position: relative;
 		background-size: cover;

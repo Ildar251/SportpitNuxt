@@ -12,13 +12,13 @@ defineProps<{
 		</div>
 
 		<div class="container breadcrumbs">
-			<div class="breadcrumbs__item">Главная страница</div>
+			<NuxtLink to="/" class="breadcrumbs__item">Главная страница</NuxtLink>
 			<div class="breadcrumbs__item">{{ page?.title }}</div>
 		</div>
 	</section>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .breadcrumbs {
 	display: flex;
 	flex-wrap: wrap;

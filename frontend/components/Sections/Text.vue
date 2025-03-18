@@ -35,29 +35,6 @@ const text_block = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.text-block {
-	display: flex;
-	gap: auto-clamp(34px, 72px);
-	margin-top: auto-clamp(30px, 72px);
-
-	&.reverse {
-		flex-direction: row-reverse;
-	}
-
-	.column {
-		flex: 3;
-	}
-
-	.image {
-		flex: 2;
-
-		img {
-			width: 100%;
-			object-fit: contain;
-		}
-	}
-}
-
 .h2 {
 	margin-bottom: auto-clamp(24px, 42px);
 	font-size: auto-clamp(24px, 50px);

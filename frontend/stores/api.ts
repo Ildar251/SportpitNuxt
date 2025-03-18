@@ -220,5 +220,9 @@ export const useApiStore = defineStore('api', {
 				return matchesBrand && matchesCategory
 			})
 		},
+
+		getStockByAlias: state => (alias: string) => {
+			return state.stocks.find(stock => stock.alias === alias)
+		},
 	},
 })
