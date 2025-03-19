@@ -193,36 +193,7 @@ button {
 		height: auto-clamp(260px, 320px);
 	}
 
-	.card__sticker {
-		@include flex(column, center, flex-start);
-		gap: 6px;
-		position: absolute;
-		top: 20px;
-		left: 20px;
-		font-size: auto-clamp(18px, 27px);
-		font-weight: 700;
 
-		&--item {
-			@include flex(row, center, center);
-			gap: 6px;
-			padding: auto-clamp(8px, 12px) auto-clamp(16px, 27px);
-
-			&.new {
-				background-color: $color-orange;
-				color: $color-white;
-			}
-
-			&.sale {
-				background-color: $color-red;
-				color: $color-white;
-			}
-
-			&.hit {
-				background-color: $color-accent;
-				color: $color-white;
-			}
-		}
-	}
 
 	.card__content {
 		@include flex(column, flex-start, flex-start);

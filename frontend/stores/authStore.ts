@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
 					'https://test.top-nnov.ru/api/profile',
 					{
 						withCredentials: true,
-						headers: { Authorization: `Bearer ${this.apiToken}` },
+						headers: { authorization: `Bearer ${this.apiToken}` },
 					}
 				)
 				this.user = response.data

@@ -28,4 +28,14 @@ export default defineNuxtConfig({
 		pageTransition: { name: 'page', mode: 'out-in' },
 	},
 	plugins: ['~/plugins/auth.ts'],
+	image: {
+		provider: 'ipx',
+		domains: ['test.top-nnov.ru'], // Разрешённые внешние домены
+		ipx: {
+			// Убираем baseURL, чтобы ipx работал локально
+			modifiers: {
+				format: 'webp', // По умолчанию WebP
+			},
+		},
+	},
 })

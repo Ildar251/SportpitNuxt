@@ -1,23 +1,7 @@
 import axios from 'axios'
 import { defineStore } from 'pinia'
 
-interface Products {
-	id: number
-	title: string
-	description: string
-	content: string
-	parent: number
-	category: string | null
-	alias: string
-	uri: string
-	price?: string
-	price_old?: string
-	taste?: string
-	sticker?: string
-	image?: string
-	volume?: string
-	brand?: string
-}
+import type { ProductFull } from '@/types/product'
 
 interface Page {
 	id: number
@@ -57,7 +41,7 @@ interface Stocks {
 
 export const useApiStore = defineStore('api', {
 	state: () => ({
-		products: [] as Products[],
+		products: [] as ProductFull[],
 		pages: [] as Page[],
 		sections: [] as Section[],
 		categories: [] as Categories[],
@@ -73,7 +57,7 @@ export const useApiStore = defineStore('api', {
 		async fetchProducts() {
 			this.loading = true
 			try {
-				const response = await axios.get<Products[]>(
+				const response = await axios.get<ProductFull[]>(
 					'https://test.top-nnov.ru/api/products'
 				)
 				this.products = response.data

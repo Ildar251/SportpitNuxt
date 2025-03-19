@@ -55,7 +55,10 @@ export const useCartStore = defineStore('cart', {
             return this.items.some((item) => item.id === productId)
         },
 
-
+        getQuantity(productId: number) {
+            const item = this.items.find((item) => item.id === productId)
+            return item ? item.quantity : 0
+        },
 
         async syncCart() {
             const authStore = useAuthStore()

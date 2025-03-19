@@ -1,26 +1,29 @@
 <script setup lang="ts">
+import 'swiper/css'
+import 'swiper/css/pagination'
+import { Autoplay, Pagination } from 'swiper/modules'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useApiStore } from '~/stores/api'
+import { useCartStore } from '~/stores/cartStore'
+import { useFavoriteStore } from '~/stores/favoritesStore'
+
+const modalStore = useModalStore()
 const route = useRoute()
 const apiStore = useApiStore()
+const cartStore = useCartStore()
+const favoriteStore = useFavoriteStore()
 const config = useRuntimeConfig()
-interface Product {
-    id: number
-    title: string
-    description: string
-    content: string
-    parent: number
-    category: string | null
-    alias: string
-    price?: string
-    price_old?: string
-    brand?: string
-    taste?: string
-    sticker?: string
-    image?: string
-    volume?: string
-}
+const authStore = useAuthStore()
+
+
+
+import type { ProductFull } from '@/types/product'
+
 // Загрузка данных о продукте
-const product = ref<Product | null>(null)
+const product = ref<ProductFull | null>(null)
+const stickers = computed(() => (product.value?.sticker ? product.value.sticker.split('||') : []))
 
 onMounted(async () => {
     if (apiStore.products.length === 0) {
@@ -29,22 +32,108 @@ onMounted(async () => {
     if (apiStore.brands.length === 0) {
         await apiStore.fetchBrands()
     }
-    // Ищем продукт по alias
-    product.value =
-        apiStore.products.find(p => p.alias === route.params.alias) || null
+    product.value = apiStore.products.find(p => p.alias === route.params.alias) || null
 
     if (!product.value) {
         console.error(`Продукт с alias "${route.params.alias}" не найден`)
     }
 })
 
-
+// Обработка объема
 const activeIndex = ref(0)
-const volume = computed(() =>
-    product.value?.volume ? product.value?.volume.split('||') : []
-)
+const volume = computed(() => (product.value?.volume ? product.value.volume.split('||') : []))
 const onVolumeClick = (index: number) => {
     activeIndex.value = index
+}
+
+// Добавление в корзину
+const addToCart = () => {
+    if (product.value) {
+        cartStore.addToCart({
+            id: product.value.id,
+            title: product.value.title,
+            price: product.value.price ? parseFloat(product.value.price) : 0,
+            image: product.value.image,
+            volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
+            quantity: 1,
+        })
+    }
+}
+
+// Удаление из корзины
+const removeFromCart = () => {
+    if (product.value) {
+        cartStore.removeFromCart(product.value.id)
+    }
+}
+
+// Переключение избранного
+const toggleFavorite = () => {
+    if (product.value) {
+        favoriteStore.toggleFavorite({
+            id: product.value.id,
+            title: product.value.title,
+            price: product.value.price ? parseFloat(product.value.price) : 0,
+            image: product.value.image,
+            volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
+        })
+    }
+}
+
+// Увеличение количества
+const increaseQuantity = () => {
+    if (product.value) {
+        const currentQuantity = cartStore.getQuantity(product.value.id)
+        cartStore.updateQuantity(product.value.id, currentQuantity + 1)
+    }
+}
+
+// Уменьшение количества
+const decreaseQuantity = () => {
+    if (product.value) {
+        const currentQuantity = cartStore.getQuantity(product.value.id)
+        cartStore.updateQuantity(product.value.id, currentQuantity - 1)
+    }
+}
+// Проверка, есть ли товар в корзине, и получение количества
+const isInCart = computed(() => (product.value ? cartStore.isInCart(product.value.id) : false))
+const cartQuantity = computed(() =>
+    product.value ? cartStore.getQuantity(product.value.id) : 0
+)
+
+const textRef = ref<HTMLElement | null>(null)
+const isTextExpanded = ref(false)
+const isTextLong = ref(false)
+
+// Динамическая высота для анимации
+const textHeight = ref('200px') // Начальная высота совпадает с CSS
+
+const toggleText = async () => {
+    if (!textRef.value) return
+
+    const fullHeight = `${textRef.value.scrollHeight}px`
+    if (!isTextExpanded.value) {
+        // Раскрытие
+        textHeight.value = fullHeight
+        isTextExpanded.value = true
+    } else {
+        // Скрытие
+        textHeight.value = '200px'
+        isTextExpanded.value = false
+    }
+}
+
+onMounted(async () => {
+    await nextTick() // Ждем рендера DOM
+    if (textRef.value) {
+        isTextLong.value = textRef.value.scrollHeight > 200
+    }
+})
+
+const activeTasteIndex = ref(0)
+const tastes = computed(() => product.value?.taste || [])
+const onTasteClick = (index: number) => {
+    activeTasteIndex.value = index
 }
 </script>
 
@@ -53,19 +142,52 @@ const onVolumeClick = (index: number) => {
         <section class="section section-product" v-if="product">
             <div class="container product">
                 <div class="product__image">
-                    <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420" />
+                    <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420"
+                        loading="lazy" />
+                    <Transition name="fade">
+                        <div class="card__sticker" v-if="stickers">
+                            <div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
+                                <NuxtIcon name="new" v-if="sticker === 'new'" />
+                                <NuxtIcon name="hit" v-if="sticker === 'hit'" />
+                                <NuxtIcon name="hit" v-if="sticker === 'sale'" />
+                                <span>{{ sticker }}</span>
+                            </div>
+                        </div>
+                    </Transition>
+
+                    <div :class="'favorite' +
+                        (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+                        @click.stop="toggleFavorite">
+                        <NuxtIcon name="favorites" />
+                    </div>
                 </div>
                 <div class="product__info">
+                    <div class="container breadcrumbs">
+                        <NuxtLink to="/" class="breadcrumbs__item">Главная страница</NuxtLink>
+                        <NuxtLink to="/catalog" class="breadcrumbs__item">Продукты</NuxtLink>
+                        <div class="breadcrumbs__item">{{ product?.title }}</div>
+                    </div>
                     <NuxtLink to="#" class="product__brand link">
-                        {{ product.brand }}
+                        {{ product.brand || 'Без бренда' }}
                     </NuxtLink>
                     <div class="product__info-main">
                         <div class="product__info-left">
                             <h1 class="h1">{{ product.title }} {{ product.taste }}</h1>
-                            <p class="product__description">{{ product.description }}</p>
+                            <div class="product__text-block" v-if="product.product_text">
+                                <div ref="textRef" class="product__text"
+                                    :class="{ 'product__text--collapsed': !isTextExpanded && isTextLong }"
+                                    :style="{ maxHeight: textHeight }" v-html="product.product_text"></div>
+                                <button v-if="isTextLong" class="btn btn-more-down"
+                                    :class="{ 'more--open': isTextExpanded }" @click="toggleText">
+                                    <span>{{ isTextExpanded ? 'Скрыть' : 'Полное описание' }}</span>
+                                    <NuxtIcon name="arrow-down" />
+                                </button>
+                            </div>
                         </div>
                         <div class="product__info-right">
-                            <div class="product__info-favorite favorite">
+                            <div :class="'product__info-favorite favorite' +
+                                (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+                                @click.stop="toggleFavorite">
                                 <NuxtIcon name="favorites" />
                             </div>
                         </div>
@@ -75,63 +197,144 @@ const onVolumeClick = (index: number) => {
                         <h3 class="h3">Объём</h3>
                         <div class="row">
                             <div :class="'product__volume-item' +
-                                (index === activeIndex ? ' product__volume-item--active' : '')
-                                " v-for="(volume, index) in volume" :key="index" @click="onVolumeClick(index)">
-                                {{ volume }} мл
+                                (index === activeIndex ? ' product__volume-item--active' : '')"
+                                v-for="(vol, index) in volume" :key="index" @click="onVolumeClick(index)">
+                                {{ vol }} мл
                             </div>
                         </div>
                     </div>
 
-                    <div class="product__taste product__info-block">
+                    <div class="product__taste product__info-block" v-if="tastes.length">
                         <h3 class="h3">Вкус</h3>
-                        <div class="row">
-                            <!-- <div :class="'product__taste-item' +
-                            (index === activeIndex ? ' product__taste-item--active' : '')
-                            " v-for="(taste, index) in taste" :key="index" @click="onTasteClick(index)">
-                            {{ taste }} мл
-                        </div> -->
-                        </div>
+                        <Swiper :modules="[Pagination, Autoplay]" :breakpoints="{
+                            512: { slidesPerView: 2 },
+                            768: { slidesPerView: 3 },
+                            1440: { slidesPerView: 4 },
+                        }" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }"
+                            :autoplay="{ delay: 2500, disableOnInteraction: false }" :speed="1000" class="taste-slider">
+                            <SwiperSlide v-for="(taste, index) in tastes" :key="taste.MIGX_id" class="taste__item"
+                                :class="{ 'taste__item--active': index === activeTasteIndex }"
+                                @click="onTasteClick(index)">
+                                <div class="taste__image">
+                                    <NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="120"
+                                        width="auto" format="webp" />
+                                </div>
+
+                                <div class="taste__text">
+                                    {{ taste.taste }}
+                                </div>
+                            </SwiperSlide>
+                        </Swiper>
                     </div>
 
-                    <div class="row">
-                        <div class="product__price">
-                            <span class="price">{{ product.price }} ₽</span>
-                            <span class="price-old">{{ product.price_old }} ₽</span>
+                    <div class="product__bottom">
+                        <div class="row">
+                            <div class="product__price">
+                                <div v-if="authStore.apiToken">
+                                    <span class="price">{{ product.price }} ₽</span>
+                                    <span class="price__subtext">Оптовая цена</span>
+                                </div>
+                                <div v-else>
+                                    <span class="price-old">{{ product.price_old }} ₽</span>
+                                    <span class="price__subtext">Без регистрации</span>
+                                </div>
+                            </div>
+
+                            <Transition name="fade">
+                                <button v-if="!isInCart" class="btn add-to-cart" @click.stop="addToCart">
+                                    <span class="span-text">В корзину</span>
+                                    <NuxtIcon name="plus" />
+                                </button>
+                                <div v-else class="row">
+                                    <div class="cart-controls">
+                                        <button class="btn qty-btn" @click.stop="decreaseQuantity">
+                                            <NuxtIcon name="minus" />
+                                        </button>
+                                        <span class="cart-quantity">{{ cartQuantity }}</span>
+                                        <button class="btn qty-btn" @click.stop="increaseQuantity">
+                                            <NuxtIcon name="plus" />
+                                        </button>
+                                    </div>
+                                    <button class="btn delete-from-cart" @click.stop="removeFromCart">
+                                        <span>Удалить из корзины</span>
+                                        <NuxtIcon name="delete" />
+                                    </button>
+                                </div>
+                            </Transition>
                         </div>
-                        <div class="product__price-info">
-                            <NuxtIcon name="warning" />
-                            <div>
-                                <h4 class="h4">Указана розничная цена.</h4>
-                                <span>Авторизуйтесь на сайте, чтобы увидеть оптовые цены.</span>
-                                <span class="warning">Минимальная сумма заказа 10 000 ₽</span>
+
+                        <div class="dop-info" v-if="!authStore.apiToken">
+                            <div class="lock">
+                                <NuxtIcon name="lock" />
+                                <span class="h4">Стоимость
+                                    оптовой закупки</span>
+                            </div>
+                            <div class="product__price-info">
+                                <div class="minimal">
+                                    Минимальная сумма<br>заказа 10 000 ₽
+                                </div>
+                                <div class="warning">
+                                    <NuxtIcon name="warning" />
+                                    <div>
+                                        <span>Чтобы узнать оптовую стоимость, зарегистрируйтесь на сайте</span>
+                                        <div class="btn btn-more" @click.prevent="modalStore.open">
+                                            <span>Зарегистрироваться</span>
+                                            <NuxtIcon name="arrow-right" />
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
+
+                        <div class="minimal" v-else>
+                            Минимальная сумма заказа 10 000 ₽
+                        </div>
+
                     </div>
 
-                    <div class="row">
-                        <button class="btn add-to-cart">
-                            <span class="span-text">В корзину</span>
-                            <NuxtIcon name="plus" />
-                        </button>
-                    </div>
                 </div>
             </div>
         </section>
-    </main>
+        <section v-else class="section section-product">
+            <div class="container">
+                <div class="not-found">Продукт не найден</div>
+            </div>
+        </section>
 
+        <div class="box">
+        </div>
+    </main>
 </template>
 
 <style lang="scss" scoped>
+@media screen and (max-width: 768px) {
+    .section-product {
+        margin-top: 0px
+    }
+}
+
 .product {
     @include flex(row, space-between, flex-start);
     gap: auto-clamp(32px, 64px);
 
     @media screen and (max-width: 768px) {
         @include flex(column, center, center);
+
+    }
+
+    .breadcrumbs {
+        margin: 0;
+        padding: 0;
+        margin-bottom: 80px;
+
+        @media screen and (max-width: 768px) {
+            margin-bottom: 20px;
+        }
     }
 
     .h1 {
-        font-size: auto-clamp(24px, 50px);
+        font-size: auto-clamp(28px, 50px);
         font-weight: 700;
     }
 
@@ -141,9 +344,85 @@ const onVolumeClick = (index: number) => {
         padding: auto-clamp(40px, 80px);
         width: 100%;
         max-width: auto-clamp(290px, 580px);
+        position: relative;
+
+        .favorite {
+            display: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            max-width: 100%;
+            padding: 30px 30px 0 30px;
+            box-shadow: 0px 0px 0px 160px $color-light;
+
+            .favorite {
+                display: flex;
+                position: absolute;
+                top: 20px;
+                right: 0px;
+            }
+
+            img {
+                max-height: 300px
+            }
+        }
+    }
+
+    .card__sticker {
+        @media screen and (max-width: 768px) {
+            left: 0px;
+        }
+    }
+
+
+
+    .taste-slider {
+        width: 100%;
+        overflow: visible !important;
+        margin-top: 24px;
+
+        .taste__item {
+            .taste__image {
+                @include flex(row, center, center);
+                width: 116px;
+                height: 116px;
+                background-color: $color-light;
+                padding-top: 20px;
+                overflow: clip;
+
+                img {
+                    object-fit: contain;
+                    object-position: 0 20px;
+                }
+            }
+
+            .taste__text {
+                margin-top: 7px;
+                font-size: 14px;
+                color: $color-gray;
+            }
+        }
+    }
+
+    .lock {
+        @include flex(column, flex-start, flex-start);
+        color: $color-gray;
+        font-weight: bold;
+
+        .nuxt-icon {
+            font-size: 40px;
+        }
+
+        span:not(.nuxt-icon) {
+            font-size: 20px;
+            max-width: 160px;
+            line-height: 1;
+            margin-top: 8px;
+        }
     }
 
     .product__info {
+        position: relative;
         flex: 1;
 
         .product__brand {
@@ -152,10 +431,40 @@ const onVolumeClick = (index: number) => {
             font-weight: 600;
         }
 
-        .product__description {
-            color: $color-gray;
-            font-size: 16px;
+        .product__text-block {
             margin-top: 32px;
+            margin-bottom: 20px;
+
+            @media screen and (max-width: 768px) {
+                margin-top: 72px;
+            }
+
+            .product__text {
+                font-size: 16px;
+                line-height: 1.5;
+                color: $color-gray;
+                transition: max-height 0.5s ease; // Плавный переход для max-height
+                overflow: hidden;
+
+                &--collapsed {
+                    position: relative;
+
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 50px;
+                        background: linear-gradient(transparent, $color-white 90%);
+                        pointer-events: none; // Чтобы градиент не мешал кликам
+                    }
+                }
+
+                :deep(p) {
+                    margin-bottom: 15px;
+                }
+            }
         }
 
         .product__info-main {
@@ -164,8 +473,17 @@ const onVolumeClick = (index: number) => {
             border-top: 2px solid $color-border;
             margin-top: 16px;
 
+            @media screen and (max-width: 768px) {
+                border: none;
+                gap: 0;
+            }
+
             .h1 {
                 padding-top: 24px;
+
+                @media screen and (max-width: 768px) {
+                    padding-top: 0;
+                }
             }
 
             .product__info-right {
@@ -173,6 +491,10 @@ const onVolumeClick = (index: number) => {
                 min-width: 15%;
                 border-left: 2px solid $color-border;
                 padding-top: 24px;
+
+                @media screen and (max-width: 768px) {
+                    display: none;
+                }
             }
 
             .favorite {
@@ -188,6 +510,7 @@ const onVolumeClick = (index: number) => {
             margin-top: auto-clamp(60px, 120px);
             border-top: 2px solid $color-border;
             padding-top: 15px;
+            width: 500px;
 
             .row {
                 @include flex(row, flex-start, flex-start);
@@ -219,101 +542,93 @@ const onVolumeClick = (index: number) => {
     }
 
     .product__price {
-        @include flex(row, center, center);
-        background-color: $color-orange;
-        padding: auto-clamp(12px, 25px) auto-clamp(7px, 14px) auto-clamp(12px, 25px) auto-clamp(32px, 64px);
-        position: relative;
-        flex: 1;
+        font-size: auto-clamp(32px, 70px);
+        font-weight: 700;
         white-space: nowrap;
 
-        &::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: -25px;
-            width: 50px;
-            background-color: $color-orange;
-            transform: skewX(-20deg);
-            z-index: -1;
-        }
+        span {
+            display: block;
+            line-height: 0.85;
 
-        .price {
-            font-size: auto-clamp(24px, 70px);
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .price-old {
-            font-size: auto-clamp(16px, 24px);
-            font-weight: 700;
-            margin-left: auto-clamp(10px, 20px);
-            color: $color-white;
-            position: relative;
-            line-height: 1;
-            height: 100%;
-
-            &::after {
-                content: '';
-                display: block;
-                width: 100%;
-                height: 2px;
-                background-color: currentColor;
-                position: absolute;
-                top: auto-clamp(5px, 10px);
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(-25deg);
-                transform-origin: center;
+            &.price__subtext {
+                font-size: auto-clamp(16px, 20px);
+                color: $color-gray;
             }
         }
 
+        &-info {
+            @include flex(row, space-between, center);
+            background-color: #FCFCFC;
+            padding: 12px 40px;
+            gap: 30px;
+            font-size: 18px;
 
+            .minimal {
+                color: $color-red;
+            }
+
+            .warning {
+                flex: 1;
+                @include flex(row, space-between, flex-start);
+                gap: 12px;
+                max-width: 360px;
+
+                .btn-more {
+                    margin-top: 10px;
+                    color: $color-accent;
+                }
+            }
+        }
     }
 
-    .product__price-info {
-        @include flex(row, flex-start, flex-start);
-        gap: 10px;
-        background-color: $color-light;
-        margin-left: 60px;
-        position: relative;
-        padding: auto-clamp(10px, 20px);
-        flex: 3;
+    .minimal {
+        @include flex(row, flex-end, center);
+        margin-left: auto;
+        color: $color-red;
+        font-size: 18px;
+        margin-top: 32px;
+    }
 
-        .nuxt-icon {
-            font-size: auto-clamp(12px, 24px);
-            margin-top: 5px;
+    .btn {
+        margin-top: 0;
+    }
+
+    .product__bottom {
+        margin-top: auto-clamp(32px, 72px);
+        padding-top: auto-clamp(32px, 72px);
+        border-top: 2px solid $color-border;
+
+
+
+        &>.row {
+            @include flex(row, space-between, stretch);
+            flex-wrap: wrap;
+            gap: 20px;
+
+            @media screen and (max-width: 768px) {
+                .product__price {
+                    width: 100%;
+                }
+            }
         }
 
-        &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: -25px;
-            width: 50px;
-            background-color: $color-light;
-            transform: skewX(-20deg);
-            z-index: -1;
+        .row {
+            flex: 1
         }
 
-        .h4 {
-            font-size: auto-clamp(10px, 20px);
+        .dop-info {
+            @include flex(row, space-between, flex-start);
+            margin-top: 42px;
         }
+    }
 
-        .h4+span {
-            font-size: auto-clamp(10px, 16px);
-            color: $color-gray;
-            font-weight: 400;
-            display: inline-block;
-        }
-
-        .warning {
-            display: inline-block;
-            margin-top: auto-clamp(10px, 20px);
-            font-size: auto-clamp(12px, 18px);
-            color: $color-red;
-            font-weight: 400;
-        }
+    .cart-controls {
+        @include flex(row, space-between, center);
+        background-color: #F1F3F6;
+        padding: auto-clamp(14px, 21px) auto-clamp(20px, 27px);
+        gap: auto-clamp(22px, 42px);
+        font-size: auto-clamp(16px, 26px);
+        margin-right: 20px;
     }
 }
 </style>

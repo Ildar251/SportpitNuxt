@@ -288,7 +288,7 @@ input[type="checkbox"]:checked::after {
     }
 
     &.btn-more {
-        @include flex(row, center, flex-start);
+        @include flex(row, flex-start, flex-start);
         gap: auto-clamp(8px, 16px);
         font-size: auto-clamp(20px, 24px);
         font-weight: 700;
@@ -307,8 +307,38 @@ input[type="checkbox"]:checked::after {
                 transform: translate(3px, -3px)
             }
         }
+    }
+
+    &.btn-more-down {
+        @include flex(row, center, flex-start);
+        gap: auto-clamp(8px, 16px);
+        font-size: auto-clamp(20px, 24px);
+        font-weight: 700;
+        color: $color-gray;
 
 
+        .nuxt-icon {
+            width: 18px;
+            height: 18px;
+            transform-origin: 0px 12px;
+        }
+
+        &:hover {
+            color: $color-accent;
+
+            .nuxt-icon {
+                transform: translate(0px, 3px)
+            }
+        }
+
+
+
+        &.more--open {
+            .nuxt-icon {
+                transform: scale(1, -1)
+            }
+
+        }
     }
 
     &.add-to-cart,
@@ -343,15 +373,43 @@ input[type="checkbox"]:checked::after {
         font-size: auto-clamp(20px, 26px);
         padding: auto-clamp(20px, 27px);
         margin-top: 42px;
-        transition: $transition;
-
-        .nuxt-icon {
-            transition: unset;
-        }
+        transition: background-color 0.3s ease;
+        color: $color-white;
 
         &:hover {
-            color: $color-accent;
+            color: $color-red;
             background-color: $color-white;
+        }
+    }
+}
+
+.card__sticker {
+    @include flex(column, center, flex-start);
+    gap: 6px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: auto-clamp(18px, 27px);
+    font-weight: 700;
+
+    &--item {
+        @include flex(row, center, center);
+        gap: 6px;
+        padding: auto-clamp(8px, 12px) auto-clamp(16px, 27px);
+
+        &.new {
+            background-color: $color-orange;
+            color: $color-white;
+        }
+
+        &.sale {
+            background-color: $color-red;
+            color: $color-white;
+        }
+
+        &.hit {
+            background-color: $color-accent;
+            color: $color-white;
         }
     }
 }
