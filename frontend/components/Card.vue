@@ -5,6 +5,8 @@ import { useFavoriteStore } from '@/stores/favoritesStore'
 const cartStore = useCartStore()
 const favoriteStore = useFavoriteStore()
 
+import type { Taste } from '@/types/product'
+
 const props = defineProps<{
 	product: {
 		id: number
@@ -16,7 +18,7 @@ const props = defineProps<{
 		alias: string
 		price?: string // Изменено на string для соответствия API
 		brand?: string
-		taste?: string
+		taste?: Taste[]
 		sticker?: string
 		image?: string
 		volume?: string
@@ -57,6 +59,7 @@ const toggleFavorite = () => {
 	})
 	console.log(favoriteStore.isFavorite(product.id))
 }
+const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкуса')
 </script>
 
 <template>
@@ -86,7 +89,7 @@ const toggleFavorite = () => {
 		<div class="card__content">
 			<div class="card__brand">{{ product.brand || 'Товар' }}</div>
 			<h3 class="card__title">{{ product.title }}</h3>
-			<div class="card__taste">{{ product.taste }}</div>
+			<div class="card__taste">{{ firstTaste }}</div>
 			<span class="card__price">{{ product.price ? `${product.price} ₽` : 'Цена не указана' }}</span>
 			<Transition name="fade">
 				<div class="card__hovered" v-if="isHovered">
@@ -124,12 +127,17 @@ const toggleFavorite = () => {
 	display: block;
 	position: relative;
 	width: 100%;
-	height: 100px;
+	height: 85px;
+	margin-top: auto;
+
+	.btn {
+		position: absolute;
+		top: 0;
+		margin-top: 0;
+	}
 }
 
-button {
-	position: absolute;
-}
+
 
 .slide-up-enter-active,
 .slide-up-leave-active {
@@ -168,6 +176,7 @@ button {
 		gap: 8px;
 		transition: $transition;
 		margin-top: 12px;
+		margin-bottom: 24px;
 
 		&--item {
 			background-color: $color-white;
@@ -231,7 +240,7 @@ button {
 	.card__hovered {
 		position: absolute;
 		background-color: $color-light;
-		bottom: -175px;
+		bottom: -190px;
 		left: -20px;
 		padding: 0 20px 20px;
 		width: calc(100% + 40px);

@@ -142,8 +142,8 @@ const onTasteClick = (index: number) => {
         <section class="section section-product" v-if="product">
             <div class="container product">
                 <div class="product__image">
-                    <NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420"
-                        loading="lazy" />
+                    <NuxtImg :src="config.public.apiUrl + tastes[activeTasteIndex].image" :alt="product.title"
+                        height="420" loading="lazy" />
                     <Transition name="fade">
                         <div class="card__sticker" v-if="stickers">
                             <div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
@@ -172,7 +172,7 @@ const onTasteClick = (index: number) => {
                     </NuxtLink>
                     <div class="product__info-main">
                         <div class="product__info-left">
-                            <h1 class="h1">{{ product.title }} {{ product.taste }}</h1>
+                            <h1 class="h1">{{ product.title }} {{ tastes[activeTasteIndex].taste }}</h1>
                             <div class="product__text-block" v-if="product.product_text">
                                 <div ref="textRef" class="product__text"
                                     :class="{ 'product__text--collapsed': !isTextExpanded && isTextLong }"
@@ -207,11 +207,11 @@ const onTasteClick = (index: number) => {
                     <div class="product__taste product__info-block" v-if="tastes.length">
                         <h3 class="h3">Вкус</h3>
                         <Swiper :modules="[Pagination, Autoplay]" :breakpoints="{
-                            512: { slidesPerView: 2 },
-                            768: { slidesPerView: 3 },
-                            1440: { slidesPerView: 4 },
-                        }" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }"
-                            :autoplay="{ delay: 2500, disableOnInteraction: false }" :speed="1000" class="taste-slider">
+                            512: { slidesPerView: 4 },
+                            768: { slidesPerView: 5 },
+                            1440: { slidesPerView: 6 },
+                        }" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }" :speed="1000"
+                            class="taste-slider">
                             <SwiperSlide v-for="(taste, index) in tastes" :key="taste.MIGX_id" class="taste__item"
                                 :class="{ 'taste__item--active': index === activeTasteIndex }"
                                 @click="onTasteClick(index)">
@@ -382,13 +382,23 @@ const onTasteClick = (index: number) => {
         margin-top: 24px;
 
         .taste__item {
+            cursor: pointer;
+
+            &:hover {
+                .taste__image {
+                    box-shadow: 0 4px 12px rgb(144, 210, 109, 0.5);
+                }
+            }
+
             .taste__image {
                 @include flex(row, center, center);
+                transition: $transition;
                 width: 116px;
                 height: 116px;
                 background-color: $color-light;
                 padding-top: 20px;
                 overflow: clip;
+                border: 5px solid transparent;
 
                 img {
                     object-fit: contain;
@@ -400,6 +410,12 @@ const onTasteClick = (index: number) => {
                 margin-top: 7px;
                 font-size: 14px;
                 color: $color-gray;
+            }
+
+            &--active {
+                .taste__image {
+                    border: 5px solid $color-accent;
+                }
             }
         }
     }
@@ -423,7 +439,7 @@ const onTasteClick = (index: number) => {
 
     .product__info {
         position: relative;
-        flex: 1;
+        width: calc(100% - auto-clamp(290px, 580px));
 
         .product__brand {
             color: $color-gray;
@@ -510,7 +526,6 @@ const onTasteClick = (index: number) => {
             margin-top: auto-clamp(60px, 120px);
             border-top: 2px solid $color-border;
             padding-top: 15px;
-            width: 500px;
 
             .row {
                 @include flex(row, flex-start, flex-start);
@@ -537,18 +552,18 @@ const onTasteClick = (index: number) => {
                 }
             }
         }
-
-
     }
 
     .product__price {
+        display: flex;
+        align-items: flex-end;
         font-size: auto-clamp(32px, 70px);
         font-weight: 700;
         white-space: nowrap;
 
         span {
             display: block;
-            line-height: 0.85;
+            line-height: 1;
 
             &.price__subtext {
                 font-size: auto-clamp(16px, 20px);
