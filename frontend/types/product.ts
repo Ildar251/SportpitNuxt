@@ -19,6 +19,13 @@ export interface Taste {
     taste: string
     image: string
 }
+
+export interface DopCompound {
+    MIGX_id: string
+    name: string
+    value: string
+}
+
 export interface ProductFull {
     id: number
     title: string
@@ -35,4 +42,10 @@ export interface ProductFull {
     image?: string
     volume?: string
     product_text?: string
+    sugar?: string
+    energy?: string
+    recommendations?: string
+    storage?: string
+    compound?: string
+    dop_compound?: DopCompound[]
 }

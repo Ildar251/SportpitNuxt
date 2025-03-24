@@ -203,6 +203,22 @@ input[type="checkbox"]:checked::after {
     transform: translateY(-30px);
 }
 
+.slide-down-enter-active,
+.slide-down-leave-active {
+    transition: all 0.25s ease-out;
+}
+
+.slide-down-enter-from {
+    opacity: 0;
+    transform: translateY(-30px);
+}
+
+.slide-down-leave-to {
+    opacity: 0;
+    transform: translateY(0px);
+}
+
+
 .overlay {
     position: fixed;
     top: 0;

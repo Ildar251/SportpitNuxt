@@ -114,8 +114,6 @@ const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкус�
 							</button>
 						</Transition>
 					</div>
-
-
 				</div>
 			</Transition>
 		</div>

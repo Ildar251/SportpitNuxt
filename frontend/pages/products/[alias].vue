@@ -135,6 +135,23 @@ const tastes = computed(() => product.value?.taste || [])
 const onTasteClick = (index: number) => {
     activeTasteIndex.value = index
 }
+
+
+const accordions = [
+    {
+        title: 'Рекомендации по применению',
+        content: '', // Пусто, как на скриншоте
+    },
+    {
+        title: 'Состав',
+        content:
+            'Плотнотечная вода вышей категории, BCAA (L - Валин, L - Изолейцин, L - Лейцин), Висовая катерная, Вещества натура, L - Сукроза, Цитрат натрия, Лимонная кислота, Ароматизатор грейпфрут',
+    },
+    {
+        title: 'Условия хранения',
+        content: '', // Пусто, как на скриншоте
+    },
+]
 </script>
 
 <template>
@@ -207,8 +224,9 @@ const onTasteClick = (index: number) => {
                     <div class="product__taste product__info-block" v-if="tastes.length">
                         <h3 class="h3">Вкус</h3>
                         <Swiper :modules="[Pagination, Autoplay]" :breakpoints="{
-                            512: { slidesPerView: 4 },
-                            768: { slidesPerView: 5 },
+                            320: { slidesPerView: 2.5 },
+                            512: { slidesPerView: 3 },
+                            768: { slidesPerView: 4 },
                             1440: { slidesPerView: 6 },
                         }" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }" :speed="1000"
                             class="taste-slider">
@@ -293,6 +311,32 @@ const onTasteClick = (index: number) => {
 
                     </div>
 
+                    <div class="product__data product__info-block">
+                        <div class="column">
+                            <h4 class="h4">Сахар</h4>
+                            <span>0г</span>
+                        </div>
+                        <div class="column">
+                            <h4 class="h4">Эн. ценность</h4>
+                            <span>32 Ккал</span>
+                        </div>
+                        <div class="column">
+                            <div class="row">
+                                <h4 class="h4">Protein</h4>
+                                <span>8 г</span>
+                            </div>
+                            <div class="row">
+                                <h4 class="h4">Protein</h4>
+                                <span>8 г</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordions">
+                        <UiAccordion v-for="(accordion, index) in accordions" :key="index" :title="accordion.title"
+                            :content="accordion.content" />
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -336,6 +380,11 @@ const onTasteClick = (index: number) => {
     .h1 {
         font-size: auto-clamp(28px, 50px);
         font-weight: 700;
+
+        @media screen and (max-width: 768px) {
+            box-shadow: 0px 0px 0px 20px $color-light;
+            background-color: $color-light;
+        }
     }
 
     .product__image {
@@ -344,7 +393,8 @@ const onTasteClick = (index: number) => {
         padding: auto-clamp(40px, 80px);
         width: 100%;
         max-width: auto-clamp(290px, 580px);
-        position: relative;
+        position: sticky;
+        top: 100px;
 
         .favorite {
             display: none;
@@ -354,6 +404,8 @@ const onTasteClick = (index: number) => {
             max-width: 100%;
             padding: 30px 30px 0 30px;
             box-shadow: 0px 0px 0px 160px $color-light;
+            position: relative;
+            top: 0;
 
             .favorite {
                 display: flex;
@@ -374,12 +426,11 @@ const onTasteClick = (index: number) => {
         }
     }
 
-
-
     .taste-slider {
         width: 100%;
         overflow: visible !important;
         margin-top: 24px;
+        margin-bottom: 50px;
 
         .taste__item {
             cursor: pointer;
@@ -393,7 +444,6 @@ const onTasteClick = (index: number) => {
             .taste__image {
                 @include flex(row, center, center);
                 transition: $transition;
-                width: 116px;
                 height: 116px;
                 background-color: $color-light;
                 padding-top: 20px;
@@ -441,6 +491,10 @@ const onTasteClick = (index: number) => {
         position: relative;
         width: calc(100% - auto-clamp(290px, 580px));
 
+        @media screen and (max-width: 768px) {
+            width: 100%;
+        }
+
         .product__brand {
             color: $color-gray;
             font-size: 12px;
@@ -459,7 +513,7 @@ const onTasteClick = (index: number) => {
                 font-size: 16px;
                 line-height: 1.5;
                 color: $color-gray;
-                transition: max-height 0.5s ease; // Плавный переход для max-height
+                transition: max-height 0.5s ease;
                 overflow: hidden;
 
                 &--collapsed {
@@ -473,7 +527,7 @@ const onTasteClick = (index: number) => {
                         width: 100%;
                         height: 50px;
                         background: linear-gradient(transparent, $color-white 90%);
-                        pointer-events: none; // Чтобы градиент не мешал кликам
+                        pointer-events: none;
                     }
                 }
 
@@ -644,6 +698,45 @@ const onTasteClick = (index: number) => {
         gap: auto-clamp(22px, 42px);
         font-size: auto-clamp(16px, 26px);
         margin-right: 20px;
+    }
+
+    .product__data {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            .h4 {
+                color: $color-gray;
+                font-weight: 400;
+                font-size: auto-clamp(14px, 16px);
+            }
+
+            span {
+                display: block;
+                margin-top: 16px;
+                font-size: auto-clamp(20px, 40px);
+                font-weight: 700;
+            }
+
+            .row {
+                margin-top: 0;
+
+                span {
+                    margin-top: 0;
+                    font-size: auto-clamp(14px, 16px);
+                }
+            }
+        }
+    }
+
+    .accordions {
+
+        margin-top: auto-clamp(32px, 64px);
+
     }
 }
 </style>
