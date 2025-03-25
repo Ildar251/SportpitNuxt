@@ -7,10 +7,25 @@ import { useMenuStore } from '~/stores/useMenuStore'
 import { useMobileMenuStore } from '~/stores/useMobileMenuStore'
 import { useModalStore } from '~/stores/useModalStore'
 
+const favoriteStore = useFavoriteStore()
+const cartStore = useCartStore()
 const authStore = useAuthStore()
 const modalStore = useModalStore()
 const menuStore = useMenuStore()
 const mobileMenuStore = useMobileMenuStore()
+
+
+const favoritesCount = computed(() => favoriteStore.items.length)
+
+const cartCount = computed(() => {
+	return cartStore.items.reduce((total, item) => total + item.quantity, 0)
+})
+
+onMounted(() => {
+	favoriteStore.loadFavorites()
+	cartStore.loadCart()
+})
+
 
 const logout = () => {
 	authStore.logout()
@@ -44,9 +59,7 @@ onMounted(() => {
 				<a href="" class="header__link link">telegram</a>
 				<a href="" class="header__link link">whatsapp</a>
 				<a href="" class="header__link link">vk</a>
-				<a href="mailto:info@nutrivery.ru" class="header__link link"
-					>info@nutrivery.ru</a
-				>
+				<a href="mailto:info@nutrivery.ru" class="header__link link">info@nutrivery.ru</a>
 			</div>
 
 			<a href="tel:+7 945 998-99-65" class="header__phone">
@@ -55,22 +68,18 @@ onMounted(() => {
 			</a>
 
 			<div class="header__items">
-				<NuxtLink to="#" class="header__favorites">
+				<NuxtLink to="/lk?tab=favorites" class="header__favorites">
 					<NuxtIcon name="favorites-head" />
-					<span class="header__favorites-count">0</span>
+					<span class="header__favorites-count" v-if="favoritesCount">{{ favoritesCount }}</span>
 				</NuxtLink>
 
 				<NuxtLink to="/lk?tab=cart" class="header__cart">
 					<NuxtIcon name="cart" />
 					<span>Корзина</span>
+					<span class="header__cart-count" v-if="cartCount">{{ cartCount }}</span>
 				</NuxtLink>
 
-				<NuxtLink
-					v-if="!authStore.apiToken"
-					to="#"
-					class="header__lk"
-					@click.prevent="modalStore.open"
-				>
+				<NuxtLink v-if="!authStore.apiToken" to="#" class="header__lk" @click.prevent="modalStore.open">
 					<NuxtIcon name="lk" />
 					<span class="full-text">Личный кабинет</span>
 					<span class="short-text">ЛК</span>
@@ -91,16 +100,11 @@ onMounted(() => {
 
 			<nav class="header__nav">
 				<div class="header__catalog">
-					<div
-						:class="'burger burger_catalog' + (menuStore.isOpen ? ' open' : '')"
-						@click="menuStore.toggle"
-					>
+					<div :class="'burger burger_catalog' + (menuStore.isOpen ? ' open' : '')" @click="menuStore.toggle">
 						<div class="icon-left"></div>
 						<div class="icon-right"></div>
 					</div>
-					<NuxtLink to="/catalog" class="header__menu-item"
-						><span>Каталог</span></NuxtLink
-					>
+					<NuxtLink to="/catalog" class="header__menu-item"><span>Каталог</span></NuxtLink>
 				</div>
 				<ul class="header__menu">
 					<li class="header__menu-item">
@@ -113,7 +117,7 @@ onMounted(() => {
 						<NuxtLink to="/about"><span>Компания</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
-						<NuxtLink to="/catalog"><span>Партнёрам</span></NuxtLink>
+						<NuxtLink to="/partners"><span>Партнёрам</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
 						<NuxtLink to="/catalog"><span>CTM</span></NuxtLink>
@@ -130,12 +134,8 @@ onMounted(() => {
 				</NuxtLink>
 			</div>
 
-			<div
-				:class="
-					'burger burger_mobile' + (mobileMenuStore.isOpen ? ' open' : '')
-				"
-				@click="mobileMenuStore.toggle"
-			>
+			<div :class="'burger burger_mobile' + (mobileMenuStore.isOpen ? ' open' : '')
+				" @click="mobileMenuStore.toggle">
 				<div class="icon-left"></div>
 				<div class="icon-right"></div>
 			</div>
@@ -188,38 +188,32 @@ onMounted(() => {
 					<nav class="header__nav-mobile">
 						<ul class="header__menu">
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"
-									><span>Бренды</span>
+								<NuxtLink to="/catalog"><span>Бренды</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"
-									><span>Акции</span>
+								<NuxtLink to="/catalog"><span>Акции</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"
-									><span>Компания</span>
+								<NuxtLink to="/catalog"><span>Компания</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"
-									><span>Партнёрам</span>
+								<NuxtLink to="/catalog"><span>Партнёрам</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"
-									><span>CTM</span>
+								<NuxtLink to="/catalog"><span>CTM</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/contacts"
-									><span>Контакты</span>
+								<NuxtLink to="/contacts"><span>Контакты</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
@@ -250,6 +244,23 @@ onMounted(() => {
 		@include flex(row, flex-start, center);
 	}
 
+	&__favorites,
+	&__cart {
+		position: relative;
+
+		&-count {
+			position: absolute;
+			@include flex(row, center, center);
+			width: 24px;
+			height: 24px;
+			background-color: $color-accent;
+			color: $color-white;
+			border-radius: 50%;
+			top: auto-clamp(6px, 12px);
+			left: auto-clamp(40px, 80px);
+		}
+	}
+
 	.container {
 		display: flex;
 		justify-content: space-between;
@@ -258,7 +269,7 @@ onMounted(() => {
 			align-items: center;
 		}
 
-		& > div:not(.header__items, .header__search) {
+		&>div:not(.header__items, .header__search) {
 			padding: auto-clamp(12px, 24px) 0;
 		}
 
@@ -317,7 +328,7 @@ onMounted(() => {
 		display: flex;
 		font-size: auto-clamp(16px, 20px);
 
-		& > a {
+		&>a {
 			display: flex;
 			align-items: center;
 			gap: auto-clamp(10px, 20px);
