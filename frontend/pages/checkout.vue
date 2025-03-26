@@ -94,13 +94,8 @@ const submitOrder = async () => {
 
 <template>
 	<main>
-		<component
-			v-for="section in sections"
-			:is="sectionMap[section]"
-			:key="section"
-			:data="sectionsData[section]"
-			:page="page"
-		/>
+		<component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
+			:page="page" />
 		<section class="section section-checkout">
 			<div class="container checkout">
 				<div class="checkout__item personal-data">
@@ -123,22 +118,12 @@ const submitOrder = async () => {
 					<h2 class="h2">Состав заказа</h2>
 					<div v-if="cartStore.items.length === 0">Корзина пуста</div>
 					<div v-else class="checkout__item-info items-list">
-						<div
-							v-for="item in cartStore.items"
-							:key="item.id"
-							class="order-item"
-						>
+						<div v-for="item in cartStore.items" :key="item.id" class="order-item">
 							<div class="item-wrap">
-								<NuxtImg
-									:src="
-										item.image
-											? `${config.public.apiUrl}${item.image}`
-											: '/placeholder.png'
-									"
-									:alt="item.title || 'Товар'"
-									class="item-image"
-									height="120"
-								/>
+								<NuxtImg :src="item.image
+									? `${config.public.apiUrl}${item.image}`
+									: '/placeholder.png'
+									" :alt="item.title || 'Товар'" class="item-image" height="120" />
 								<div class="item-quantity">
 									{{ item.quantity }}
 								</div>
@@ -154,11 +139,7 @@ const submitOrder = async () => {
 				<div class="checkout__item payment-method">
 					<h2 class="h2">Способ оплаты</h2>
 					<div class="checkout__item-info options">
-						<UiTabs
-							:tabsClass="'tabs-payment'"
-							:tabs="paymentOptions"
-							v-model="paymentOptionsActive"
-						/>
+						<UiTabs :tabsClass="'tabs-payment'" :tabs="paymentOptions" v-model="paymentOptionsActive" />
 					</div>
 				</div>
 
@@ -166,11 +147,7 @@ const submitOrder = async () => {
 				<div class="checkout__item delivery-method">
 					<h2 class="h2">Способ доставки</h2>
 					<div class="checkout__item-info options">
-						<UiTabs
-							:tabs-class="'tabs-delivery'"
-							:tabs="deliveryOptions"
-							v-model="deliveryOptionsActive"
-						/>
+						<UiTabs :tabs-class="'tabs-delivery'" :tabs="deliveryOptions" v-model="deliveryOptionsActive" />
 						<Transition name="fade">
 							<div v-if="deliveryOptionsActive === 'pickup'" class="pickup">
 								<div class="info">
@@ -219,7 +196,7 @@ const submitOrder = async () => {
 						<span class="total__text">Итого:</span>
 						<span class="total__price">{{ cartStore.totalPrice }} ₽</span>
 					</div>
-					<button class="btn btn-submit" @click="submitOrder">
+					<button class="btn btn--fill" @click="submitOrder">
 						<span>Оформить заказ</span>
 					</button>
 				</div>

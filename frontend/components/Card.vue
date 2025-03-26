@@ -102,7 +102,7 @@ const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкус�
 					</div>
 					<div class="button-wrapper">
 						<Transition name="slide-up">
-							<button v-if="!cartStore.isInCart(product.id)" class="btn add-to-cart"
+							<button v-if="!cartStore.isInCart(product.id)" class="btn btn--fill"
 								@click.prevent.stop="addToCart">
 								<span class="span-text">В корзину</span>
 								<NuxtIcon name="plus" />

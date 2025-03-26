@@ -9,7 +9,7 @@ const modalStore = useModalStore()
             <h4 class="h4">Для доступа к личному кабинету авторизуйтесь</h4>
         </div>
 
-        <div class="btn-auth btn" @click.prevent="modalStore.open">
+        <div class="fill btn" @click.prevent="modalStore.open">
             <NuxtIcon name="user" />
             <span>Авторизоваться</span>
         </div>

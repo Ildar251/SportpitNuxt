@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { gsap } from 'gsap'
+import type { Swiper as SwiperType } from 'swiper'
 import 'swiper/css'
+import 'swiper/css/effect-fade'
 import 'swiper/css/pagination'
-import { Autoplay, Pagination } from 'swiper/modules'
+import { Autoplay, EffectFade, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApiStore } from '~/stores/api'
 import { useCartStore } from '~/stores/cartStore'
 import { useFavoriteStore } from '~/stores/favoritesStore'
-
 const modalStore = useModalStore()
 const route = useRoute()
 const apiStore = useApiStore()
@@ -132,26 +133,101 @@ onMounted(async () => {
 
 const activeTasteIndex = ref(0)
 const tastes = computed(() => product.value?.taste || [])
+const tasteTextRef = ref<HTMLElement | null>(null)
+const imageSliderRef = ref<SwiperType | null>(null)
 const onTasteClick = (index: number) => {
 	activeTasteIndex.value = index
+	if (imageSliderRef.value) {
+		imageSliderRef.value.slideTo(index) // Переключаем слайд в image-slider
+	}
 }
 
+const animateTasteText = (text: string) => {
+	if (!tasteTextRef.value) return
 
-const accordions = [
+	const chars = text.split('') // Разбиваем текст на буквы
+	tasteTextRef.value.innerHTML = '' // Очищаем содержимое span
+
+	// Создаём span для каждой буквы
+	chars.forEach((char, i) => {
+		const charSpan = document.createElement('span')
+		charSpan.className = 'taste-char'
+		charSpan.textContent = char
+		tasteTextRef.value?.appendChild(charSpan)
+	})
+
+	// Анимируем буквы
+	gsap.fromTo(
+		tasteTextRef.value.querySelectorAll('.taste-char'),
+		{
+			opacity: 0,
+			y: 20,
+			rotation: 10,
+		},
+		{
+			opacity: 1,
+			y: 0,
+			rotation: 0,
+			duration: 0.5,
+			stagger: 0.05,
+			ease: 'power2.out',
+		}
+	)
+}
+
+onMounted(async () => {
+	await nextTick() // Ждем рендера DOM
+	if (apiStore.products.length === 0) {
+		await apiStore.fetchProducts()
+	}
+	if (apiStore.brands.length === 0) {
+		await apiStore.fetchBrands()
+	}
+	product.value = apiStore.products.find(p => p.alias === route.params.alias) || null
+
+	if (!product.value) {
+		console.error(`Продукт с alias "${route.params.alias}" не найден`)
+	}
+
+	// Инициализируем текст вкуса, если есть tastes
+	if (tastes.value.length > 0 && tasteTextRef.value) {
+		const initialTaste = tastes.value[activeTasteIndex.value]?.taste
+		if (initialTaste) {
+			animateTasteText(initialTaste)
+		}
+	}
+
+	// Существующая логика для textRef
+	if (textRef.value) {
+		isTextLong.value = textRef.value.scrollHeight > 200
+	}
+})
+
+watch(activeTasteIndex, (newIndex) => {
+	if (!tastes.value[newIndex]) return
+	const text = tastes.value[newIndex].taste
+	animateTasteText(text)
+})
+
+const dop_compound = computed(() => {
+	return product.value?.dop_compound || []
+})
+
+const accordions = computed(() => [
 	{
 		title: 'Рекомендации по применению',
-		content: '', // Пусто, как на скриншоте
+		content: product.value?.recommendations || '',
 	},
 	{
 		title: 'Состав',
-		content:
-			'Плотнотечная вода вышей категории, BCAA (L - Валин, L - Изолейцин, L - Лейцин), Висовая катерная, Вещества натура, L - Сукроза, Цитрат натрия, Лимонная кислота, Ароматизатор грейпфрут',
+		content: product.value?.compound || '',
 	},
 	{
 		title: 'Условия хранения',
-		content: '', // Пусто, как на скриншоте
+		content: product.value?.storage || '',
 	},
-]
+])
+
 </script>
 
 <template>
@@ -159,8 +235,22 @@ const accordions = [
 		<section class="section section-product" v-if="product">
 			<div class="container product">
 				<div class="product__image">
-					<NuxtImg :src="config.public.apiUrl + tastes[activeTasteIndex].image" :alt="product.title"
-						height="420" loading="lazy" />
+					<div class="image">
+						<Swiper :modules="[Pagination, EffectFade]" :effect="'fade'" :fadeEffect="{ crossFade: true }"
+							:spaceBetween="20" :slidesPerView="1" :pagination="{ clickable: false }"
+							:allowTouchMove="false" :simulateTouch="false" :speed="700" :initialSlide="activeTasteIndex"
+							class="image-slider" @swiper="(swiper) => (imageSliderRef = swiper)">
+							<SwiperSlide v-for="(taste, index) in tastes" :key="taste.MIGX_id" class="image__item">
+								<NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="420"
+									loading="lazy" placeholder=".././images/box.svg" />
+							</SwiperSlide>
+							<!-- Добавляем дефолтное изображение как последний слайд -->
+							<SwiperSlide v-if="!tastes.length" class="image__item">
+								<NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420"
+									loading="lazy" placeholder=".././images/box.svg" />
+							</SwiperSlide>
+						</Swiper>
+					</div>
 					<Transition name="fade">
 						<div class="card__sticker" v-if="stickers">
 							<div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
@@ -188,7 +278,9 @@ const accordions = [
 					</NuxtLink>
 					<div class="product__info-main">
 						<div class="product__info-left">
-							<h1 class="h1">{{ product.title }} {{ tastes[activeTasteIndex].taste }}</h1>
+							<h1 class="h1">{{ product.title }}
+								<span v-if="tastes.length > 0" ref="tasteTextRef" class="taste-text"></span>
+							</h1>
 							<div class="product__text-block" v-if="product.product_text">
 								<div ref="textRef" class="product__text"
 									:class="{ 'product__text--collapsed': !isTextExpanded && isTextLong }"
@@ -232,7 +324,7 @@ const accordions = [
 								@click="onTasteClick(index)">
 								<div class="taste__image">
 									<NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="120"
-										width="auto" format="webp" />
+										width="auto" format="webp" placeholder=".././images/box.svg" />
 								</div>
 
 								<div class="taste__text">
@@ -256,7 +348,7 @@ const accordions = [
 							</div>
 
 							<Transition name="fade">
-								<button v-if="!isInCart" class="btn add-to-cart" @click.stop="addToCart">
+								<button v-if="!isInCart" class="btn btn--fill" @click.stop="addToCart">
 									<span class="span-text">В корзину</span>
 									<NuxtIcon name="plus" />
 								</button>
@@ -311,20 +403,16 @@ const accordions = [
 					<div class="product__data product__info-block">
 						<div class="column">
 							<h4 class="h4">Сахар</h4>
-							<span>0г</span>
+							<span>{{ product.sugar }}</span>
 						</div>
 						<div class="column">
 							<h4 class="h4">Эн. ценность</h4>
-							<span>32 Ккал</span>
+							<span>{{ product.energy }}</span>
 						</div>
 						<div class="column">
-							<div class="row">
-								<h4 class="h4">Protein</h4>
-								<span>8 г</span>
-							</div>
-							<div class="row">
-								<h4 class="h4">Protein</h4>
-								<span>8 г</span>
+							<div class="row" v-for="i in dop_compound">
+								<h4 class="h4">{{ i.title }}</h4>
+								<span>{{ i.value }}</span>
 							</div>
 						</div>
 					</div>
@@ -342,9 +430,6 @@ const accordions = [
 				<div class="not-found">Продукт не найден</div>
 			</div>
 		</section>
-
-		<div class="box">
-		</div>
 	</main>
 </template>
 
@@ -362,6 +447,15 @@ const accordions = [
 	@media screen and (max-width: 768px) {
 		@include flex(column, center, center);
 
+	}
+
+	.image {
+		@include flex(row, center, center);
+		width: 100%;
+
+		.image__item {
+			text-align: center;
+		}
 	}
 
 	.breadcrumbs {
@@ -591,6 +685,7 @@ const accordions = [
 					background-color: $color-light;
 					font-size: 20px;
 					white-space: nowrap;
+					font-weight: 700;
 
 					&:hover {
 						transform: translateY(-5px);

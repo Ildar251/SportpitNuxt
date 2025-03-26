@@ -22,7 +22,7 @@ export interface Taste {
 
 export interface DopCompound {
     MIGX_id: string
-    name: string
+    title: string
     value: string
 }
 

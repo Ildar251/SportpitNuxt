@@ -49,17 +49,10 @@ watch(
 		<div v-if="cartStore.items.length === 0">Корзина пуста</div>
 		<div v-else>
 			<div class="cart-list" v-auto-animate>
-				<div
-					v-for="product in cartStore.items"
-					:key="product.id"
-					class="cart-item"
-				>
+				<div v-for="product in cartStore.items" :key="product.id" class="cart-item">
 					<div class="cart-item__image">
-						<NuxtImg
-							placeholder="./images/box.svg"
-							:src="config.public.apiUrl + product.image"
-							:alt="product.title || 'Товар'"
-						/>
+						<NuxtImg placeholder="./images/box.svg" :src="config.public.apiUrl + product.image"
+							:alt="product.title || 'Товар'" />
 					</div>
 
 					<div class="cart-item__info">
@@ -71,19 +64,13 @@ watch(
 							<div class="cart-item__quantity">
 								<span>Количество:</span>
 								<div class="quantity-count">
-									<NuxtIcon
-										name="minus"
-										@click="
-											cartStore.updateQuantity(product.id, product.quantity - 1)
-										"
-									/>
+									<NuxtIcon name="minus" @click="
+										cartStore.updateQuantity(product.id, product.quantity - 1)
+										" />
 									{{ Math.round(animatedQuantity[product.id] || 0) }}
-									<NuxtIcon
-										name="plus-calc"
-										@click="
-											cartStore.updateQuantity(product.id, product.quantity + 1)
-										"
-									/>
+									<NuxtIcon name="plus-calc" @click="
+										cartStore.updateQuantity(product.id, product.quantity + 1)
+										" />
 								</div>
 							</div>
 						</div>
@@ -96,10 +83,10 @@ watch(
 								{{
 									product.price
 										? `${Math.round(
-												animatedQuantity[product.id] * product.price
-										  )}`
+											animatedQuantity[product.id] * product.price
+										)}`
 										: `Цена не
-                            указана`
+								указана`
 								}}
 							</div>
 						</div>
@@ -118,18 +105,12 @@ watch(
 				<div class="cart-total">
 					<div class="cart-total__info">
 						<span>Итого:</span>
-						<span class="cart-total__price"
-							>{{ Math.round(animatedTotalPrice) }} ₽</span
-						>
+						<span class="cart-total__price">{{ Math.round(animatedTotalPrice) }} ₽</span>
 					</div>
 
-					<NuxtLink
-						to="/checkout"
-						:class="
-							'btn btn-submit ' +
-							(cartStore.items.length === 0 ? 'disabled' : '')
-						"
-					>
+					<NuxtLink to="/checkout" :class="'btn btn--fill ' +
+						(cartStore.items.length === 0 ? 'disabled' : '')
+						">
 						<span>Оформить заказ</span>
 					</NuxtLink>
 				</div>

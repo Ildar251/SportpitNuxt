@@ -11,10 +11,10 @@ const config = useRuntimeConfig()
 
 const props = defineProps<{ data?: any, page?: any }>()
 
-const for_partners = computed(() => {
+const info = computed(() => {
 	try {
-		return props.page?.tvFields?.for_partners
-			? JSON.parse(props.page?.tvFields?.for_partners)
+		return props.page?.tvFields?.info
+			? JSON.parse(props.page?.tvFields?.info)
 			: []
 	} catch (error) {
 		console.error('❌ Ошибка парсинга MIGX-поля advantages_items:', error)
@@ -22,10 +22,10 @@ const for_partners = computed(() => {
 	}
 })
 
-console.log(for_partners.value[0]?.tab)
+console.log(info.value[0]?.tab)
 
 const tabs = computed(() => {
-	return for_partners.value.map((item: { tab: string }) => ({
+	return info.value.map((item: { tab: string }) => ({
 		id: item.tab,
 		label: item.tab,
 	}))
@@ -46,22 +46,23 @@ const onSlideChange = (swiper: SwiperType) => {
 const setActiveTab = (tabId: string) => {
 	const index = tabs.value.findIndex((tab: { id: string }) => tab.id === tabId)
 	if (index !== -1 && swiperRef.value) {
-		swiperRef.value.slideTo(index) // Переключаем слайд
-		activeTab.value = tabId // Обновляем активный таб
+		swiperRef.value.slideTo(index)
+		activeTab.value = tabId
 	}
 }
+
 </script>
 
 <template>
-	<section class="section section-for-partners">
+	<section class="section section-pay-info">
 		<div class="container">
 			<div class="info">
 				<div class="left">
 					<UiTabs tabsClass="tabs-info" v-model="activeTab" :tabs="tabs" @update:model-value="setActiveTab" />
-					<NuxtLink to="/for-partners" class="info__banner">
-						<NuxtImg src="/images/banner.jpg" alt="info" />
+					<NuxtLink to="/pay-info" class="info__banner">
+						<NuxtImg src="/images/banner_2.jpg" alt="info" />
 						<div class="btn btn--fill">
-							<span>Стать партнёром</span>
+							<span>Задать вопрос</span>
 							<NuxtIcon name="arrow-right" />
 						</div>
 					</NuxtLink>
@@ -70,8 +71,9 @@ const setActiveTab = (tabId: string) => {
 					:pagination="{ clickable: true }" class="content-slider" :effect="'fade'"
 					:fadeEffect="{ crossFade: true }" @swiper="(swiper) => (swiperRef = swiper)"
 					@slideChange="onSlideChange" :speed="1000">
-					<SwiperSlide v-for="item in for_partners" :key="item.MIGX_id" class="content__item">
-						<NuxtImg :src="config.public.apiUrl + item.img" :alt="item.tab" class="content__image" />
+					<SwiperSlide v-for="item in info" :key="item.MIGX_id" class="content__item">
+						<NuxtImg :src="config.public.apiUrl + item.img" :alt="item.tab" class="content__image"
+							v-if="item.img" />
 						<h2 class="h2">{{ item.tab }}</h2>
 						<div class="content__text" v-html="item.content"></div>
 					</SwiperSlide>
@@ -160,7 +162,7 @@ const setActiveTab = (tabId: string) => {
 			}
 
 			.h2 {
-				margin: 38px 0 24px;
+				margin: 0 0 24px;
 				font-size: auto-clamp(32px, 50px);
 			}
 
