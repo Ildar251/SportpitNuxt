@@ -1,8 +1,9 @@
 import { useAuthStore } from '@/stores/authStore'
-import type { Product } from '@/types/product'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { toast } from 'vue3-toastify'
+
+import type { Product } from '@/types/product'
 
 export const useCartStore = defineStore('cart', {
     state: () => ({

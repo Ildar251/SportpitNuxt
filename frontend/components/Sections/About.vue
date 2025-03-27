@@ -1,4 +1,12 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const props = defineProps<{ data?: { about_title?: string, about_text?: string, about_text_blog?: string, about_text_post?: string, about_file?: string } }>()
+
+const config = useRuntimeConfig()
+const baseUrl = config.public.apiUrl
+
+
+const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : '#'
+</script>
 
 <template>
     <section class="section section-about">
@@ -9,38 +17,33 @@
                     <NuxtImg src="/images/about_planet.png" class="about__planet" />
                 </div>
                 <div class="about__center">
-                    <h2 class="h2">О нас</h2>
-                    <p class="text">
-                        Есть много вариантов Lorem Ipsum, но большинство из них имеет не всегда приемлемые модификации,
-                        например, юмористические вставки или слова, которые даже отдалённо не напоминают латынь. Если
-                        вам нужен Lorem Ipsum для серьёзного проекта, вам нужен Lorem Ipsum для серьёзного проекта
+                    <h2 class="h2">{{ data?.about_title || 'О нас' }}</h2>
+                    <p class="text" v-if="data?.about_text">
+                        {{ data?.about_text }}
                     </p>
-                    <div class="btn btn-more">
+                    <NuxtLink to="/about" class="btn btn-more">
                         <span>Подробнее</span>
                         <NuxtIcon name="arrow-right" />
-                    </div>
+                    </NuxtLink>
                 </div>
                 <div class="about__bottom">
                     <div class="about__item">
                         <div class="about__link">
-                            <NuxtLink class="link">Поставщикам</NuxtLink>
+                            <NuxtLink to="/partners" class="link">Поставщикам</NuxtLink>
                         </div>
-
 
                         <div class="about__image">
                             <NuxtImg src="/images/about_post.png" class="image" />
                         </div>
 
                         <p class="text">
-                            Есть много вариантов Lorem Ipsum, но большинство из них имеет не всегда приемлемые
-                            модификации, например, юмористические вставки или слова, которые даже отдалённо не
-                            напоминают латынь. Если вам нужен Lorem Ipsum для серьёзного проекта
+                            {{ data?.about_text_post }}
                         </p>
                     </div>
                     <div class="about__item">
                         <div class="about__link">
-                            <NuxtLink class="link">Спорстменам</NuxtLink>
-                            <NuxtLink class="link">Блогерам</NuxtLink>
+                            <NuxtLink class="link" to="/partners">Спорстменам</NuxtLink>
+                            <NuxtLink class="link" to="/partners">Блогерам</NuxtLink>
                         </div>
 
 
@@ -49,17 +52,15 @@
                         </div>
 
                         <p class="text">
-                            Есть много вариантов Lorem Ipsum, но большинство из них имеет не всегда приемлемые
-                            модификации, например, юмористические вставки или слова, которые даже отдалённо не
-                            напоминают латынь. Если вам нужен Lorem Ipsum для серьёзного проекта
+                            {{ data?.about_text_blog }}
                         </p>
                     </div>
                 </div>
 
-                <NuxtLink to="/" class="about__download">
+                <a :href="fileUrl" download class="about__download">
                     <NuxtIcon name="nlo" />
                     <span>Скачать оптовый каталог</span>
-                </NuxtLink>
+                </a>
             </div>
         </div>
     </section>
@@ -196,22 +197,35 @@
 
     .about__download {
         background-color: $color-accent;
-        @include flex(column, center, center);
+        @include flex(column, flex-start, center);
         gap: 0;
         width: 100%;
         font-size: auto-clamp(36px, 124px);
         overflow: hidden;
-        transition: 0.3s ease background-color, 0.3s ease color;
+        transition: 0.3s ease;
         text-align: center;
+        max-height: auto-clamp(140px, 280px);
+        padding-top: 35px;
+
+        .nuxt-icon {
+            transition: none;
+
+            &:hover {
+                color: $color-white;
+            }
+        }
+
+        span {
+            font-weight: 700;
+        }
 
         &:hover {
             background-color: $color-orange;
             color: $color-white;
+            max-height: 400px;
         }
 
-        span {
-            margin-bottom: calc(auto-clamp(15px, 50px) * -1);
-        }
+
     }
 }
 </style>

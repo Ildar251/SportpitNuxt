@@ -242,12 +242,12 @@ const accordions = computed(() => [
 							class="image-slider" @swiper="(swiper) => (imageSliderRef = swiper)">
 							<SwiperSlide v-for="(taste, index) in tastes" :key="taste.MIGX_id" class="image__item">
 								<NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="420"
-									loading="lazy" placeholder=".././images/box.svg" />
+									loading="lazy" placeholder="/images/box.svg" />
 							</SwiperSlide>
 							<!-- Добавляем дефолтное изображение как последний слайд -->
 							<SwiperSlide v-if="!tastes.length" class="image__item">
 								<NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420"
-									loading="lazy" placeholder=".././images/box.svg" />
+									loading="lazy" placeholder="/images/box.svg" />
 							</SwiperSlide>
 						</Swiper>
 					</div>
@@ -324,7 +324,7 @@ const accordions = computed(() => [
 								@click="onTasteClick(index)">
 								<div class="taste__image">
 									<NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="120"
-										width="auto" format="webp" placeholder=".././images/box.svg" />
+										width="auto" format="webp" placeholder="/images/box.svg" />
 								</div>
 
 								<div class="taste__text">
@@ -347,27 +347,28 @@ const accordions = computed(() => [
 								</div>
 							</div>
 
-							<Transition name="fade">
-								<button v-if="!isInCart" class="btn btn--fill" @click.stop="addToCart">
-									<span class="span-text">В корзину</span>
+
+							<div class="cart-controls" :class="{ 'cart-controls--active': isInCart }">
+								<button class="btn qty-btn" @click.stop="decreaseQuantity">
+									<NuxtIcon name="minus" />
+								</button>
+								<span class="cart-quantity">{{ cartQuantity }}</span>
+								<button class="btn qty-btn" @click.stop="increaseQuantity">
 									<NuxtIcon name="plus" />
 								</button>
-								<div v-else class="row">
-									<div class="cart-controls">
-										<button class="btn qty-btn" @click.stop="decreaseQuantity">
-											<NuxtIcon name="minus" />
-										</button>
-										<span class="cart-quantity">{{ cartQuantity }}</span>
-										<button class="btn qty-btn" @click.stop="increaseQuantity">
-											<NuxtIcon name="plus" />
-										</button>
-									</div>
-									<button class="btn delete-from-cart" @click.stop="removeFromCart">
+							</div>
+							<div class="btn-wrapper">
+								<Transition name="button-swap" mode="out-in">
+									<button v-if="!isInCart" class="btn btn--fill" @click.stop="addToCart">
+										<span class="span-text">В корзину</span>
+										<NuxtIcon name="plus" />
+									</button>
+									<button v-else class="btn delete-from-cart" @click.stop="removeFromCart">
 										<span>Удалить из корзины</span>
 										<NuxtIcon name="delete" />
 									</button>
-								</div>
-							</Transition>
+								</Transition>
+							</div>
 						</div>
 
 						<div class="dop-info" v-if="!authStore.apiToken">
@@ -400,16 +401,16 @@ const accordions = computed(() => [
 
 					</div>
 
-					<div class="product__data product__info-block">
-						<div class="column">
+					<div class="product__data product__info-block" v-if="product.sugar || product.energy">
+						<div class="column" v-if="product.sugar">
 							<h4 class="h4">Сахар</h4>
 							<span>{{ product.sugar }}</span>
 						</div>
-						<div class="column">
+						<div class="column" v-if="product.energy">
 							<h4 class="h4">Эн. ценность</h4>
 							<span>{{ product.energy }}</span>
 						</div>
-						<div class="column">
+						<div class="column" v-if="dop_compound">
 							<div class="row" v-for="i in dop_compound">
 								<h4 class="h4">{{ i.title }}</h4>
 								<span>{{ i.value }}</span>
@@ -455,6 +456,10 @@ const accordions = computed(() => [
 
 		.image__item {
 			text-align: center;
+
+			img {
+				object-fit: cover;
+			}
 		}
 	}
 
@@ -512,6 +517,8 @@ const accordions = computed(() => [
 	}
 
 	.card__sticker {
+		z-index: 1;
+
 		@media screen and (max-width: 768px) {
 			left: 0px;
 		}
@@ -750,9 +757,49 @@ const accordions = computed(() => [
 		margin-top: 32px;
 	}
 
-	.btn {
-		margin-top: 0;
+	.btn-wrapper {
+		flex: 1;
+		position: relative;
+		display: block;
+		height: 85px;
+
+		.btn {
+			margin-top: 0;
+			position: absolute;
+			inset: 0;
+
+		}
 	}
+
+	.button-swap-enter-active,
+	.button-swap-leave-active {
+		transition: all 0.4s ease;
+	}
+
+	.button-swap-enter-from {
+		opacity: 0;
+		transform: translateX(-20px) rotate(-5deg); // Въезд слева с лёгким поворотом
+		filter: blur(3px); // Размытие при появлении
+	}
+
+	.button-swap-enter-to {
+		opacity: 1;
+		transform: translateX(0) rotate(0deg);
+		filter: blur(0);
+	}
+
+	.button-swap-leave-from {
+		opacity: 1;
+		transform: translateX(0) rotate(0deg);
+		filter: blur(0);
+	}
+
+	.button-swap-leave-to {
+		opacity: 0;
+		transform: translateX(20px) rotate(5deg); // Уход вправо с лёгким поворотом
+		filter: blur(3px); // Размытие при исчезновении
+	}
+
 
 	.product__bottom {
 		margin-top: auto-clamp(32px, 72px);
@@ -789,7 +836,12 @@ const accordions = computed(() => [
 		padding: auto-clamp(14px, 21px) auto-clamp(20px, 27px);
 		gap: auto-clamp(22px, 42px);
 		font-size: auto-clamp(16px, 26px);
-		margin-right: 20px;
+		opacity: 0;
+		transition: $transition;
+
+		&--active {
+			opacity: 1;
+		}
 	}
 
 	.product__data {

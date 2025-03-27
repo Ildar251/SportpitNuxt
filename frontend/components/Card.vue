@@ -84,7 +84,7 @@ const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкус�
 				</div>
 			</Transition>
 			<NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy" class="card__img"
-				placeholder="./images/box.svg" />
+				placeholder="/images/box.svg" />
 		</div>
 		<div class="card__content">
 			<div class="card__brand">{{ product.brand || 'Товар' }}</div>
@@ -132,6 +132,7 @@ const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкус�
 		position: absolute;
 		top: 0;
 		margin-top: 0;
+
 	}
 }
 

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import gsap from 'gsap'
-
 import { NuxtLink } from '#components'
+import gsap from 'gsap'
 import { useAuthStore } from '~/stores/authStore'
 import { useMenuStore } from '~/stores/useMenuStore'
 import { useMobileMenuStore } from '~/stores/useMobileMenuStore'
@@ -79,16 +78,18 @@ onMounted(() => {
 					<span class="header__cart-count" v-if="cartCount">{{ cartCount }}</span>
 				</NuxtLink>
 
-				<NuxtLink v-if="!authStore.apiToken" to="#" class="header__lk" @click.prevent="modalStore.open">
-					<NuxtIcon name="lk" />
-					<span class="full-text">Личный кабинет</span>
-					<span class="short-text">ЛК</span>
-				</NuxtLink>
+				<ClientOnly>
+					<NuxtLink v-if="!authStore.apiToken" to="#" class="header__lk" @click.prevent="modalStore.open">
+						<NuxtIcon name="lk" />
+						<span class="full-text">Личный кабинет</span>
+						<span class="short-text">ЛК</span>
+					</NuxtLink>
 
-				<NuxtLink v-else class="header__lk" to="/lk">
-					<NuxtIcon name="lk" />
-					<span class="header__email">{{ authStore.user?.email }}</span>
-				</NuxtLink>
+					<NuxtLink v-else class="header__lk" to="/lk">
+						<NuxtIcon name="lk" />
+						<span class="header__email">{{ authStore.user?.email }}</span>
+					</NuxtLink>
+				</ClientOnly>
 			</div>
 		</div>
 		<div class="container container__bottom">
@@ -107,9 +108,6 @@ onMounted(() => {
 					<NuxtLink to="/catalog" class="header__menu-item"><span>Каталог</span></NuxtLink>
 				</div>
 				<ul class="header__menu">
-					<li class="header__menu-item">
-						<NuxtLink to="/catalog"><span>Бренды</span></NuxtLink>
-					</li>
 					<li class="header__menu-item">
 						<NuxtLink to="/stocks"><span>Акции</span></NuxtLink>
 					</li>

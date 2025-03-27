@@ -35,7 +35,7 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
 <template>
     <div class="catalog-filter">
         <div class="catalog-filter__title">Фильтры</div>
-        <div class="catalog-filter__item">
+        <div class="catalog-filter__wrapper">
             <div class="catalog-filter__item-head" @click="toggleDropdown('brands')">
                 <h3 class="catalog-filter__item-title">
                     Бренд
@@ -80,6 +80,18 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
 .catalog-filter {
     margin-bottom: 20px;
     min-width: 20%;
+    position: sticky;
+    top: 80px;
+    background-color: $color-white;
+    z-index: 10;
+
+    @media screen and (max-width: 768px) {
+        width: calc(100% + 68px);
+        top: 40px;
+        margin-left: -24px;
+        margin-right: -24px;
+        padding: 0px 24px;
+    }
 }
 
 .catalog-filter__item-head {
@@ -91,16 +103,11 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
     padding-bottom: 13px;
 }
 
-.catalog-filter__item-title {
-    font-size: 24px;
-}
-
 .catalog-filter__item-head .icon {
     width: 18px;
     height: 2.25px;
     background-color: $color-gray;
     border-radius: 1px;
-    margin-right: 10px;
     position: relative;
 
     &::before {
@@ -127,12 +134,17 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
 }
 
 .catalog-filter__title {
-    font-size: 26px;
+    font-size: auto-clamp(20px, 26px);
     padding: 24px 0;
-    margin-bottom: 10px;
+    margin-bottom: 24px;
     color: $color-gray;
     width: 100%;
     border-right: 2px solid $color-border;
+    height: auto-clamp(60px, 120px);
+
+    @media screen and (max-width: 768px) {
+        border-right: 0;
+    }
 }
 
 .catalog-filter__list {
@@ -141,6 +153,10 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
     margin: 0;
     overflow: hidden;
     margin-top: 20px;
+}
+
+.catalog-filter__wrapper {
+    margin-bottom: auto-clamp(30px, 60px);
 }
 
 .catalog-filter__item {
@@ -158,6 +174,7 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
 }
 
 .catalog-filter__item-title {
+    font-size: auto-clamp(18px, 24px);
     cursor: pointer;
     user-select: none;
 }

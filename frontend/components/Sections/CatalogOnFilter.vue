@@ -15,7 +15,9 @@ defineProps<{ data?: { catalog_title?: string } }>()
 <style lang="scss" scoped>
 .section-catalog {
     .row {
-        gap: 80px;
+        gap: auto-clamp(40px, 80px);
+        align-items: flex-start;
+        flex-wrap: wrap;
     }
 }
 </style>
