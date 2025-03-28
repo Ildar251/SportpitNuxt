@@ -8,6 +8,8 @@ interface User {
 	phone: string
 	email: string
 	inn: string
+	isLegalEntity: boolean // Новое поле для определения типа пользователя
+	loyaltyPoints: number // Новое поле для хранения бонусов
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -21,15 +23,17 @@ export const useAuthStore = defineStore('auth', {
 	actions: {
 		async fetchProfile() {
 			try {
-				const response = await axios.get<User>(
-					'https://test.top-nnov.ru/api/profile',
-					{
-						withCredentials: true,
-						headers: { authorization: `Bearer ${this.apiToken}` },
-					}
-				)
-				this.user = response.data
-				localStorage.setItem('user', JSON.stringify(response.data))
+				const response = await axios.get<User>('https://test.top-nnov.ru/api/profile', {
+					withCredentials: true,
+					headers: { authorization: `Bearer ${this.apiToken}` },
+				})
+				const userData = response.data
+				// Определяем, является ли пользователь юридическим лицом
+				userData.isLegalEntity = !!userData.inn
+				// Если бонусов нет в данных, инициализируем их
+				userData.loyaltyPoints = userData.loyaltyPoints || 0
+				this.user = userData
+				localStorage.setItem('user', JSON.stringify(userData))
 			} catch (err) {
 				console.error('Ошибка загрузки профиля', err)
 			}
@@ -49,17 +53,13 @@ export const useAuthStore = defineStore('auth', {
 				)
 				this.apiToken = response.data.api_token
 
-				// Проверяем, что apiToken не равен null перед сохранением
 				if (this.apiToken) {
 					localStorage.setItem('apiToken', this.apiToken)
-					axios.defaults.headers.common[
-						'Authorization'
-					] = `Bearer ${this.apiToken}`
+					axios.defaults.headers.common['Authorization'] = `Bearer ${this.apiToken}`
 				}
 
 				await this.fetchProfile()
 
-				// Синхронизация корзины и избранного
 				const cartStore = useCartStore()
 				const favoritesStore = useFavoriteStore()
 				await cartStore.syncCart()
@@ -95,10 +95,9 @@ export const useAuthStore = defineStore('auth', {
 						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 					}
 				)
-				toast.success(
-					'Регистрация успешна! Проверьте почту для подтверждения.',
-					{ autoClose: 3000 }
-				)
+				toast.success('Регистрация успешна! Проверьте почту для подтверждения.', {
+					autoClose: 3000,
+				})
 			} catch (err) {
 				this.error = 'Ошибка регистрации'
 				toast.error('Ошибка регистрации. Попробуйте снова', { autoClose: 3000 })
@@ -121,9 +120,7 @@ export const useAuthStore = defineStore('auth', {
 				)
 				this.apiToken = response.data.api_token
 				localStorage.setItem('apiToken', this.apiToken)
-				axios.defaults.headers.common[
-					'Authorization'
-				] = `Bearer ${this.apiToken}`
+				axios.defaults.headers.common['Authorization'] = `Bearer ${this.apiToken}`
 				await this.fetchProfile()
 				toast.success('Email подтвержден, вход выполнен!', { autoClose: 3000 })
 			} catch (err) {
@@ -142,9 +139,7 @@ export const useAuthStore = defineStore('auth', {
 			localStorage.removeItem('apiToken')
 			localStorage.removeItem('user')
 			delete axios.defaults.headers.common['Authorization']
-			console.log(this.apiToken)
 
-			// Загружаем корзину и избранное обратно в localStorage
 			const cartStore = useCartStore()
 			const favoritesStore = useFavoriteStore()
 			cartStore.loadCart()
@@ -170,6 +165,34 @@ export const useAuthStore = defineStore('auth', {
 
 		isAuthenticated() {
 			return this.apiToken !== null
-		}
+		},
+
+		// Метод для начисления бонусов
+		async addLoyaltyPoints(orderTotal: number) {
+			if (!this.user || this.user.isLegalEntity) return // Бонусы только для физических лиц
+
+			const pointsToAdd = Math.floor(orderTotal * 0.01) // 1% от суммы заказа
+			this.user.loyaltyPoints += pointsToAdd
+
+			// Сохраняем обновлённые данные пользователя
+			localStorage.setItem('user', JSON.stringify(this.user))
+
+			// Отправляем обновление на сервер (если API поддерживает)
+			try {
+				await axios.post(
+					'https://test.top-nnov.ru/api/update-loyalty-points',
+					{ loyaltyPoints: this.user.loyaltyPoints },
+					{
+						withCredentials: true,
+						headers: {
+							'Authorization': `Bearer ${this.apiToken}`,
+							'Content-Type': 'application/json',
+						},
+					}
+				)
+			} catch (err) {
+				console.error('Ошибка обновления бонусов на сервере:', err)
+			}
+		},
 	},
 })

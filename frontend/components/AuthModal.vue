@@ -133,8 +133,8 @@ const activeTab = ref(tabs[0].id)
               <UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
               <UiInput v-model="confirmPassword" type="password" placeholder="Подтверждение пароля"
                 :error="errors.confirmPassword" />
-              <Transition name="slide-down">
-                <UiInput v-model="inn" type="password" placeholder="Инн" v-if="activeTab === 'legal'"
+              <Transition name="slide-input">
+                <UiInput v-model="inn" type="text" mask="##########" placeholder="Инн" v-show="activeTab === 'legal'"
                   :error="errors.inn" />
               </Transition>
             </div>
@@ -254,5 +254,39 @@ const activeTab = ref(tabs[0].id)
     }
   }
 
+}
+
+.slide-input-enter-active,
+.slide-input-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+  /* Скрываем содержимое во время анимации */
+}
+
+.slide-input-enter-from,
+.slide-input-leave-to {
+  opacity: 0;
+  height: 0;
+}
+
+.slide-input-enter-to,
+.slide-input-leave-from {
+  opacity: 1;
+  height: 62px;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.25s ease-out;
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
 }
 </style>

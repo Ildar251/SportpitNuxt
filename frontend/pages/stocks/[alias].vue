@@ -38,17 +38,12 @@ onMounted(async () => {
 				<div class="stock" v-if="stock">
 					<div class="stock__content">
 						<div class="stock__date">{{ stock.tvFields.stock_date }}</div>
-						<div
-							class="stock__text text-block"
-							v-html="stock.tvFields.stock_text"
-						></div>
+						<div class="stock__text text-block" v-html="stock.tvFields.stock_text"></div>
+					</div>
+					<div class="stock__image">
+						<NuxtImg :src="config.public.apiUrl + stock.tvFields.stock_image" :alt="stock.title" />
 					</div>
 
-					<NuxtImg
-						:src="config.public.apiUrl + stock.tvFields.stock_image"
-						:alt="stock.title"
-						class="stock__image"
-					/>
 				</div>
 				<div v-else-if="apiStore.loading" class="loading">Загрузка...</div>
 				<div v-else class="not-found">Акция не найдена</div>
@@ -66,19 +61,44 @@ onMounted(async () => {
 	padding-top: 42px;
 	border-top: 2px solid $color-border;
 
+	@media screen and (max-width: 768px) {
+		flex-direction: column;
+	}
+
 	.stock__date {
 		@include flex(row, center, center);
-		padding: 16px 42px;
-		font-size: auto-clamp(24px, 42px);
+		padding: 14px 36px;
+		font-size: auto-clamp(24px, 36px);
 		background-color: $color-red;
 		width: fit-content;
 		font-weight: 700;
 		color: $color-white;
-		margin-bottom: 42px;
+		margin-bottom: 16px;
 	}
 
 	.stock__text {
 		color: $color-gray;
+	}
+
+	.stock__content {
+		width: 60%;
+
+		@media screen and (max-width: 768px) {
+			width: 100%;
+		}
+
+		.text-block {
+			margin-top: auto-clamp(24px, 36px);
+		}
+	}
+
+	.stock__image {
+		max-width: 680px;
+		width: 40%;
+
+		@media screen and (max-width: 768px) {
+			width: 100%;
+		}
 	}
 }
 </style>

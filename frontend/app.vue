@@ -22,6 +22,7 @@ onMounted(() => {
     <NuxtPage />
 
     <AuthModal />
+    <SearchModal />
     <Preload />
     <Overlay />
     <Footer />

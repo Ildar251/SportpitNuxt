@@ -1,28 +1,39 @@
+<!-- components/Overlay.vue -->
 <script setup lang="ts">
 import { useMenuStore } from '~/stores/useMenuStore'
 import { useMobileMenuStore } from '~/stores/useMobileMenuStore'
 import { useModalStore } from "~/stores/useModalStore"
+import { useSearchModalStore } from '~/stores/useSearchModalStore'
 
 const menuStore = useMenuStore()
 const mobileMenuStore = useMobileMenuStore()
 const modalStore = useModalStore()
+const searchModalStore = useSearchModalStore()
 
 const { isOpen: isMenuOpen } = storeToRefs(menuStore)
 const { isOpen: isMobileMenuOpen } = storeToRefs(mobileMenuStore)
 const { isOpen: isModalOpen } = storeToRefs(modalStore)
+const { isOpen: isSearchModalOpen } = storeToRefs(searchModalStore)
 
-const isVisible = computed(() => isMenuOpen.value || isMobileMenuOpen.value || isModalOpen.value)
+const isVisible = computed(() =>
+    isMenuOpen.value ||
+    isMobileMenuOpen.value ||
+    isModalOpen.value ||
+    isSearchModalOpen.value
+)
 
 const closeAll = () => {
     menuStore.close()
     mobileMenuStore.close()
     modalStore.close()
+    searchModalStore.close()
 }
 </script>
+
 <template>
     <Transition name="fade">
         <div v-if="isVisible" class="overlay" @click="closeAll"
-            :style="{ 'z-index': modalStore.isOpen == true ? '110' : '50' }"></div>
+            :style="{ 'z-index': modalStore.isOpen || searchModalStore.isOpen ? '110' : '50' }"></div>
     </Transition>
 </template>
 

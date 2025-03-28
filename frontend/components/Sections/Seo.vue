@@ -45,25 +45,30 @@
     display: grid;
     grid-template-columns: 1.2fr 2fr 1.2fr;
     border-top: 2px solid $color-border;
-    gap: 42px;
+    gap: auto-clamp(20px, 42px);
+
+    @media screen and (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
 
     &>div {
-        padding-top: 42px;
+        padding-top: auto-clamp(28px, 42px);
     }
 
     .seo__subtitle {
-        font-size: 26px;
+        font-size: auto-clamp(20px, 26px);
         color: $color-gray;
     }
 
     .seo__title {
-        font-size: 42px;
+        font-size: auto-clamp(28px, 42px);
         margin-top: 24px;
+        padding-right: 20px;
     }
 
     .seo__text {
         position: relative;
-        font-size: 18px;
+        font-size: auto-clamp(16px, 18px);
 
 
         p {
@@ -80,15 +85,23 @@
             background-color: $color-border;
             position: absolute;
             top: 0;
-            left: -42px;
+            left: calc(auto-clamp(20px, 42px) * -1);
         }
     }
 
     .seo__images {
         @include flex(column, flex-start, flex-start);
-        gap: 24px;
-
+        gap: auto-clamp(12px, 24px);
         width: 100%;
+
+        @media screen and (max-width: 768px) {
+            flex-direction: row;
+            padding-top: 0;
+
+            img {
+                width: calc(50% - auto-clamp(6px, 12px));
+            }
+        }
     }
 }
 </style>

@@ -12,6 +12,7 @@ export default defineNuxtConfig({
 		public: {
 			apiUrl: process.env.apiUrl || 'http://localhost:1337',
 			yandexMapsApiKey: process.env.YANDEX_MAPS_API_KEY,
+			dadataApiKey: process.env.DADATA_API_KEY,
 		},
 	},
 	css: ['~/assets/styles/default.scss', '~/assets/styles/main.scss'],

@@ -50,6 +50,19 @@ onMounted(() => {
 		)
 	})
 })
+
+
+const searchModalStore = useSearchModalStore()
+const apiStore = useApiStore()
+
+// Открываем модальное окно поиска
+const openSearchModal = () => {
+	// Убедимся, что товары загружены
+	if (!apiStore.products.length) {
+		apiStore.fetchProducts()
+	}
+	searchModalStore.open()
+}
 </script>
 <template>
 	<header class="header">
@@ -127,9 +140,9 @@ onMounted(() => {
 			</nav>
 
 			<div class="header__search">
-				<NuxtLink to="/catalog">
+				<button class="header__search-button" @click="openSearchModal">
 					<NuxtIcon name="search" />
-				</NuxtLink>
+				</button>
 			</div>
 
 			<div :class="'burger burger_mobile' + (mobileMenuStore.isOpen ? ' open' : '')

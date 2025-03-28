@@ -1,7 +1,6 @@
+import type { ProductFull } from '@/types/product'
 import axios from 'axios'
 import { defineStore } from 'pinia'
-
-import type { ProductFull } from '@/types/product'
 
 interface Page {
 	id: number
@@ -51,6 +50,7 @@ export const useApiStore = defineStore('api', {
 		error: null as string | null,
 		selectedBrands: [] as string[], // Выбранные бренды
 		selectedCategories: [] as string[], // Выбранные категории
+		currentBrand: null as string | null, // Текущий бренд (для страницы бренда)
 	}),
 
 	actions: {
@@ -74,7 +74,7 @@ export const useApiStore = defineStore('api', {
 				const response = await axios.get<Page[]>(
 					'https://test.top-nnov.ru/api/pages'
 				)
-				this.pages = response.data // Записываем страницы в store
+				this.pages = response.data
 			} catch (err) {
 				this.error = 'Ошибка загрузки страниц'
 			} finally {
@@ -138,16 +138,9 @@ export const useApiStore = defineStore('api', {
 			}
 		},
 
-		filterProducts() {
-			return this.products.filter(product => {
-				const matchesBrand =
-					this.selectedBrands.length === 0 ||
-					this.selectedBrands.includes(product.brand || '')
-				const matchesCategory =
-					this.selectedCategories.length === 0 ||
-					this.selectedCategories.includes(product.category || '')
-				return matchesBrand && matchesCategory
-			})
+		// Установка текущего бренда (для страницы бренда)
+		setCurrentBrand(brand: string | null) {
+			this.currentBrand = brand
 		},
 
 		// Установка выбранных брендов
@@ -195,9 +188,12 @@ export const useApiStore = defineStore('api', {
 		// Получение отфильтрованных продуктов
 		filteredProducts: state => {
 			return state.products.filter(product => {
+				// Если задан currentBrand (на странице бренда), фильтруем только по этому бренду
 				const matchesBrand =
-					state.selectedBrands.length === 0 ||
-					state.selectedBrands.includes(product.brand || '')
+					(state.currentBrand
+						? product.brand === state.currentBrand
+						: state.selectedBrands.length === 0 ||
+						state.selectedBrands.includes(product.brand || ''))
 				const matchesCategory =
 					state.selectedCategories.length === 0 ||
 					state.selectedCategories.includes(product.category || '')

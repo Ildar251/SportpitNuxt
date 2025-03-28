@@ -3,81 +3,105 @@ import { useApiStore } from '@/stores/api'
 
 const route = useRoute()
 const apiStore = useApiStore()
-const brandAlias = computed(() => route.params.brand)
+const brandAlias = computed(() => route.params.brand as string)
 const config = useRuntimeConfig()
 const { sections, sectionMap, sectionsData, page } = usePage('brands')
+
 // Получаем бренд по alias
 const brand = computed(() => {
-    return apiStore.brands.find((b) => b.alias === brandAlias.value)
+  return apiStore.brands.find((b) => b.alias === brandAlias.value)
 })
 
-// Если брендов нет, загружаем их
-onMounted(() => {
-    if (!apiStore.brands.length) {
-        apiStore.fetchBrands()
+// Устанавливаем текущий бренд
+watch(
+  brand,
+  (newBrand) => {
+    if (newBrand) {
+      apiStore.setCurrentBrand(newBrand.title) // Устанавливаем текущий бренд
     }
+  },
+  { immediate: true }
+)
+
+// Очищаем фильтр при выходе со страницы
+onUnmounted(() => {
+  apiStore.setCurrentBrand(null) // Сбрасываем текущий бренд
+  apiStore.setSelectedCategories([]) // Сбрасываем фильтр по категориям
+})
+
+// Загружаем данные, если они ещё не загружены
+onMounted(() => {
+  if (!apiStore.brands.length) {
+    apiStore.fetchBrands()
+  }
+  if (!apiStore.products.length) {
+    apiStore.fetchProducts()
+  }
 })
 </script>
 
 <template>
-    <main>
-        <section class="section section-hero">
-            <div class="container">
-                <div v-if="brand" class="hero"
-                    :style="`background-image: url(${config.public.apiUrl + brand.tvFields.info_bg});`">
-                    <h1 class="h1">{{ brand.title }}</h1>
-                    <div class="brand__description">
-                        <div class="text">
-                            {{ brand.description }}
-                        </div>
-                    </div>
-                    <div class="brand__logo">
-                        <NuxtImg :src="config.public.apiUrl + brand.tvFields.info_logo" :alt="brand.title" />
-                    </div>
-                </div>
+  <main>
+    <section class="section section-hero">
+      <div class="container">
+        <div v-if="brand" class="hero"
+          :style="`background-image: url(${config.public.apiUrl + brand.tvFields.info_bg});`">
+          <h1 class="h1">{{ brand.title }}</h1>
+          <div class="brand__description">
+            <div class="text">
+              {{ brand.description }}
             </div>
-        </section>
-        <component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
-            :page="page" :noInfoTitle="true" />
+          </div>
+          <div class="brand__logo">
+            <NuxtImg :src="config.public.apiUrl + brand.tvFields.info_logo" :alt="brand.title" />
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <SectionsSeo />
-    </main>
+    <component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
+      :page="page" :noInfoTitle="true" />
+
+    <SectionsSeo />
+  </main>
 </template>
+
+
 
 
 <style lang="scss" scoped>
 .section-hero {
-    margin-top: auto-clamp(25px, 50px);
+  margin-top: auto-clamp(25px, 50px);
 }
 
 .hero {
-    padding: auto-clamp(30px, 72px);
-    color: $color-white;
-    min-height: auto-clamp(300px, 560px);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-color: $color-primary;
+  padding: auto-clamp(30px, 72px);
+  color: $color-white;
+  min-height: auto-clamp(300px, 560px);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: $color-primary;
 
-    .h1 {
-        font-size: auto-clamp(80px, 140px);
+  .h1 {
+    font-size: auto-clamp(80px, 140px);
+  }
+
+  .brand__description {
+    font-size: auto-clamp(14px, 16px);
+
+    margin: auto-clamp(20px, 40px) 0;
+    padding: auto-clamp(20px, 40px) 0;
+    width: 100%;
+    border-top: 2px solid $color-border;
+
+    .text {
+      max-width: 700px;
     }
+  }
 
-    .brand__description {
-        font-size: auto-clamp(14px, 16px);
-
-        margin: auto-clamp(20px, 40px) 0;
-        padding: auto-clamp(20px, 40px) 0;
-        width: 100%;
-        border-top: 2px solid $color-border;
-
-        .text {
-            max-width: 700px;
-        }
-    }
-
-    .brand__logo {
-        filter: brightness(0) invert(1);
-    }
+  .brand__logo {
+    filter: brightness(0) invert(1);
+  }
 }
 </style>

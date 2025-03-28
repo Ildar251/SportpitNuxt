@@ -5,7 +5,6 @@ defineProps<{ data?: { catalog_title?: string } }>()
 <template>
     <section class="section section-catalog" id="catalog">
         <div class="container line-top row">
-
             <CatalogFilter />
             <CardList :filters="true" />
         </div>

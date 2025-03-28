@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useApiStore } from '~/stores/api'
 
+const route = useRoute()
 const apiStore = useApiStore()
+
+// Проверяем, находимся ли мы на странице бренда
+const isBrandPage = computed(() => {
+    return route.name === 'brand' || route.name?.toString().includes('brand')
+})
 
 // Получаем уникальные бренды и категории
 const uniqueBrands = computed(() => apiStore.uniqueBrands)
@@ -35,7 +42,9 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
 <template>
     <div class="catalog-filter">
         <div class="catalog-filter__title">Фильтры</div>
-        <div class="catalog-filter__wrapper">
+
+        <!-- Показываем фильтр по брендам только если мы НЕ на странице бренда -->
+        <div v-if="!isBrandPage" class="catalog-filter__wrapper">
             <div class="catalog-filter__item-head" @click="toggleDropdown('brands')">
                 <h3 class="catalog-filter__item-title">
                     Бренд
