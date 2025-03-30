@@ -63,7 +63,7 @@ const submitOrder = async () => {
 			createdAt: new Date().toISOString(),
 		}
 		console.log('Отправляемые данные:', orderData)
-		console.log('API Token:', authStore.apiToken) // Добавляем отладку токена
+		console.log('API Token:', authStore.apiToken)
 
 		const response = await $fetch<ApiResponse>(
 			'https://test.top-nnov.ru/api/order',
@@ -77,9 +77,11 @@ const submitOrder = async () => {
 		)
 
 		if (response.success) {
+			// Начисляем бонусы перед очисткой корзины
+			await authStore.addLoyaltyPoints(cartStore.totalPrice)
 			cartStore.clearCart()
 			toast.success('Заказ успешно оформлен!', { autoClose: 3000 })
-			router.push({ path: '/lk', query: { tab: 'order-history' } }) // Редирект на вкладку order-history
+			router.push({ path: '/lk', query: { tab: 'order-history' } })
 		} else {
 			toast.error(response.message || 'Ошибка при оформлении заказа', {
 				autoClose: 3000,
@@ -94,8 +96,13 @@ const submitOrder = async () => {
 
 <template>
 	<main>
-		<component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
-			:page="page" />
+		<component
+			v-for="section in sections"
+			:is="sectionMap[section]"
+			:key="section"
+			:data="sectionsData[section]"
+			:page="page"
+		/>
 		<section class="section section-checkout">
 			<div class="container checkout">
 				<div class="checkout__item personal-data">
@@ -118,12 +125,22 @@ const submitOrder = async () => {
 					<h2 class="h2">Состав заказа</h2>
 					<div v-if="cartStore.items.length === 0">Корзина пуста</div>
 					<div v-else class="checkout__item-info items-list">
-						<div v-for="item in cartStore.items" :key="item.id" class="order-item">
+						<div
+							v-for="item in cartStore.items"
+							:key="item.id"
+							class="order-item"
+						>
 							<div class="item-wrap">
-								<NuxtImg :src="item.image
-									? `${config.public.apiUrl}${item.image}`
-									: '/placeholder.png'
-									" :alt="item.title || 'Товар'" class="item-image" height="120" />
+								<NuxtImg
+									:src="
+										item.image
+											? `${config.public.apiUrl}${item.image}`
+											: '/placeholder.png'
+									"
+									:alt="item.title || 'Товар'"
+									class="item-image"
+									height="120"
+								/>
 								<div class="item-quantity">
 									{{ item.quantity }}
 								</div>
@@ -139,7 +156,11 @@ const submitOrder = async () => {
 				<div class="checkout__item payment-method">
 					<h2 class="h2">Способ оплаты</h2>
 					<div class="checkout__item-info options">
-						<UiTabs :tabsClass="'tabs-payment'" :tabs="paymentOptions" v-model="paymentOptionsActive" />
+						<UiTabs
+							:tabsClass="'tabs-payment'"
+							:tabs="paymentOptions"
+							v-model="paymentOptionsActive"
+						/>
 					</div>
 				</div>
 
@@ -147,7 +168,11 @@ const submitOrder = async () => {
 				<div class="checkout__item delivery-method">
 					<h2 class="h2">Способ доставки</h2>
 					<div class="checkout__item-info options">
-						<UiTabs :tabs-class="'tabs-delivery'" :tabs="deliveryOptions" v-model="deliveryOptionsActive" />
+						<UiTabs
+							:tabs-class="'tabs-delivery'"
+							:tabs="deliveryOptions"
+							v-model="deliveryOptionsActive"
+						/>
 						<Transition name="fade">
 							<div v-if="deliveryOptionsActive === 'pickup'" class="pickup">
 								<div class="info">

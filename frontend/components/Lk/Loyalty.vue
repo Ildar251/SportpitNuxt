@@ -5,35 +5,74 @@ const authStore = useAuthStore()
 
 // Проверяем, что пользователь — физическое лицо
 const isEligibleForLoyalty = computed(() => {
-    return authStore.user && !authStore.user.isLegalEntity
+	return authStore.user && !authStore.user.isLegalEntity
 })
 </script>
 
 <template>
-    <div v-if="isEligibleForLoyalty" class="loyalty-program">
-        <p>Добро пожаловать в программу лояльности!</p>
-        <p>За каждую покупку вы получаете 1% от суммы заказа в виде бонусов.</p>
-        <p>Ваш текущий баланс: <strong>{{ authStore.user?.loyaltyPoints || 0 }}</strong> бонусов</p>
-    </div>
-    <div v-else class="loyalty-program">
-        <p>Программа лояльности доступна только для физических лиц.</p>
-    </div>
+	<div v-if="isEligibleForLoyalty" class="loyalty-program">
+		<div class="loyalty-program__item">
+			<div>
+				<strong>{{ authStore.user?.loyaltyPoints }}</strong>
+				<span>Баллов</span>
+			</div>
+			<p>Можете оплатить ими часть заказа</p>
+		</div>
+		<div class="loyalty-program__info">
+			<div>
+				<strong>1%</strong>
+			</div>
+			<p>С ваших всех покупок будет зачислен в бонусную программу</p>
+		</div>
+	</div>
+	<div v-else class="loyalty-program">
+		<p>Программа лояльности доступна только для физических лиц.</p>
+	</div>
 </template>
 
 <style scoped lang="scss">
 .loyalty-program {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
+	@include flex(row, flex-start, flex-start);
+	.loyalty-program__item {
+		padding: 24px 42px;
+		background-color: $color-accent;
+		color: $color-white;
+		width: fit-content;
+		div {
+			@include flex(column, flex-start, flex-start);
 
-    p {
-        margin-bottom: 10px;
-        font-size: 16px;
-        color: #333;
-    }
+			strong {
+				font-size: 72px;
+				line-height: 1;
+			}
+		}
 
-    strong {
-        color: #2ecc71;
-    }
+		p {
+			max-width: 140px;
+			padding-top: 18px;
+		}
+	}
+
+	.loyalty-program__info {
+		padding: 24px 42px;
+		background-color: #fcfcfc;
+		color: $color-primary;
+		width: fit-content;
+		div {
+			@include flex(column, flex-start, flex-start);
+
+			strong {
+				font-size: 72px;
+				line-height: 1;
+			}
+		}
+
+		p {
+			max-width: 190px;
+			padding-top: 18px;
+			text-wrap: balance;
+			color: $color-gray;
+		}
+	}
 }
 </style>

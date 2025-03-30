@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios' // Импортируем AxiosError
 import { defineStore } from 'pinia'
 import { toast } from 'vue3-toastify'
 
@@ -8,8 +8,8 @@ interface User {
 	phone: string
 	email: string
 	inn: string
-	isLegalEntity: boolean // Новое поле для определения типа пользователя
-	loyaltyPoints: number // Новое поле для хранения бонусов
+	isLegalEntity: boolean
+	loyaltyPoints: number
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -17,20 +17,21 @@ export const useAuthStore = defineStore('auth', {
 		user: null as User | null,
 		apiToken: null as string | null,
 		loading: true,
-		error: null as string | null,
+		error: undefined as string | undefined, // Меняем тип на string | undefined
 	}),
 
 	actions: {
 		async fetchProfile() {
 			try {
-				const response = await axios.get<User>('https://test.top-nnov.ru/api/profile', {
-					withCredentials: true,
-					headers: { authorization: `Bearer ${this.apiToken}` },
-				})
+				const response = await axios.get<User>(
+					'https://test.top-nnov.ru/api/profile',
+					{
+						withCredentials: true,
+						headers: { authorization: `Bearer ${this.apiToken}` },
+					}
+				)
 				const userData = response.data
-				// Определяем, является ли пользователь юридическим лицом
 				userData.isLegalEntity = !!userData.inn
-				// Если бонусов нет в данных, инициализируем их
 				userData.loyaltyPoints = userData.loyaltyPoints || 0
 				this.user = userData
 				localStorage.setItem('user', JSON.stringify(userData))
@@ -41,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
 
 		async login(email: string, password: string) {
 			this.loading = true
-			this.error = null
+			this.error = undefined // Обновляем для нового типа
 			try {
 				const response = await axios.post(
 					'https://test.top-nnov.ru/api/login',
@@ -55,7 +56,9 @@ export const useAuthStore = defineStore('auth', {
 
 				if (this.apiToken) {
 					localStorage.setItem('apiToken', this.apiToken)
-					axios.defaults.headers.common['Authorization'] = `Bearer ${this.apiToken}`
+					axios.defaults.headers.common[
+						'Authorization'
+					] = `Bearer ${this.apiToken}`
 				}
 
 				await this.fetchProfile()
@@ -82,25 +85,63 @@ export const useAuthStore = defineStore('auth', {
 			phone: string,
 			email: string,
 			password: string,
-			inn: string
-		) {
+			inn: string,
+			isLegalEntity: boolean
+		): Promise<{ success: boolean; message: string }> {
 			this.loading = true
-			this.error = null
+			this.error = undefined
+
 			try {
-				await axios.post(
+				const response = await axios.post(
 					'https://test.top-nnov.ru/api/register',
-					new URLSearchParams({ surname, name, phone, email, password, inn }),
+					new URLSearchParams({
+						surname,
+						name,
+						phone,
+						email,
+						password,
+						inn,
+						isLegalEntity: isLegalEntity.toString(),
+					}),
 					{
 						withCredentials: true,
 						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 					}
 				)
-				toast.success('Регистрация успешна! Проверьте почту для подтверждения.', {
-					autoClose: 3000,
-				})
-			} catch (err) {
-				this.error = 'Ошибка регистрации'
-				toast.error('Ошибка регистрации. Попробуйте снова', { autoClose: 3000 })
+
+				const message = response.data.message || 'Регистрация успешна!' // ✅ Гарантируем, что это строка
+
+				toast.success(message, { autoClose: 3000 })
+				return { success: true, message }
+			} catch (err: any) {
+				const errorMessage = err.response?.data?.message ?? 'Ошибка регистрации' // ✅ Гарантируем, что это строка
+				this.error = errorMessage
+
+				return { success: false, message: errorMessage }
+			} finally {
+				this.loading = false
+			}
+		},
+		async deleteUser(email: string): Promise<void> {
+			this.loading = true
+			this.error = undefined
+			try {
+				await axios.post(
+					'https://test.top-nnov.ru/api/delete-user',
+					new URLSearchParams({ email }),
+					{
+						withCredentials: true,
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					}
+				)
+			} catch (err: unknown) {
+				if (err instanceof AxiosError) {
+					this.error =
+						err.response?.data?.message || 'Ошибка удаления пользователя'
+				} else {
+					this.error = 'Неизвестная ошибка при удалении пользователя'
+				}
+				throw new Error(this.error)
 			} finally {
 				this.loading = false
 			}
@@ -108,7 +149,7 @@ export const useAuthStore = defineStore('auth', {
 
 		async confirmEmail(email: string, code: string): Promise<void> {
 			this.loading = true
-			this.error = null
+			this.error = undefined
 			try {
 				const response = await axios.post<{ api_token: string }>(
 					'https://test.top-nnov.ru/api/confirm',
@@ -120,14 +161,18 @@ export const useAuthStore = defineStore('auth', {
 				)
 				this.apiToken = response.data.api_token
 				localStorage.setItem('apiToken', this.apiToken)
-				axios.defaults.headers.common['Authorization'] = `Bearer ${this.apiToken}`
+				axios.defaults.headers.common[
+					'Authorization'
+				] = `Bearer ${this.apiToken}`
 				await this.fetchProfile()
 				toast.success('Email подтвержден, вход выполнен!', { autoClose: 3000 })
-			} catch (err) {
-				this.error = 'Ошибка подтверждения'
-				toast.error('Ошибка подтверждения. Проверьте код и попробуйте снова', {
-					autoClose: 3000,
-				})
+			} catch (err: unknown) {
+				// Указываем тип unknown
+				// Сужаем тип до AxiosError
+				if (err instanceof AxiosError) {
+					this.error = err.response?.data?.message || 'Ошибка подтверждения'
+					throw new Error(this.error)
+				}
 			} finally {
 				this.loading = false
 			}
@@ -167,31 +212,47 @@ export const useAuthStore = defineStore('auth', {
 			return this.apiToken !== null
 		},
 
-		// Метод для начисления бонусов
 		async addLoyaltyPoints(orderTotal: number) {
-			if (!this.user || this.user.isLegalEntity) return // Бонусы только для физических лиц
+			if (!this.user || this.user.isLegalEntity) {
+				console.log(
+					'Не начисляем бонусы: пользователь не авторизован или является юридическим лицом'
+				)
+				return
+			}
 
-			const pointsToAdd = Math.floor(orderTotal * 0.01) // 1% от суммы заказа
+			const pointsToAdd = Math.floor(orderTotal * 0.01)
+			console.log(
+				`Начисляем ${pointsToAdd} бонусов за заказ на сумму ${orderTotal}`
+			)
+
 			this.user.loyaltyPoints += pointsToAdd
-
-			// Сохраняем обновлённые данные пользователя
 			localStorage.setItem('user', JSON.stringify(this.user))
+			console.log(
+				`Обновили localStorage: loyaltyPoints = ${this.user.loyaltyPoints}`
+			)
 
-			// Отправляем обновление на сервер (если API поддерживает)
 			try {
-				await axios.post(
+				const response = await axios.post(
 					'https://test.top-nnov.ru/api/update-loyalty-points',
 					{ loyaltyPoints: this.user.loyaltyPoints },
 					{
 						withCredentials: true,
 						headers: {
-							'Authorization': `Bearer ${this.apiToken}`,
+							Authorization: `Bearer ${this.apiToken}`,
 							'Content-Type': 'application/json',
 						},
 					}
 				)
+				console.log('Бонусы успешно обновлены на сервере:', response.data)
 			} catch (err) {
 				console.error('Ошибка обновления бонусов на сервере:', err)
+				if (err instanceof AxiosError) {
+					console.error('Детали ошибки:', err.response?.data)
+					throw new Error(
+						err.response?.data?.message || 'Ошибка обновления бонусов'
+					)
+				}
+				throw new Error('Неизвестная ошибка при обновлении бонусов')
 			}
 		},
 	},
