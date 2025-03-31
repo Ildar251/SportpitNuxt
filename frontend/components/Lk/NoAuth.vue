@@ -22,7 +22,7 @@ const modalStore = useModalStore()
     @include flex(row, space-between, center);
     gap: 32px;
     background-color: #FCFCFC;
-    padding: 42px;
+    padding: auto-clamp(16px, 42px);
 
     .lk__noAuth-text {
         @include flex(row, flex-start, center);
@@ -33,7 +33,7 @@ const modalStore = useModalStore()
         }
 
         .h4 {
-            font-size: 20px;
+            font-size: auto-clamp(14px, 20px);
         }
     }
 

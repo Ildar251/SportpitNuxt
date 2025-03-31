@@ -653,8 +653,8 @@ a {
 .modal {
     .modal__close {
         position: absolute;
-        top: auto-clamp(34px, 72px);
-        right: auto-clamp(34px, 72px);
+        top: auto-clamp(20px, 72px);
+        right: auto-clamp(20px, 72px);
         border: none;
         background: none;
         font-size: 24px;

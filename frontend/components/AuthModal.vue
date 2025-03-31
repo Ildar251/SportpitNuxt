@@ -51,9 +51,9 @@ const registerSchema = (isLegalEntity: boolean) =>
 		...baseRegisterSchema,
 		inn: isLegalEntity
 			? yup
-					.string()
-					.matches(/^\d{10}$/, 'ИНН должен содержать 10 цифр')
-					.required('Введите ИНН')
+				.string()
+				.matches(/^\d{10}$/, 'ИНН должен содержать 10 цифр')
+				.required('Введите ИНН')
 			: yup.string().notRequired(),
 	})
 
@@ -240,100 +240,40 @@ watch(
 		<div v-if="modalStore.isOpen" class="modal modal-auth">
 			<div class="modal__content">
 				<div class="modal__left">
-					<NuxtImg src="/images/logo.svg" alt="logo" width="320" />
+					<NuxtImg src="/images/logo.svg" alt="logo" sizes="250px  md:320px" />
 					<h2 class="h2">Личный кабинет</h2>
-					<NuxtImg
-						src="/images/auth-img.jpg"
-						alt="img"
-						width="380"
-						class="modal__img"
-					/>
+					<NuxtImg src="/images/auth-img.jpg" alt="img" width="380" class="modal__img" />
 				</div>
 
 				<Transition name="slide-up" mode="out-in">
-					<form
-						class="form form--auth"
-						v-if="authStep === 'login'"
-						@submit="login"
-					>
+					<form class="form form--auth" v-if="authStep === 'login'" @submit="login">
 						<h2 class="h2">Авторизация</h2>
-						<UiInput
-							v-model="email"
-							type="email"
-							placeholder="E-mail"
-							:error="errors.email"
-						/>
-						<UiInput
-							v-model="password"
-							type="password"
-							placeholder="Пароль"
-							:error="errors.password"
-						/>
+						<UiInput v-model="email" type="email" placeholder="E-mail" :error="errors.email" />
+						<UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
 						<div class="form__elems">
 							<button type="submit">Войти в аккаунт</button>
 							<div class="modal__link">
 								<span>Ещё нет аккаунта?</span>
-								<span class="link" @click="changeStep('register')"
-									>Зарегистрироваться</span
-								>
+								<span class="link" @click="changeStep('register')">Зарегистрироваться</span>
 							</div>
 						</div>
 					</form>
 
-					<form
-						class="form"
-						v-else-if="authStep === 'register'"
-						@submit="register"
-					>
+					<form class="form" v-else-if="authStep === 'register'" @submit="register">
 						<h2 class="h2">Регистрация</h2>
-						<UiTabs v-model="activeTab" :tabsClass="'tabs-lk'" :tabs="tabs" />
+						<UiTabs v-model="activeTab" :tabsClass="'tabs-auth'" :tabs="tabs" />
 						<div class="form__grid">
-							<UiInput
-								v-model="surname"
-								type="text"
-								placeholder="Фамилия"
-								:error="errors.surname"
-							/>
-							<UiInput
-								v-model="name"
-								type="text"
-								placeholder="Имя"
-								:error="errors.name"
-							/>
-							<UiInput
-								v-model="phone"
-								mask="+7 (###) ###-##-##"
-								type="tel"
-								placeholder="Номер"
-								:error="errors.phone"
-							/>
-							<UiInput
-								v-model="email"
-								type="email"
-								placeholder="Почта"
-								:error="errors.email"
-							/>
-							<UiInput
-								v-model="password"
-								type="password"
-								placeholder="Пароль"
-								:error="errors.password"
-							/>
-							<UiInput
-								v-model="confirmPassword"
-								type="password"
-								placeholder="Подтверждение пароля"
-								:error="errors.confirmPassword"
-							/>
+							<UiInput v-model="surname" type="text" placeholder="Фамилия" :error="errors.surname" />
+							<UiInput v-model="name" type="text" placeholder="Имя" :error="errors.name" />
+							<UiInput v-model="phone" mask="+7 (###) ###-##-##" type="tel" placeholder="Номер"
+								:error="errors.phone" />
+							<UiInput v-model="email" type="email" placeholder="Почта" :error="errors.email" />
+							<UiInput v-model="password" type="password" placeholder="Пароль" :error="errors.password" />
+							<UiInput v-model="confirmPassword" type="password" placeholder="Подтверждение пароля"
+								:error="errors.confirmPassword" />
 							<Transition name="slide-input">
-								<UiInput
-									v-model="inn"
-									type="text"
-									mask="##########"
-									placeholder="ИНН"
-									v-show="activeTab === 'legal'"
-									:error="errors.inn"
-								/>
+								<UiInput v-model="inn" type="text" mask="##########" placeholder="ИНН"
+									v-show="activeTab === 'legal'" :error="errors.inn" />
 							</Transition>
 						</div>
 
@@ -352,20 +292,11 @@ watch(
 						</div>
 					</form>
 
-					<form
-						class="form"
-						v-else-if="authStep === 'confirm'"
-						@submit="confirmRegistration"
-					>
+					<form class="form" v-else-if="authStep === 'confirm'" @submit="confirmRegistration">
 						<h2 class="h2">Подтвердите email</h2>
 						<UiInput v-model="registeredEmail" type="hidden" />
-						<UiInput
-							v-model="confirmationCode"
-							type="text"
-							placeholder="Код подтверждения"
-							:error="errors.confirmationCode"
-							:disabled="attemptsLeft <= 0"
-						/>
+						<UiInput v-model="confirmationCode" type="text" placeholder="Код подтверждения"
+							:error="errors.confirmationCode" :disabled="attemptsLeft <= 0" />
 						<p v-if="attemptsLeft < 5" style="margin-top: 10px">
 							Осталось попыток: {{ attemptsLeft }}
 						</p>
@@ -388,14 +319,17 @@ watch(
 </template>
 <style scoped lang="scss">
 .modal {
+	max-height: 95svh;
+
 	&.modal-auth {
 		background: $color-white;
 		color: $color-primary;
-		padding: auto-clamp(34px, 72px);
+		padding: auto-clamp(20px, 72px);
 		position: relative;
 		max-width: 1400px;
 		width: 90%;
-		overflow: hidden;
+		overflow-x: hidden;
+		overflow-y: auto;
 		position: fixed;
 		top: 50%;
 		left: 50%;
@@ -406,7 +340,11 @@ watch(
 		.modal__content {
 			width: 100%;
 			@include flex(row, center, stretch);
-			gap: 84px;
+			gap: auto-clamp(42px, 84px);
+
+			@media screen and (max-width: 768px) {
+				flex-direction: column;
+			}
 
 			.modal__left {
 				@include flex(column, center, center);
@@ -425,11 +363,19 @@ watch(
 					height: 100%;
 					background-color: $color-border;
 					position: absolute;
-					right: -42px;
+					right: calc(auto-clamp(21px, 42px) * -1);
+
+					@media screen and (max-width: 768px) {
+						display: none;
+					}
 				}
 
 				.modal__img {
 					margin-top: auto-clamp(30px, 60px);
+
+					@media screen and (max-width: 768px) {
+						display: none;
+					}
 				}
 			}
 		}
