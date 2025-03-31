@@ -49,13 +49,8 @@ const toggleOrderDetails = async (orderId: string) => {
 		У вас пока нет заказов
 	</div>
 	<div v-else class="orders-list">
-		<div
-			v-for="order in orders"
-			:key="order.order_id"
-			:class="
-				'order-item' + (expandedOrder === order.order_id ? ' expanded' : '')
-			"
-		>
+		<div v-for="order in orders" :key="order.order_id" :class="'order-item' + (expandedOrder === order.order_id ? ' expanded' : '')
+			">
 			<div class="row">
 				<div class="left">
 					<div class="order-item__date">
@@ -67,10 +62,7 @@ const toggleOrderDetails = async (orderId: string) => {
 				<div class="right">
 					<div class="order-item__price">{{ order.total_price }} ₽</div>
 
-					<div
-						class="btn btn-more btn-more-order"
-						@click="toggleOrderDetails(order.order_id)"
-					>
+					<div class="btn btn-more btn-more-order" @click="toggleOrderDetails(order.order_id)">
 						<Transition name="slide-down">
 							<span v-if="expandedOrder !== order.order_id">Подробнее</span>
 							<span v-else>Скрыть</span>
@@ -84,16 +76,10 @@ const toggleOrderDetails = async (orderId: string) => {
 					<div class="order-items">
 						<div v-for="item in order.items" :key="item.id" class="item">
 							<div class="item-wrap">
-								<NuxtImg
-									:src="
-										item.image
-											? `${config.public.apiUrl}${item.image}`
-											: '/placeholder.png'
-									"
-									:alt="item.title || 'Товар'"
-									class="item-image"
-									height="120"
-								/>
+								<NuxtImg :src="item.image
+									? `${config.public.apiUrl}${item.image}`
+									: '/placeholder.png'
+									" :alt="item.title || 'Товар'" class="item-image" height="120" />
 								<div class="item-quantity">
 									{{ item.quantity }}
 								</div>
@@ -130,6 +116,10 @@ const toggleOrderDetails = async (orderId: string) => {
 		color: $color-gray;
 		transition: $transition;
 
+		@media screen and (max-width: 768px) {
+			padding: 20px 20px 50px;
+		}
+
 		.row {
 			@include flex(row, space-between, stretch);
 		}
@@ -160,6 +150,10 @@ const toggleOrderDetails = async (orderId: string) => {
 			position: relative;
 			font-size: auto-clamp(18px, 24px);
 
+			@media screen and (max-width: 768px) {
+				margin-bottom: -25px;
+			}
+
 			.nuxt-icon {
 				font-size: auto-clamp(14px, 18px);
 			}
@@ -168,6 +162,7 @@ const toggleOrderDetails = async (orderId: string) => {
 				display: flex;
 				position: absolute;
 				right: 0;
+
 				&::after {
 					content: '';
 					display: block;
@@ -188,6 +183,7 @@ const toggleOrderDetails = async (orderId: string) => {
 		&.expanded {
 			background-color: $color-light;
 			color: $color-primary;
+
 			.btn-more {
 				.nuxt-icon {
 					transform: rotate(-170deg);
@@ -202,6 +198,7 @@ const toggleOrderDetails = async (orderId: string) => {
 
 			&__bottom {
 				margin-top: 32px;
+
 				&-info {
 					@include flex(column, space-between, flex-start);
 					font-size: auto-clamp(18px, 24px);

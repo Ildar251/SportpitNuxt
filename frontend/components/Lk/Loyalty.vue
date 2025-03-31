@@ -33,16 +33,18 @@ const isEligibleForLoyalty = computed(() => {
 <style scoped lang="scss">
 .loyalty-program {
 	@include flex(row, flex-start, flex-start);
+
 	.loyalty-program__item {
-		padding: 24px 42px;
+		padding: 24px auto-clamp(30px, 42px);
 		background-color: $color-accent;
 		color: $color-white;
 		width: fit-content;
+
 		div {
 			@include flex(column, flex-start, flex-start);
 
 			strong {
-				font-size: 72px;
+				font-size: auto-clamp(48px, 72px);
 				line-height: 1;
 			}
 		}
@@ -54,15 +56,16 @@ const isEligibleForLoyalty = computed(() => {
 	}
 
 	.loyalty-program__info {
-		padding: 24px 42px;
+		padding: 24px auto-clamp(30px, 42px);
 		background-color: #fcfcfc;
 		color: $color-primary;
 		width: fit-content;
+
 		div {
 			@include flex(column, flex-start, flex-start);
 
 			strong {
-				font-size: 72px;
+				font-size: auto-clamp(48px, 72px);
 				line-height: 1;
 			}
 		}

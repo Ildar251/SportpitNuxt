@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { NuxtIcon, NuxtLink } from '#components'
-
+import { NuxtLink } from '#components'
+import { useSiteSettings } from '~/composables/useSiteSettings'
+const settings = useSiteSettings()
 </script>
 
 <template>
@@ -10,9 +11,9 @@ import { NuxtIcon, NuxtLink } from '#components'
                 <NuxtImg src="/images/logo_light.svg" alt="logo" width="260" />
 
                 <div class="footer__contacts">
-                    <a href="" class="footer__link">telegram</a>
-                    <a href="" class="footer__link">whatsapp</a>
-                    <a href="" class="footer__link">vk</a>
+                    <a :href="settings.telegram" class="footer__link">telegram</a>
+                    <a :href="settings.whatsapp" class="footer__link">whatsapp</a>
+                    <a :href="settings.vk" class="footer__link">vk</a>
                 </div>
             </div>
 
@@ -75,8 +76,8 @@ import { NuxtIcon, NuxtLink } from '#components'
                     </ul>
                 </div>
                 <div class="footer__column">
-                    <NuxtLink to="/" class="footer__phone footer__link">+7 945 998-99-65</NuxtLink>
-                    <NuxtLink to="/" class="footer__email footer__link">support@sportpit.ru</NuxtLink>
+                    <a :href="'tel:' + settings.phone" class="footer__phone footer__link">{{ settings.phone }}</a>
+                    <a :href="'mailto:' + settings.email" class="footer__email footer__link">{{ settings.email }}</a>
                 </div>
             </nav>
 

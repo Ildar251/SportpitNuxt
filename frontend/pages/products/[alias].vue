@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ProductFull } from '@/types/product'
 import { gsap } from 'gsap'
 import type { Swiper as SwiperType } from 'swiper'
 import 'swiper/css'
@@ -6,25 +7,56 @@ import 'swiper/css/effect-fade'
 import 'swiper/css/pagination'
 import { Autoplay, EffectFade, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { useRoute } from 'vue-router'
 import { useApiStore } from '~/stores/api'
+import { useAuthStore } from '~/stores/authStore'
 import { useCartStore } from '~/stores/cartStore'
 import { useFavoriteStore } from '~/stores/favoritesStore'
+import { useModalStore } from '~/stores/useModalStore'
+
+// Импортируем Vue Easy Lightbox
+import VueEasyLightbox from 'vue-easy-lightbox'
+import 'vue-easy-lightbox/dist/external-css/vue-easy-lightbox.css' // Импортируем стили
+
 const modalStore = useModalStore()
 const route = useRoute()
+const router = useRouter()
 const apiStore = useApiStore()
 const cartStore = useCartStore()
 const favoriteStore = useFavoriteStore()
-const config = useRuntimeConfig()
 const authStore = useAuthStore()
-
-
-
-import type { ProductFull } from '@/types/product'
+const config = useRuntimeConfig()
 
 // Загрузка данных о продукте
 const product = ref<ProductFull | null>(null)
+const relatedTastes = ref<ProductFull[]>([])
 const stickers = computed(() => (product.value?.sticker ? product.value.sticker.split('||') : []))
+
+// Лайтбокс
+const lightboxVisible = ref(false)
+const lightboxIndex = ref(0)
+const lightboxImages = computed(() => {
+	if (!product.value) return []
+	// Формируем массив изображений: текущее + изображения других вкусов
+	return [
+		{
+			src: config.public.apiUrl + product.value.image,
+			title: `${product.value.title} - ${product.value.taste}`,
+		},
+		...relatedTastes.value.map(p => ({
+			src: config.public.apiUrl + p.image,
+			title: `${p.title} - ${p.taste}`,
+		})),
+	]
+})
+
+const showLightbox = (index: number) => {
+	lightboxIndex.value = index
+	lightboxVisible.value = true
+}
+
+const hideLightbox = () => {
+	lightboxVisible.value = false
+}
 
 onMounted(async () => {
 	if (apiStore.products.length === 0) {
@@ -33,10 +65,25 @@ onMounted(async () => {
 	if (apiStore.brands.length === 0) {
 		await apiStore.fetchBrands()
 	}
+
 	product.value = apiStore.products.find(p => p.alias === route.params.alias) || null
 
 	if (!product.value) {
 		console.error(`Продукт с alias "${route.params.alias}" не найден`)
+		return
+	}
+
+	relatedTastes.value = apiStore.products.filter(
+		p => p.title === product.value!.title && p.alias !== product.value!.alias
+	)
+
+	if (product.value.taste && tasteTextRef.value) {
+		animateTasteText(product.value.taste)
+	}
+
+	await nextTick()
+	if (textRef.value) {
+		isTextLong.value = textRef.value.scrollHeight > 200
 	}
 })
 
@@ -57,6 +104,7 @@ const addToCart = () => {
 			image: product.value.image,
 			volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
 			quantity: 1,
+			taste: product.value.taste,
 		})
 	}
 }
@@ -77,6 +125,7 @@ const toggleFavorite = () => {
 			price: product.value.price ? parseFloat(product.value.price) : 0,
 			image: product.value.image,
 			volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
+			taste: product.value.taste,
 		})
 	}
 }
@@ -96,59 +145,69 @@ const decreaseQuantity = () => {
 		cartStore.updateQuantity(product.value.id, currentQuantity - 1)
 	}
 }
+
 // Проверка, есть ли товар в корзине, и получение количества
 const isInCart = computed(() => (product.value ? cartStore.isInCart(product.value.id) : false))
-const cartQuantity = computed(() =>
-	product.value ? cartStore.getQuantity(product.value.id) : 0
-)
+const cartQuantity = computed(() => (product.value ? cartStore.getQuantity(product.value.id) : 0))
 
+// Логика текста описания
 const textRef = ref<HTMLElement | null>(null)
 const isTextExpanded = ref(false)
 const isTextLong = ref(false)
-
-// Динамическая высота для анимации
-const textHeight = ref('200px') // Начальная высота совпадает с CSS
+const textHeight = ref('200px')
 
 const toggleText = async () => {
 	if (!textRef.value) return
 
 	const fullHeight = `${textRef.value.scrollHeight}px`
 	if (!isTextExpanded.value) {
-		// Раскрытие
 		textHeight.value = fullHeight
 		isTextExpanded.value = true
 	} else {
-		// Скрытие
 		textHeight.value = '200px'
 		isTextExpanded.value = false
 	}
 }
 
-onMounted(async () => {
-	await nextTick() // Ждем рендера DOM
-	if (textRef.value) {
-		isTextLong.value = textRef.value.scrollHeight > 200
-	}
+// Логика вкусов
+const activeTasteIndex = ref(0)
+const tastes = computed(() => {
+	if (!product.value) return []
+	const allTastes = [
+		{
+			MIGX_id: product.value.id.toString(),
+			taste: product.value.taste,
+			image: product.value.image,
+			alias: product.value.alias,
+		},
+		...relatedTastes.value.map(p => ({
+			MIGX_id: p.id.toString(),
+			taste: p.taste,
+			image: p.image,
+			alias: p.alias,
+		})),
+	]
+	return allTastes
 })
 
-const activeTasteIndex = ref(0)
-const tastes = computed(() => product.value?.taste || [])
 const tasteTextRef = ref<HTMLElement | null>(null)
 const imageSliderRef = ref<SwiperType | null>(null)
+
 const onTasteClick = (index: number) => {
-	activeTasteIndex.value = index
-	if (imageSliderRef.value) {
-		imageSliderRef.value.slideTo(index) // Переключаем слайд в image-slider
+	if (index === activeTasteIndex.value) return
+
+	const selectedTaste = tastes.value[index]
+	if (selectedTaste.alias !== product.value!.alias) {
+		router.push(`/products/${selectedTaste.alias}`)
 	}
 }
 
 const animateTasteText = (text: string) => {
 	if (!tasteTextRef.value) return
 
-	const chars = text.split('') // Разбиваем текст на буквы
-	tasteTextRef.value.innerHTML = '' // Очищаем содержимое span
+	const chars = text.split('')
+	tasteTextRef.value.innerHTML = ''
 
-	// Создаём span для каждой буквы
 	chars.forEach((char, i) => {
 		const charSpan = document.createElement('span')
 		charSpan.className = 'taste-char'
@@ -156,78 +215,47 @@ const animateTasteText = (text: string) => {
 		tasteTextRef.value?.appendChild(charSpan)
 	})
 
-	// Анимируем буквы
 	gsap.fromTo(
 		tasteTextRef.value.querySelectorAll('.taste-char'),
-		{
-			opacity: 0,
-			y: 20,
-			rotation: 10,
-		},
-		{
-			opacity: 1,
-			y: 0,
-			rotation: 0,
-			duration: 0.5,
-			stagger: 0.05,
-			ease: 'power2.out',
-		}
+		{ opacity: 0, y: 20, rotation: 10 },
+		{ opacity: 1, y: 0, rotation: 0, duration: 0.5, stagger: 0.05, ease: 'power2.out' }
 	)
 }
 
-onMounted(async () => {
-	await nextTick() // Ждем рендера DOM
-	if (apiStore.products.length === 0) {
-		await apiStore.fetchProducts()
-	}
-	if (apiStore.brands.length === 0) {
-		await apiStore.fetchBrands()
-	}
-	product.value = apiStore.products.find(p => p.alias === route.params.alias) || null
+watch(
+	() => route.params.alias,
+	async (newAlias) => {
+		product.value = apiStore.products.find(p => p.alias === newAlias) || null
 
-	if (!product.value) {
-		console.error(`Продукт с alias "${route.params.alias}" не найден`)
-	}
+		if (!product.value) {
+			console.error(`Продукт с alias "${newAlias}" не найден`)
+			return
+		}
 
-	// Инициализируем текст вкуса, если есть tastes
-	if (tastes.value.length > 0 && tasteTextRef.value) {
-		const initialTaste = tastes.value[activeTasteIndex.value]?.taste
-		if (initialTaste) {
-			animateTasteText(initialTaste)
+		relatedTastes.value = apiStore.products.filter(
+			p => p.title === product.value!.title && p.alias !== product.value!.alias
+		)
+
+		activeTasteIndex.value = tastes.value.findIndex(t => t.alias === newAlias)
+
+		if (product.value.taste && tasteTextRef.value) {
+			animateTasteText(product.value.taste)
+		}
+
+		await nextTick()
+		if (textRef.value) {
+			isTextLong.value = textRef.value.scrollHeight > 200
 		}
 	}
+)
 
-	// Существующая логика для textRef
-	if (textRef.value) {
-		isTextLong.value = textRef.value.scrollHeight > 200
-	}
-})
-
-watch(activeTasteIndex, (newIndex) => {
-	if (!tastes.value[newIndex]) return
-	const text = tastes.value[newIndex].taste
-	animateTasteText(text)
-})
-
-const dop_compound = computed(() => {
-	return product.value?.dop_compound || []
-})
+const dop_compound = computed(() => product.value?.dop_compound || [])
 
 const accordions = computed(() => [
-	{
-		title: 'Рекомендации по применению',
-		content: product.value?.recommendations || '',
-	},
-	{
-		title: 'Состав',
-		content: product.value?.compound || '',
-	},
-	{
-		title: 'Условия хранения',
-		content: product.value?.storage || '',
-	},
+	{ title: 'Рекомендации по применению', content: product.value?.recommendations || '' },
+	{ title: 'Состав', content: product.value?.compound || '' },
+	{ title: 'Условия хранения', content: product.value?.storage || '' },
 ])
-
 </script>
 
 <template>
@@ -242,12 +270,13 @@ const accordions = computed(() => [
 							class="image-slider" @swiper="(swiper) => (imageSliderRef = swiper)">
 							<SwiperSlide v-for="(taste, index) in tastes" :key="taste.MIGX_id" class="image__item">
 								<NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="420"
-									loading="lazy" placeholder="/images/box.svg" />
+									loading="lazy" placeholder="/images/box.svg" class="clickable-image"
+									@click="showLightbox(index)" />
 							</SwiperSlide>
-							<!-- Добавляем дефолтное изображение как последний слайд -->
 							<SwiperSlide v-if="!tastes.length" class="image__item">
 								<NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" height="420"
-									loading="lazy" placeholder="/images/box.svg" />
+									loading="lazy" placeholder="/images/box.svg" class="clickable-image"
+									@click="showLightbox(0)" />
 							</SwiperSlide>
 						</Swiper>
 					</div>
@@ -262,8 +291,8 @@ const accordions = computed(() => [
 						</div>
 					</Transition>
 
-					<div :class="'favorite' +
-						(favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')" @click.stop="toggleFavorite">
+					<div :class="'favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+						@click.stop="toggleFavorite">
 						<NuxtIcon name="favorites" />
 					</div>
 				</div>
@@ -278,8 +307,9 @@ const accordions = computed(() => [
 					</NuxtLink>
 					<div class="product__info-main">
 						<div class="product__info-left">
-							<h1 class="h1">{{ product.title }}
-								<span v-if="tastes.length > 0" ref="tasteTextRef" class="taste-text"></span>
+							<h1 class="h1">
+								{{ product.title }}
+								<span v-if="product.taste" ref="tasteTextRef" class="taste-text"></span>
 							</h1>
 							<div class="product__text-block" v-if="product.product_text">
 								<div ref="textRef" class="product__text"
@@ -293,8 +323,8 @@ const accordions = computed(() => [
 							</div>
 						</div>
 						<div class="product__info-right">
-							<div :class="'product__info-favorite favorite' +
-								(favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')" @click.stop="toggleFavorite">
+							<div :class="'product__info-favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+								@click.stop="toggleFavorite">
 								<NuxtIcon name="favorites" />
 							</div>
 						</div>
@@ -303,15 +333,14 @@ const accordions = computed(() => [
 					<div class="product__volume product__info-block">
 						<h3 class="h3">Объём</h3>
 						<div class="row">
-							<div :class="'product__volume-item' +
-								(index === activeIndex ? ' product__volume-item--active' : '')" v-for="(vol, index) in volume" :key="index"
-								@click="onVolumeClick(index)">
+							<div :class="'product__volume-item' + (index === activeIndex ? ' product__volume-item--active' : '')"
+								v-for="(vol, index) in volume" :key="index" @click="onVolumeClick(index)">
 								{{ vol }} мл
 							</div>
 						</div>
 					</div>
 
-					<div class="product__taste product__info-block" v-if="tastes.length">
+					<div class="product__taste product__info-block" v-if="tastes.length > 1">
 						<h3 class="h3">Вкус</h3>
 						<Swiper :modules="[Pagination, Autoplay]" :breakpoints="{
 							320: { slidesPerView: 2.5 },
@@ -326,7 +355,6 @@ const accordions = computed(() => [
 									<NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="120"
 										width="auto" format="webp" placeholder="/images/box.svg" />
 								</div>
-
 								<div class="taste__text">
 									{{ taste.taste }}
 								</div>
@@ -346,7 +374,6 @@ const accordions = computed(() => [
 									<span class="price__subtext">Без регистрации</span>
 								</div>
 							</div>
-
 
 							<div class="cart-controls" :class="{ 'cart-controls--active': isInCart }">
 								<button class="btn qty-btn" @click.stop="decreaseQuantity">
@@ -374,12 +401,11 @@ const accordions = computed(() => [
 						<div class="dop-info" v-if="!authStore.apiToken">
 							<div class="lock">
 								<NuxtIcon name="lock" />
-								<span class="h4">Стоимость
-									оптовой закупки</span>
+								<span class="h4">Стоимость оптовой закупки</span>
 							</div>
 							<div class="product__price-info">
 								<div class="minimal">
-									Минимальная сумма<br>заказа 10 000 ₽
+									Минимальная сумма<br />заказа 10 000 ₽
 								</div>
 								<div class="warning">
 									<NuxtIcon name="warning" />
@@ -391,14 +417,12 @@ const accordions = computed(() => [
 										</div>
 									</div>
 								</div>
-
 							</div>
 						</div>
 
 						<div class="minimal" v-else>
 							Минимальная сумма заказа 10 000 ₽
 						</div>
-
 					</div>
 
 					<div class="product__data product__info-block" v-if="product.sugar || product.energy">
@@ -422,7 +446,6 @@ const accordions = computed(() => [
 						<UiAccordion v-for="(accordion, index) in accordions" :key="index" :title="accordion.title"
 							:content="accordion.content" />
 					</div>
-
 				</div>
 			</div>
 		</section>
@@ -431,8 +454,29 @@ const accordions = computed(() => [
 				<div class="not-found">Продукт не найден</div>
 			</div>
 		</section>
+
+		<!-- Добавляем компонент VueEasyLightbox -->
+		<VueEasyLightbox :visible="lightboxVisible" :imgs="lightboxImages" :index="lightboxIndex" @hide="hideLightbox"
+			:escDisabled="false" :scrollDisabled="true" :moveDisabled="false" />
 	</main>
 </template>
+
+<style scoped>
+/* Стили для кликабельного изображения */
+.clickable-image {
+	cursor: pointer;
+	transition: opacity 0.3s ease;
+}
+
+.clickable-image:hover {
+	opacity: 0.9;
+}
+
+/* Убираем стандартное поведение Swiper для кликов */
+.image-slider {
+	pointer-events: auto;
+}
+</style>
 
 <style lang="scss" scoped>
 @media screen and (max-width: 768px) {
@@ -558,6 +602,9 @@ const accordions = computed(() => [
 				margin-top: 7px;
 				font-size: 14px;
 				color: $color-gray;
+				text-overflow: ellipsis;
+				overflow: hidden;
+				;
 			}
 
 			&--active {

@@ -437,6 +437,10 @@ input[type="checkbox"]:checked::after {
             object-fit: contain;
         }
     }
+
+    @media screen and (max-width: 768px) {
+        flex-direction: column !important;
+    }
 }
 
 .container {

@@ -95,13 +95,7 @@ watch(
 			</div>
 
 			<div class="cart-footer">
-				<div class="cart-promo">
-					<span>Применить промокод:</span>
-					<div class="cart-promo__input">
-						<input type="text" placeholder="Промокод" class="input" />
-						<button>Применить</button>
-					</div>
-				</div>
+
 				<div class="cart-total">
 					<div class="cart-total__info">
 						<span>Итого:</span>
@@ -125,46 +119,14 @@ watch(
 	gap: 12px;
 }
 
-.cart-promo {
-	@include flex(column, flex-start, flex-start);
-
-	span {
-		font-size: 16px;
-		color: $color-gray;
-		font-weight: bold;
-		margin-left: 42px;
-	}
-
-	&__input {
-		width: 100%;
-		padding: 26px 42px;
-		font-size: auto-clamp(16px, 20px);
-		border: none;
-		outline: none;
-		transition: border-color 0.3s ease, box-shadow 0.3s ease;
-		background-color: #fcfcfc;
-		color: inherit;
-
-		input {
-			border: none;
-			background-color: #fcfcfc;
-			font-weight: 700;
-			color: $color-primary;
-		}
-
-		button {
-			font-size: 18px;
-		}
-	}
-}
 
 .cart-footer {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
-	gap: 130px;
-	margin-top: 72px;
-	padding-top: 38px;
+	gap: auto-clamp(42px, 130px);
+	margin-top: auto-clamp(42px, 72px);
+	padding-top: auto-clamp(22px, 38px);
 	border-top: 2px solid $color-border;
 }
 
@@ -174,18 +136,26 @@ watch(
 
 .cart-total {
 	font-size: 1.2rem;
-	@include flex(column, flex-start, flex-end);
+	@include flex(row, space-between, flex-end);
 	flex: 1;
+
+	@media screen and (max-width: 768px) {
+		flex-direction: column;
+	}
 
 	&__info {
 		@include flex(column, flex-start, flex-start);
 		gap: 12px;
+
+		@media screen and (max-width: 768px) {
+			flex-direction: row;
+		}
 	}
 }
 
 .cart-total__price {
 	font-weight: bold;
-	font-size: 50px;
+	font-size: auto-clamp(32px, 50px);
 }
 
 .cart-item {
@@ -198,8 +168,8 @@ watch(
 	.cart-item__image {
 		@include flex(row, center, center);
 		background-color: $color-light;
-		width: 196px;
-		height: 196px;
+		width: auto-clamp(120px, 196px);
+		height: auto-clamp(120px, 196px);
 
 		img {
 			height: 80%;
@@ -248,7 +218,7 @@ watch(
 		}
 
 		.h3 {
-			font-size: 24px;
+			font-size: auto-clamp(18px, 24px);
 		}
 	}
 }

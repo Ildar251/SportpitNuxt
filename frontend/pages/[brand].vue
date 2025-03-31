@@ -5,8 +5,18 @@ const route = useRoute()
 const apiStore = useApiStore()
 const brandAlias = computed(() => route.params.brand as string)
 const config = useRuntimeConfig()
-const { sections, sectionMap, sectionsData, page } = usePage('brands')
+const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('brands')
 
+
+useHead({
+  title: pageTitle,
+  meta: [
+    { name: 'description', content: pageDescription },
+    { property: 'og:title', content: pageTitle },
+    { property: 'og:description', content: pageDescription },
+    { property: 'og:type', content: 'website' },
+  ],
+})
 // Получаем бренд по alias
 const brand = computed(() => {
   return apiStore.brands.find((b) => b.alias === brandAlias.value)

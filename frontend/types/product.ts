@@ -5,6 +5,7 @@ export interface Product {
     image?: string
     volume?: number
     quantity: number // Только для корзины
+    taste?: string
 }
 
 export interface FavoriteProduct {
@@ -13,13 +14,8 @@ export interface FavoriteProduct {
     price?: number
     image?: string
     volume?: number
+    taste?: string
 }
-export interface Taste {
-    MIGX_id: string
-    taste: string
-    image: string
-}
-
 export interface DopCompound {
     MIGX_id: string
     title: string
@@ -29,23 +25,26 @@ export interface DopCompound {
 export interface ProductFull {
     id: number
     title: string
-    description: string
-    content: string
-    parent: number
-    category: string | null
+    longtitle: string
     alias: string
-    price?: string
-    price_old?: string
-    brand?: string
-    taste?: Taste[]
-    sticker?: string
-    image?: string
-    volume?: string
-    product_text?: string
-    sugar?: string
-    energy?: string
-    recommendations?: string
-    storage?: string
-    compound?: string
-    dop_compound?: DopCompound[]
+    description: string
+    category: string
+    image: string
+    brand: string
+    price: string
+    price_old: string
+    sticker: string
+    taste: string // Теперь строка, а не массив
+    volume: string
+    product_text: string
+    sugar: string
+    energy: string
+    recommendations: string
+    storage: string
+    compound: string
+    dop_compound: Array<{
+        MIGX_id: string
+        title: string
+        value: string
+    }>
 }

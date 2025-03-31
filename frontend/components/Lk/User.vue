@@ -110,8 +110,10 @@ watch(
 <style lang="scss" scoped>
 .personal__info {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(220px, auto));
     gap: auto-clamp(20px, 40px);
+
+
 
     &-item {
         padding: auto-clamp(18px, 26px) auto-clamp(28px, 42px);

@@ -64,5 +64,42 @@ const setActiveTab = (tabId: string) => {
         border-right: 4px solid $color-accent;
         background-color: $color-border;
     }
+
+    &.tabs-lk {
+
+
+        @include flex(column, flex-start, flex-start);
+
+        @media screen and (max-width: 768px) {
+            width: 100%;
+            flex-direction: row;
+            flex-wrap: wrap;
+
+            .tabs__item {
+                width: calc(100% / 3 - 8px);
+                border-right: none;
+                border-bottom: 4px solid $color-border;
+                gap: 10px;
+                padding: 7px 14px;
+
+                span:not(.nuxt-icon) {
+                    font-size: 10px;
+                }
+
+                &.active {
+                    border-bottom: 4px solid $color-accent;
+                    border-right: none;
+                }
+            }
+        }
+
+    }
+
+    &.tabs-delivery,
+    &.tabs-payment {
+        @media screen and (max-width: 768px) {
+            flex-direction: column;
+        }
+    }
 }
 </style>

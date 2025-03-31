@@ -156,17 +156,22 @@ watch(activeTab, async newTab => {
 	gap: 44px;
 	padding-top: 44px;
 
-	.tabs-lk {
-		@include flex(column, flex-start, flex-start);
+	@media screen and (max-width: 768px) {
+		flex-direction: column;
+		padding-top: 10px;
 	}
+
 
 	.lk__content {
 		border-top: 2px solid $color-border;
 		flex: 1;
-
 		position: relative;
 		overflow: hidden;
 		transition: height 0.4s ease-in-out;
+
+		@media screen and (max-width: 768px) {
+			width: 100%;
+		}
 
 		.h2 {
 			margin-bottom: 42px;
@@ -176,6 +181,11 @@ watch(activeTab, async newTab => {
 		.lk__content-item {
 			margin: 42px 0px 0px 42px;
 			width: calc(100% - 45px);
+
+			@media screen and (max-width: 768px) {
+				margin: 20px 0px;
+				width: 100%;
+			}
 		}
 	}
 }

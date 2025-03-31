@@ -13,6 +13,9 @@ const modalStore = useModalStore()
 const menuStore = useMenuStore()
 const mobileMenuStore = useMobileMenuStore()
 
+import { useSiteSettings } from '~/composables/useSiteSettings'
+const settings = useSiteSettings()
+
 
 const favoritesCount = computed(() => favoriteStore.items.length)
 
@@ -63,20 +66,39 @@ const openSearchModal = () => {
 	}
 	searchModalStore.open()
 }
+
+const config = useRuntimeConfig()
+
+
+onMounted(() => {
+	apiStore.fetchBrands()
+	apiStore.fetchStocks()
+})
+
+const brands = computed(() => apiStore.brands)
+const stocks = computed(() => apiStore.stocks)
 </script>
 <template>
 	<header class="header">
 		<div class="container header__top">
 			<div class="header__contacts">
-				<a href="" class="header__link link">telegram</a>
-				<a href="" class="header__link link">whatsapp</a>
-				<a href="" class="header__link link">vk</a>
-				<a href="mailto:info@nutrivery.ru" class="header__link link">info@nutrivery.ru</a>
+				<NuxtLink :to="settings.telegram" target="_blank" class="header__link link">
+					telegram
+				</NuxtLink>
+				<NuxtLink :to="settings.whatsapp" target="_blank" class="header__link link">
+					whatsapp
+				</NuxtLink>
+				<NuxtLink :to="settings.vk" target="_blank" class="header__link link">
+					vk
+				</NuxtLink>
+				<a :href="'mailto:' + settings.email" class="header__link link">
+					{{ settings.email }}
+				</a>
 			</div>
 
-			<a href="tel:+7 945 998-99-65" class="header__phone">
+			<a :href="'tel:' + settings.phone" class="header__phone">
 				<NuxtIcon name="phone" />
-				<span>+7 945 998-99-65</span>
+				<span>{{ settings.phone }}</span>
 			</a>
 
 			<div class="header__items">
@@ -131,7 +153,10 @@ const openSearchModal = () => {
 						<NuxtLink to="/partners"><span>Партнёрам</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
-						<NuxtLink to="/catalog"><span>CTM</span></NuxtLink>
+						<NuxtLink to="/ctm"><span>CTM</span></NuxtLink>
+					</li>
+					<li class="header__menu-item">
+						<NuxtLink to="/delivery-and-payment"><span>Оплата</span></NuxtLink>
 					</li>
 					<li class="header__menu-item">
 						<NuxtLink to="/contacts"><span>Контакты</span></NuxtLink>
@@ -155,38 +180,37 @@ const openSearchModal = () => {
 		<Transition name="slide-down">
 			<div class="menu" v-if="menuStore.isOpen">
 				<div class="container menu__container">
-					<div class="menu__column">
-						<NuxtLink class="menu__column-title">Категория 1</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Бренды</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Акции</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Компания</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Партнёрам</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Контакты</NuxtLink>
+					<div class="menu__brands">
+						<div class="menu__brands-title">
+							Бренды
+						</div>
+						<div v-for="brand in brands" :key="brand.id">
+							<NuxtLink :to="`${brand.alias}`" class="link">
+								{{ brand.title }}
+							</NuxtLink>
+						</div>
 					</div>
 					<div class="menu__column">
-						<NuxtLink class="menu__column-title">Категория 2</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Бренды</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Акции</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Компания</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Партнёрам</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Контакты</NuxtLink>
+						<NuxtLink :to="{ path: '/catalog', query: { category: 'Напитки' } }" class="menu__column-title">
+							Напитки</NuxtLink>
 					</div>
 					<div class="menu__column">
-						<NuxtLink class="menu__column-title">Категория 3</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Бренды</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Акции</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Компания</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Партнёрам</NuxtLink>
-						<NuxtLink to="/catalog" class="menu__item">Контакты</NuxtLink>
+						<NuxtLink :to="{ path: '/catalog', query: { category: 'Энергетики' } }"
+							class="menu__column-title">Энергетики</NuxtLink>
+					</div>
+					<div class="menu__column">
+						<NuxtLink :to="{ path: '/catalog', query: { category: 'Батончики' } }"
+							class="menu__column-title">Батончики</NuxtLink>
 					</div>
 
 					<div class="menu__stocks">
-						<NuxtLink class="menu__stocks-item">
-							<NuxtImg src="/images/stocks_1.jpg" alt="stocks" />
-						</NuxtLink>
-
-						<NuxtLink class="menu__stocks-item">
-							<NuxtImg src="/images/stocks_2.jpg" alt="stocks" />
+						<NuxtLink :to="'/stocks/' + stock.alias" class="menu__stocks-item" v-for="stock in stocks"
+							:key="stock.id" :style="{
+								backgroundImage: `url(${config.public.apiUrl + stock.tvFields.stock_image
+									})`,
+							}">
+							<div class="stocks__item-date">{{ stock.tvFields.stock_date }}</div>
+							<h3 class="h3">{{ stock.title }}</h3>
 						</NuxtLink>
 					</div>
 				</div>
@@ -219,12 +243,17 @@ const openSearchModal = () => {
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>CTM</span>
+								<NuxtLink to="/ctm"><span>CTM</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
 								<NuxtLink to="/contacts"><span>Контакты</span>
+									<NuxtIcon name="arrow-right" />
+								</NuxtLink>
+							</li>
+							<li class="header__menu-item">
+								<NuxtLink to="/delivery-and-payment"><span>Оплата</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
@@ -582,6 +611,23 @@ const openSearchModal = () => {
 	transition: $transition;
 	padding: 24px 0;
 
+	.menu__brands {
+		&-title {
+			font-size: auto-clamp(28px, 44px);
+			margin-bottom: auto-clamp(20px, 24px);
+			color: $color-accent;
+			font-weight: bold;
+		}
+
+		.link {
+			font-size: auto-clamp(24px, 32px);
+			color: $color-primary;
+			margin-bottom: 12px;
+			display: inline-block;
+			font-weight: bold;
+		}
+	}
+
 	&.menu-mobile {
 		height: 100vh;
 	}
@@ -610,6 +656,35 @@ const openSearchModal = () => {
 	.menu__stocks {
 		@include flex(column, center, flex-start);
 		gap: 8px;
+
+
+		&-item {
+			@include flex(column, space-between, flex-start);
+			width: auto-clamp(300px, 400px);
+			height: auto-clamp(140px, 164px);
+			padding: 22px;
+			position: relative;
+			background-size: cover;
+			background-position: top;
+			background-repeat: no-repeat;
+			overflow: hidden;
+			color: $color-white;
+		}
+
+		.stocks__item-date {
+			@include flex(row, center, center);
+			padding: 12px 22px;
+			font-size: auto-clamp(12px, 20px);
+			background-color: $color-red;
+			width: fit-content;
+			font-weight: 700;
+		}
+
+		.h3 {
+			font-size: auto-clamp(16px, 24px);
+			width: fit-content;
+			padding-top: 24px;
+		}
 	}
 }
 </style>

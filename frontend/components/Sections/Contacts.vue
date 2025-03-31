@@ -1,6 +1,6 @@
 <script setup lang="ts">
-
-
+import { useSiteSettings } from '~/composables/useSiteSettings'
+const settings = useSiteSettings()
 </script>
 
 <template>
@@ -9,17 +9,23 @@
             <div class="contacts">
                 <div class="contacts__info">
                     <div class="contacts__links">
-                        <NuxtLink to="mailto:info@bloomit.ru" class="contacts__link contacts__link-email">
-                            info@bloomit.ru
-                        </NuxtLink>
-                        <NuxtLink to="tel:+7 945 998-99-65" class="contacts__link contacts__link-phone">
-                            +7 945 998-99-65
-                        </NuxtLink>
+                        <a :href="'mailto:' + settings.email" class="contacts__link contacts__link-email">
+                            {{ settings.email }}
+                        </a>
+                        <a :href="'tel:' + settings.phone" class="contacts__link contacts__link-phone">
+                            <span>{{ settings.phone }}</span>
+                        </a>
                     </div>
                     <div class="contacts__social">
-                        <NuxtLink to="" class="link">telegram</NuxtLink>
-                        <NuxtLink to="" class="link">whatsapp</NuxtLink>
-                        <NuxtLink to="" class="link">vk</NuxtLink>
+                        <NuxtLink :to="settings.telegram" target="_blank" class=" link">
+                            telegram
+                        </NuxtLink>
+                        <NuxtLink :to="settings.whatsapp" target="_blank" class=" link">
+                            whatsapp
+                        </NuxtLink>
+                        <NuxtLink :to="settings.vk" target="_blank" class=" link">
+                            vk
+                        </NuxtLink>
                     </div>
                 </div>
 
@@ -29,13 +35,12 @@
                     <div class="contacts__bottom">
                         <div class="contacts__item contacts__item-address">
                             <h3 class="h3">Адрес</h3>
-                            <span>Ермолаевский переулок, 22-26с1, Москва, 123001</span>
+                            <span>{{ settings.address }}</span>
                         </div>
 
                         <div class="contacts__item contacts__item-time">
                             <h3 class="h3">Режим работы</h3>
-                            <span>пн-пт 9:00 — 18:00</span>
-                            <span>сб-вс 10:00 — 16:00</span>
+                            <span v-html="settings.time"></span>
                         </div>
                     </div>
                 </div>
@@ -50,6 +55,10 @@
     border-top: 2px solid $color-border;
     gap: 42px;
 
+    @media screen and (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+
     &>div {
         padding-top: 42px;
     }
@@ -57,6 +66,10 @@
     .contacts__info {
         @include flex(column, flex-start, flex-start);
         gap: auto-clamp(22px, 72px);
+
+        @media screen and (max-width: 768px) {
+            width: 100%;
+        }
 
         .contacts__links {
             @include flex(column, flex-start, flex-start);
@@ -78,6 +91,9 @@
     .contacts__map {
         position: relative;
 
+        @media screen and (max-width: 768px) {
+            width: 100%;
+        }
 
         &::before {
             content: '';
@@ -96,6 +112,10 @@
         display: flex;
         margin-top: 24px;
         gap: 12px;
+
+        @media screen and (max-width: 768px) {
+            flex-direction: column;
+        }
 
         .contacts__item {
             background-color: $color-light;

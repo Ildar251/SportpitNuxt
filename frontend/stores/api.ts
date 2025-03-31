@@ -7,6 +7,8 @@ interface Page {
 	title: string
 	alias: string
 	sections: string
+	description?: string
+	tvFields?: Record<string, any>
 }
 
 interface Section {
@@ -48,6 +50,7 @@ export const useApiStore = defineStore('api', {
 		stocks: [] as Stocks[],
 		loading: false,
 		error: null as string | null,
+		siteSettings: {} as Record<string, any>,
 		selectedBrands: [] as string[], // Выбранные бренды
 		selectedCategories: [] as string[], // Выбранные категории
 		currentBrand: null as string | null, // Текущий бренд (для страницы бренда)
@@ -71,10 +74,22 @@ export const useApiStore = defineStore('api', {
 		async fetchPages() {
 			this.loading = true
 			try {
-				const response = await axios.get<Page[]>(
-					'https://test.top-nnov.ru/api/pages'
-				)
+				const response = await axios.get<Page[]>('https://test.top-nnov.ru/api/pages')
 				this.pages = response.data
+
+				// Сохраняем tvFields главной страницы в siteSettings
+				const contacts = this.pages.find(page => page.alias === 'contacts')
+				if (contacts && contacts.tvFields) {
+					this.siteSettings = {
+						telegram: contacts.tvFields.telegram || '',
+						vk: contacts.tvFields.vk || '',
+						email: contacts.tvFields.email || '',
+						phone: contacts.tvFields.phone || '',
+						whatsapp: contacts.tvFields.whatsapp || '',
+						address: contacts.tvFields.address || '',
+						time: contacts.tvFields.time || '',
+					}
+				}
 			} catch (err) {
 				this.error = 'Ошибка загрузки страниц'
 			} finally {
@@ -204,5 +219,7 @@ export const useApiStore = defineStore('api', {
 		getStockByAlias: state => (alias: string) => {
 			return state.stocks.find(stock => stock.alias === alias)
 		},
+
+		getSiteSettings: state => state.siteSettings,
 	},
 })

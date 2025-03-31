@@ -5,8 +5,6 @@ import { useFavoriteStore } from '@/stores/favoritesStore'
 const cartStore = useCartStore()
 const favoriteStore = useFavoriteStore()
 
-import type { Taste } from '@/types/product'
-
 const props = defineProps<{
 	product: {
 		id: number
@@ -16,9 +14,9 @@ const props = defineProps<{
 		parent: number
 		category: string | null
 		alias: string
-		price?: string // Изменено на string для соответствия API
+		price?: string
 		brand?: string
-		taste?: Taste[]
+		taste?: string // Теперь строка, а не массив
 		sticker?: string
 		image?: string
 		volume?: string
@@ -26,12 +24,13 @@ const props = defineProps<{
 }>()
 
 const product = props.product
-
 const config = useRuntimeConfig()
 const isHovered = ref(false)
 
 const stickers = computed(() => (product.sticker ? product.sticker.split('||') : []))
 const volume = computed(() => (product.volume ? product.volume.split('||') : []))
+
+// Индекс активного объёма
 const activeIndex = ref(0)
 
 const onVolumeClick = (index: number) => {
@@ -42,10 +41,11 @@ const addToCart = () => {
 	cartStore.addToCart({
 		id: product.id,
 		title: product.title,
-		price: product.price ? parseFloat(product.price) : 0, // Приводим строку к числу
+		price: product.price ? parseFloat(product.price) : 0,
 		image: product.image,
 		volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
 		quantity: 1,
+		taste: product.taste, // Добавляем вкус в данные корзины
 	})
 }
 
@@ -53,13 +53,12 @@ const toggleFavorite = () => {
 	favoriteStore.toggleFavorite({
 		id: product.id,
 		title: product.title,
-		price: product.price ? parseFloat(product.price) : 0, // Приводим строку к числу
+		price: product.price ? parseFloat(product.price) : 0,
 		image: product.image,
 		volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
+		taste: product.taste, // Добавляем вкус в данные избранного
 	})
-	console.log(favoriteStore.isFavorite(product.id))
 }
-const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкуса')
 </script>
 
 <template>
@@ -77,9 +76,8 @@ const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкус�
 				</div>
 			</Transition>
 			<Transition name="fade">
-				<div :class="'card__favorite favorite' +
-					(favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')
-					" @click.prevent.stop="toggleFavorite">
+				<div :class="'card__favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+					@click.prevent.stop="toggleFavorite">
 					<NuxtIcon name="favorites" />
 				</div>
 			</Transition>
@@ -89,15 +87,14 @@ const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкус�
 		<div class="card__content">
 			<div class="card__brand">{{ product.brand || 'Товар' }}</div>
 			<h3 class="card__title">{{ product.title }}</h3>
-			<div class="card__taste">{{ firstTaste }}</div>
+			<div class="card__taste">{{ product.taste || 'Без вкуса' }}</div>
 			<span class="card__price">{{ product.price ? `${product.price} ₽` : 'Цена не указана' }}</span>
 			<Transition name="fade">
 				<div class="card__hovered" v-if="isHovered">
 					<div class="card__volume">
-						<div :class="'card__volume--item' +
-							(index === activeIndex ? ' card__volume--active' : '')
-							" v-for="(volume, index) in volume" :key="index" @click="onVolumeClick(index)">
-							{{ volume }} мл
+						<div :class="'card__volume--item' + (index === activeIndex ? ' card__volume--active' : '')"
+							v-for="(vol, index) in volume" :key="index" @click="onVolumeClick(index)">
+							{{ vol }} мл
 						</div>
 					</div>
 					<div class="button-wrapper">
@@ -107,7 +104,6 @@ const firstTaste = computed(() => product.taste?.[0]?.taste || 'Без вкус�
 								<span class="span-text">В корзину</span>
 								<NuxtIcon name="plus" />
 							</button>
-
 							<button v-else class="btn delete-from-cart"
 								@click.prevent.stop="cartStore.removeFromCart(product.id)">
 								<NuxtIcon name="delete" />

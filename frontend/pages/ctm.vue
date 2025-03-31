@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePage } from '~/composables/usePage'
-const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('contacts')
-
+// Получаем данные страницы
+const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('ctm')
 
 useHead({
   title: pageTitle,
@@ -16,7 +16,7 @@ useHead({
 
 <template>
   <main>
-    <component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
-      :page="page" />
+    <component v-for="section in sections" :is="sectionMap[section]" :page="page" :key="section"
+      :data="sectionsData[section]" />
   </main>
 </template>

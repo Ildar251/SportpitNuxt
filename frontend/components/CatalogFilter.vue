@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useApiStore } from '~/stores/api'
 
 const route = useRoute()
+const router = useRouter()
 const apiStore = useApiStore()
 
 // Проверяем, находимся ли мы на странице бренда
@@ -27,6 +28,15 @@ const isCategoriesOpen = ref(false)
 const applyFilters = () => {
     apiStore.setSelectedBrands(selectedBrands.value)
     apiStore.setSelectedCategories(selectedCategories.value)
+
+    // Обновляем query-параметр в URL
+    router.push({
+        path: route.path,
+        query: {
+            ...route.query,
+            category: selectedCategories.value.length > 0 ? selectedCategories.value[0] : undefined,
+        },
+    })
 }
 
 // Функция для переключения состояния dropdown
@@ -37,6 +47,33 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
         isCategoriesOpen.value = !isCategoriesOpen.value
     }
 }
+
+// Загружаем фильтры из query-параметров при монтировании
+onMounted(() => {
+    // Загружаем продукты, если они ещё не загружены
+    if (!apiStore.products.length) {
+        apiStore.fetchProducts()
+    }
+
+    // Считываем query-параметр category
+    const categoryFromQuery = route.query.category
+    if (typeof categoryFromQuery === 'string' && uniqueCategories.value.includes(categoryFromQuery)) {
+        selectedCategories.value = [categoryFromQuery]
+        isCategoriesOpen.value = true // Открываем dropdown категорий
+        applyFilters() // Применяем фильтр
+    }
+})
+
+// Синхронизируем query-параметр с выбранными категориями
+watch(selectedCategories, (newCategories) => {
+    router.push({
+        path: route.path,
+        query: {
+            ...route.query,
+            category: newCategories.length > 0 ? newCategories[0] : undefined,
+        },
+    })
+})
 </script>
 
 <template>
@@ -46,9 +83,7 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
         <!-- Показываем фильтр по брендам только если мы НЕ на странице бренда -->
         <div v-if="!isBrandPage" class="catalog-filter__wrapper">
             <div class="catalog-filter__item-head" @click="toggleDropdown('brands')">
-                <h3 class="catalog-filter__item-title">
-                    Бренд
-                </h3>
+                <h3 class="catalog-filter__item-title">Бренд</h3>
                 <div :class="'icon' + (isBrandsOpen ? ' is-active' : '')"></div>
             </div>
             <Transition name="dropdown">
@@ -65,9 +100,7 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
 
         <div class="catalog-filter__item">
             <div class="catalog-filter__item-head" @click="toggleDropdown('categories')">
-                <h3 class="catalog-filter__item-title">
-                    Категория
-                </h3>
+                <h3 class="catalog-filter__item-title">Категория</h3>
                 <div :class="'icon' + (isCategoriesOpen ? ' is-active' : '')"></div>
             </div>
             <Transition name="dropdown">
@@ -84,7 +117,6 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
         </div>
     </div>
 </template>
-
 <style scoped lang="scss">
 .catalog-filter {
     margin-bottom: 20px;

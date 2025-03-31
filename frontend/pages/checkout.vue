@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 
@@ -9,11 +9,28 @@ import { toast } from 'vue3-toastify'
 interface ApiResponse {
 	success: boolean
 	message: string
-	order?: any // Опционально, если сервер возвращает данные заказа
+	order?: any
+}
+
+interface PromoCode {
+	MIGX_id: string
+	promo: string
+	discount: string
+	minOrder?: string
+	expires?: string
 }
 
 import { usePage } from '~/composables/usePage'
-const { sections, sectionMap, sectionsData, page } = usePage('checkout')
+const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('checkout')
+useHead({
+	title: pageTitle,
+	meta: [
+		{ name: 'description', content: pageDescription },
+		{ property: 'og:title', content: pageTitle },
+		{ property: 'og:description', content: pageDescription },
+		{ property: 'og:type', content: 'website' },
+	],
+})
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
@@ -40,15 +57,88 @@ const deliveryOptions = [
 ]
 const deliveryOptionsActive = ref(deliveryOptions[0].id)
 
-// Обработчик отправки заказа// Обработчик отправки заказа
+// Реактивные переменные для промокода
+const promoCodeInput = ref<string>('')
+const appliedPromoCode = ref<string | null>(null)
+const discount = ref<number>(0)
+const promoError = ref<string | null>(null)
+
+// Доступные промокоды (берём из page.tvFields.promo)
+const availablePromoCodes = computed<PromoCode[]>(() => {
+	if (page.value?.tvFields?.promo) {
+		try {
+			return JSON.parse(page.value.tvFields.promo)
+		} catch (err) {
+			console.error('Ошибка парсинга промокодов:', err)
+			return []
+		}
+	}
+	return []
+})
+
+// Итоговая сумма с учётом скидки
+const finalPrice = computed(() => {
+	const total = cartStore.totalPrice
+	if (discount.value > 0) {
+		const discountAmount = total * (discount.value / 100)
+		return Math.max(0, total - discountAmount)
+	}
+	return total
+})
+
+// Функция применения промокода
+const applyPromoCode = () => {
+	const code = promoCodeInput.value.trim().toLowerCase()
+	if (!code) {
+		promoError.value = 'Введите промокод'
+		return
+	}
+
+	const promo = availablePromoCodes.value.find(p => p.promo.toLowerCase() === code)
+	if (!promo) {
+		toast.error(`Промокод недействителен`)
+		return
+	}
+
+	// Проверка минимальной суммы заказа
+	const minOrder = promo.minOrder ? parseFloat(promo.minOrder) : 0
+	if (minOrder > 0 && cartStore.totalPrice < minOrder) {
+		toast.error(`Минимальная сумма заказа для этого промокода — ${minOrder} ₽. Текущая сумма: ${cartStore.totalPrice} ₽`)
+		return
+	}
+
+	// Проверка срока действия
+	if (promo.expires) {
+		const expirationDate = new Date(promo.expires)
+		const currentDate = new Date()
+		if (currentDate > expirationDate) {
+			promoError.value = 'Срок действия промокода истёк'
+			return
+		}
+	}
+
+	// Применяем промокод
+	appliedPromoCode.value = promo.promo
+	discount.value = parseFloat(promo.discount)
+	promoError.value = null
+	toast.success(`Промокод ${promo.promo} применён! Скидка ${promo.discount}%`, { autoClose: 3000 })
+}
+
+// Функция сброса промокода
+const resetPromoCode = () => {
+	promoCodeInput.value = ''
+	appliedPromoCode.value = null
+	discount.value = 0
+	promoError.value = null
+}
+
+// Обработчик отправки заказа
 const submitOrder = async () => {
 	try {
 		const paymentMethodLabel =
-			paymentOptions.find(option => option.id === paymentOptionsActive.value)
-				?.label || paymentOptionsActive.value
+			paymentOptions.find(option => option.id === paymentOptionsActive.value)?.label || paymentOptionsActive.value
 		const deliveryMethodLabel =
-			deliveryOptions.find(option => option.id === deliveryOptionsActive.value)
-				?.label || deliveryOptionsActive.value
+			deliveryOptions.find(option => option.id === deliveryOptionsActive.value)?.label || deliveryOptionsActive.value
 
 		const orderData = {
 			user: {
@@ -58,6 +148,9 @@ const submitOrder = async () => {
 			},
 			items: cartStore.items,
 			totalPrice: cartStore.totalPrice,
+			finalPrice: finalPrice.value, // Итоговая сумма с учётом скидки
+			promoCode: appliedPromoCode.value, // Добавляем промокод
+			discount: discount.value, // Добавляем размер скидки
 			paymentMethod: paymentMethodLabel,
 			deliveryMethod: deliveryMethodLabel,
 			createdAt: new Date().toISOString(),
@@ -77,9 +170,10 @@ const submitOrder = async () => {
 		)
 
 		if (response.success) {
-			// Начисляем бонусы перед очисткой корзины
-			await authStore.addLoyaltyPoints(cartStore.totalPrice)
+			// Начисляем бонусы на основе итоговой суммы (finalPrice)
+			await authStore.addLoyaltyPoints(finalPrice.value)
 			cartStore.clearCart()
+			resetPromoCode() // Сбрасываем промокод после успешного заказа
 			toast.success('Заказ успешно оформлен!', { autoClose: 3000 })
 			router.push({ path: '/lk', query: { tab: 'order-history' } })
 		} else {
@@ -96,13 +190,8 @@ const submitOrder = async () => {
 
 <template>
 	<main>
-		<component
-			v-for="section in sections"
-			:is="sectionMap[section]"
-			:key="section"
-			:data="sectionsData[section]"
-			:page="page"
-		/>
+		<component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
+			:page="page" />
 		<section class="section section-checkout">
 			<div class="container checkout">
 				<div class="checkout__item personal-data">
@@ -125,22 +214,12 @@ const submitOrder = async () => {
 					<h2 class="h2">Состав заказа</h2>
 					<div v-if="cartStore.items.length === 0">Корзина пуста</div>
 					<div v-else class="checkout__item-info items-list">
-						<div
-							v-for="item in cartStore.items"
-							:key="item.id"
-							class="order-item"
-						>
+						<div v-for="item in cartStore.items" :key="item.id" class="order-item">
 							<div class="item-wrap">
-								<NuxtImg
-									:src="
-										item.image
-											? `${config.public.apiUrl}${item.image}`
-											: '/placeholder.png'
-									"
-									:alt="item.title || 'Товар'"
-									class="item-image"
-									height="120"
-								/>
+								<NuxtImg :src="item.image
+									? `${config.public.apiUrl}${item.image}`
+									: '/placeholder.png'
+									" :alt="item.title || 'Товар'" class="item-image" height="120" />
 								<div class="item-quantity">
 									{{ item.quantity }}
 								</div>
@@ -156,11 +235,7 @@ const submitOrder = async () => {
 				<div class="checkout__item payment-method">
 					<h2 class="h2">Способ оплаты</h2>
 					<div class="checkout__item-info options">
-						<UiTabs
-							:tabsClass="'tabs-payment'"
-							:tabs="paymentOptions"
-							v-model="paymentOptionsActive"
-						/>
+						<UiTabs :tabsClass="'tabs-payment'" :tabs="paymentOptions" v-model="paymentOptionsActive" />
 					</div>
 				</div>
 
@@ -168,11 +243,7 @@ const submitOrder = async () => {
 				<div class="checkout__item delivery-method">
 					<h2 class="h2">Способ доставки</h2>
 					<div class="checkout__item-info options">
-						<UiTabs
-							:tabs-class="'tabs-delivery'"
-							:tabs="deliveryOptions"
-							v-model="deliveryOptionsActive"
-						/>
+						<UiTabs :tabs-class="'tabs-delivery'" :tabs="deliveryOptions" v-model="deliveryOptionsActive" />
 						<Transition name="fade">
 							<div v-if="deliveryOptionsActive === 'pickup'" class="pickup">
 								<div class="info">
@@ -211,6 +282,15 @@ const submitOrder = async () => {
 				</div>
 
 				<div class="checkout__footer">
+					<div class="cart-promo">
+						<span>Применить промокод:</span>
+						<div class="cart-promo__input">
+							<input v-model="promoCodeInput" type="text" placeholder="Промокод" class="input"
+								:disabled="!!appliedPromoCode" @keyup.enter="applyPromoCode" />
+							<button v-if="!appliedPromoCode" @click="applyPromoCode">Применить</button>
+							<button v-else @click="resetPromoCode">Отменить</button>
+						</div>
+					</div>
 					<div class="warning">
 						<NuxtIcon name="warning" />
 						<div class="span">
@@ -219,7 +299,12 @@ const submitOrder = async () => {
 					</div>
 					<div class="total__info">
 						<span class="total__text">Итого:</span>
-						<span class="total__price">{{ cartStore.totalPrice }} ₽</span>
+						<span class="total__price">
+							{{ finalPrice }} ₽
+							<Transition name="fade">
+								<span v-if="discount" class="original-price">{{ cartStore.totalPrice }} ₽</span>
+							</Transition>
+						</span>
 					</div>
 					<button class="btn btn--fill" @click="submitOrder">
 						<span>Оформить заказ</span>
@@ -231,20 +316,59 @@ const submitOrder = async () => {
 </template>
 
 <style scoped lang="scss">
+.cart-promo {
+	@include flex(column, flex-start, flex-start);
+
+	span {
+		font-size: 16px;
+		color: $color-gray;
+		font-weight: bold;
+		margin-left: 42px;
+	}
+
+	&__input {
+		width: 100%;
+		padding: 26px 42px;
+		font-size: auto-clamp(16px, 20px);
+		border: none;
+		outline: none;
+		transition: border-color 0.3s ease, box-shadow 0.3s ease;
+		background-color: #fcfcfc;
+		color: inherit;
+
+		input {
+			border: none;
+			background-color: #fcfcfc;
+			font-weight: 700;
+			color: $color-primary;
+		}
+
+		button {
+			font-size: 18px;
+		}
+	}
+}
+
+
 .checkout {
 	.checkout__item {
 		display: grid;
-		grid-template-columns: 400px 1fr;
+		grid-template-columns: auto-clamp(280px, 400px) 1fr;
 		gap: 42px;
 		border-top: 2px solid $color-border;
 
+		@media screen and (max-width: 768px) {
+			grid-template-columns: 1fr;
+			gap: 10px;
+		}
+
 		&:not(:first-of-type) {
-			margin-top: 100px;
+			margin-top: auto-clamp(40px, 100px);
 		}
 
 		.h2 {
-			font-size: 42px;
-			padding-top: 42px;
+			font-size: auto-clamp(28px, 42px);
+			padding-top: auto-clamp(28px, 42px);
 			position: relative;
 
 			&::after {
@@ -256,11 +380,15 @@ const submitOrder = async () => {
 				position: absolute;
 				top: 0;
 				right: 0;
+
+				@media screen and (max-width: 768px) {
+					display: none;
+				}
 			}
 		}
 
 		&-info {
-			padding-top: 42px;
+			padding-top: auto-clamp(28px, 42px);
 		}
 	}
 
@@ -330,7 +458,7 @@ const submitOrder = async () => {
 		}
 
 		.h4 {
-			font-size: auto-clamp(24px, 32px);
+			font-size: auto-clamp(20px, 32px);
 			color: $color-gray;
 		}
 
@@ -342,7 +470,8 @@ const submitOrder = async () => {
 	.checkout__footer {
 		font-size: 1.2rem;
 		@include flex(row, flex-end, center);
-		gap: auto-clamp(40px, 120px);
+		flex-wrap: wrap;
+		gap: 20px auto-clamp(40px, 100px);
 		margin-top: 72px;
 
 		.btn {
@@ -372,6 +501,14 @@ const submitOrder = async () => {
 	.total__price {
 		font-weight: bold;
 		font-size: auto-clamp(24px, 50px);
+
+		@include flex(column, flex-end, flex-end);
+
+		.original-price {
+			font-size: 20px;
+			color: $color-gray;
+			text-decoration: line-through;
+		}
 	}
 }
 </style>

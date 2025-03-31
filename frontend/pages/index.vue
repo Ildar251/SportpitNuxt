@@ -1,28 +1,16 @@
 <script setup lang="ts">
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { nextTick, onMounted, onUpdated } from 'vue'
-
-gsap.registerPlugin(ScrollTrigger)
-
 import { usePage } from '~/composables/usePage'
-const { sections, sectionMap, sectionsData } = usePage('index')
+// Получаем данные страницы
+const { sections, sectionMap, sectionsData, pageTitle, pageDescription } = usePage('index')
 
-// Функция для обновления ScrollTrigger
-const refreshScrollTrigger = async () => {
-  await nextTick() // Ждём рендеринг DOM
-  console.log('Обновляем ScrollTrigger...')
-  ScrollTrigger.refresh()
-}
-
-onMounted(async () => {
-  await nextTick()
-  refreshScrollTrigger()
-})
-
-onUpdated(() => {
-  // Если компоненты или данные обновились, пересчитываем позиции
-  refreshScrollTrigger()
+useHead({
+  title: pageTitle,
+  meta: [
+    { name: 'description', content: pageDescription },
+    { property: 'og:title', content: pageTitle },
+    { property: 'og:description', content: pageDescription },
+    { property: 'og:type', content: 'website' },
+  ],
 })
 </script>
 
