@@ -16,8 +16,11 @@ const text_block = computed(() => {
 <template>
 	<section class="section section-text">
 		<div class="container">
-			<div :class="'text-block' + (item.MIGX_id % 2 === 0 ? ' reverse' : '')" v-for="item in text_block"
-				:key="item.MIGX_id">
+			<div
+				:class="'text-block' + (item.MIGX_id % 2 === 0 ? ' reverse' : '')"
+				v-for="item in text_block"
+				:key="item.MIGX_id"
+			>
 				<div class="column">
 					<h2 class="h2" v-if="item.title">{{ item.title }}</h2>
 					<div class="text" v-html="item.text"></div>
@@ -31,12 +34,33 @@ const text_block = computed(() => {
 	</section>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .h2 {
 	margin-bottom: auto-clamp(24px, 42px);
 	font-size: auto-clamp(24px, 50px);
 }
 
+.privacy-policy {
+	padding: 2rem 0;
+
+	.text {
+		color: $color-primary;
+
+		h2 {
+			margin-top: 2rem;
+			margin-bottom: 1rem;
+		}
+
+		p {
+			margin-bottom: 1rem;
+			line-height: 1.6;
+		}
+
+		a {
+			text-decoration: underline;
+		}
+	}
+}
 .text {
 	color: $color-gray;
 	line-height: 1.4;

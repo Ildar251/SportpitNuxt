@@ -21,7 +21,8 @@ interface PromoCode {
 }
 
 import { usePage } from '~/composables/usePage'
-const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('checkout')
+const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } =
+	usePage('checkout')
 useHead({
 	title: pageTitle,
 	meta: [
@@ -41,6 +42,14 @@ const config = useRuntimeConfig()
 if (!authStore.isAuthenticated) {
 	router.push('/login')
 }
+
+// Реактивные переменные для личных данных, изначально берём из профиля
+const userSurname = ref<string>(authStore.user?.surname || '')
+const userName = ref<string>(authStore.user?.name || '')
+const userEmail = ref<string>(authStore.user?.email || '')
+const userPhone = ref<string>(authStore.user?.phone || '')
+const company = ref<string>('')
+const orderComment = ref<string>('') // Добавляем переменную для комментария
 
 // Реактивные переменные для выбора способа оплаты и доставки
 const paymentOptions = [
@@ -94,7 +103,9 @@ const applyPromoCode = () => {
 		return
 	}
 
-	const promo = availablePromoCodes.value.find(p => p.promo.toLowerCase() === code)
+	const promo = availablePromoCodes.value.find(
+		p => p.promo.toLowerCase() === code
+	)
 	if (!promo) {
 		toast.error(`Промокод недействителен`)
 		return
@@ -103,7 +114,9 @@ const applyPromoCode = () => {
 	// Проверка минимальной суммы заказа
 	const minOrder = promo.minOrder ? parseFloat(promo.minOrder) : 0
 	if (minOrder > 0 && cartStore.totalPrice < minOrder) {
-		toast.error(`Минимальная сумма заказа для этого промокода — ${minOrder} ₽. Текущая сумма: ${cartStore.totalPrice} ₽`)
+		toast.error(
+			`Минимальная сумма заказа для этого промокода — ${minOrder} ₽. Текущая сумма: ${cartStore.totalPrice} ₽`
+		)
 		return
 	}
 
@@ -121,7 +134,9 @@ const applyPromoCode = () => {
 	appliedPromoCode.value = promo.promo
 	discount.value = parseFloat(promo.discount)
 	promoError.value = null
-	toast.success(`Промокод ${promo.promo} применён! Скидка ${promo.discount}%`, { autoClose: 3000 })
+	toast.success(`Промокод ${promo.promo} применён! Скидка ${promo.discount}%`, {
+		autoClose: 3000,
+	})
 }
 
 // Функция сброса промокода
@@ -134,23 +149,55 @@ const resetPromoCode = () => {
 
 // Обработчик отправки заказа
 const submitOrder = async () => {
+	// Валидация полей
+	if (!userSurname.value.trim()) {
+		toast.error('Пожалуйста, укажите вашу фамилию', { autoClose: 3000 })
+		return
+	}
+	if (!userName.value.trim()) {
+		toast.error('Пожалуйста, укажите ваше имя', { autoClose: 3000 })
+		return
+	}
+	if (
+		!userEmail.value.trim() ||
+		!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail.value)
+	) {
+		toast.error('Пожалуйста, укажите корректный email', { autoClose: 3000 })
+		return
+	}
+	if (!userPhone.value.trim() || !/^\+?\d{10,15}$/.test(userPhone.value)) {
+		toast.error('Пожалуйста, укажите корректный номер телефона', {
+			autoClose: 3000,
+		})
+		return
+	}
+	if (!company.value.trim()) {
+		toast.error('Пожалуйста, укажите название компании', { autoClose: 3000 })
+		return
+	}
+
 	try {
 		const paymentMethodLabel =
-			paymentOptions.find(option => option.id === paymentOptionsActive.value)?.label || paymentOptionsActive.value
+			paymentOptions.find(option => option.id === paymentOptionsActive.value)
+				?.label || paymentOptionsActive.value
 		const deliveryMethodLabel =
-			deliveryOptions.find(option => option.id === deliveryOptionsActive.value)?.label || deliveryOptionsActive.value
+			deliveryOptions.find(option => option.id === deliveryOptionsActive.value)
+				?.label || deliveryOptionsActive.value
 
 		const orderData = {
 			user: {
-				name: authStore.user?.name,
-				email: authStore.user?.email,
-				phone: authStore.user?.phone,
+				surname: userSurname.value, // Добавляем фамилию
+				name: userName.value,
+				email: userEmail.value,
+				phone: userPhone.value,
+				company: company.value, // Добавляем компанию
 			},
+			comment: orderComment.value, // Добавляем комментарий
 			items: cartStore.items,
 			totalPrice: cartStore.totalPrice,
-			finalPrice: finalPrice.value, // Итоговая сумма с учётом скидки
-			promoCode: appliedPromoCode.value, // Добавляем промокод
-			discount: discount.value, // Добавляем размер скидки
+			finalPrice: finalPrice.value,
+			promoCode: appliedPromoCode.value,
+			discount: discount.value,
 			paymentMethod: paymentMethodLabel,
 			deliveryMethod: deliveryMethodLabel,
 			createdAt: new Date().toISOString(),
@@ -170,10 +217,9 @@ const submitOrder = async () => {
 		)
 
 		if (response.success) {
-			// Начисляем бонусы на основе итоговой суммы (finalPrice)
 			await authStore.addLoyaltyPoints(finalPrice.value)
 			cartStore.clearCart()
-			resetPromoCode() // Сбрасываем промокод после успешного заказа
+			resetPromoCode()
 			toast.success('Заказ успешно оформлен!', { autoClose: 3000 })
 			router.push({ path: '/lk', query: { tab: 'order-history' } })
 		} else {
@@ -187,26 +233,86 @@ const submitOrder = async () => {
 	}
 }
 </script>
-
 <template>
 	<main>
-		<component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
-			:page="page" />
+		<component
+			v-for="section in sections"
+			:is="sectionMap[section]"
+			:key="section"
+			:data="sectionsData[section]"
+			:page="page"
+		/>
 		<section class="section section-checkout">
 			<div class="container checkout">
 				<div class="checkout__item personal-data">
 					<h2 class="h2">Личные данные</h2>
-					<div v-if="authStore.user" class="checkout__item-info">
-						<p>
-							<strong>Имя:</strong> {{ authStore.user.name || 'Не указано' }}
-						</p>
-						<p>
-							<strong>Email:</strong> {{ authStore.user.email || 'Не указано' }}
-						</p>
-						<p>
-							<strong>Телефон:</strong>
-							{{ authStore.user.phone || 'Не указано' }}
-						</p>
+					<div class="checkout__item-info">
+						<div class="form-group">
+							<label for="surname">Фамилия:</label>
+							<input
+								id="surname"
+								v-model="userSurname"
+								type="text"
+								class="input"
+								placeholder="Введите вашу фамилию"
+								required
+							/>
+						</div>
+						<div class="form-group">
+							<label for="name">Имя:</label>
+							<input
+								id="name"
+								v-model="userName"
+								type="text"
+								class="input"
+								placeholder="Введите ваше имя"
+								required
+							/>
+						</div>
+						<div class="form-group">
+							<label for="email">Email:</label>
+							<input
+								id="email"
+								v-model="userEmail"
+								type="email"
+								class="input"
+								placeholder="Введите ваш email"
+								required
+							/>
+						</div>
+						<div class="form-group">
+							<label for="phone">Телефон:</label>
+							<input
+								id="phone"
+								v-model="userPhone"
+								type="tel"
+								class="input"
+								placeholder="Введите ваш телефон"
+								required
+							/>
+						</div>
+						<div class="form-group">
+							<label for="company">Компания:</label>
+							<input
+								id="company"
+								v-model="company"
+								type="text"
+								class="input"
+								placeholder="Введите название компании"
+								required
+							/>
+						</div>
+						<div class="form-group">
+							<label for="comment">Комментарий к заказу:</label>
+							<textarea
+								id="comment"
+								v-model="orderComment"
+								class="textarea"
+								placeholder="Введите ваш комментарий (необязательно)"
+								rows="4"
+								maxlength="500"
+							></textarea>
+						</div>
 					</div>
 				</div>
 
@@ -214,12 +320,22 @@ const submitOrder = async () => {
 					<h2 class="h2">Состав заказа</h2>
 					<div v-if="cartStore.items.length === 0">Корзина пуста</div>
 					<div v-else class="checkout__item-info items-list">
-						<div v-for="item in cartStore.items" :key="item.id" class="order-item">
+						<div
+							v-for="item in cartStore.items"
+							:key="item.id"
+							class="order-item"
+						>
 							<div class="item-wrap">
-								<NuxtImg :src="item.image
-									? `${config.public.apiUrl}${item.image}`
-									: '/placeholder.png'
-									" :alt="item.title || 'Товар'" class="item-image" height="120" />
+								<NuxtImg
+									:src="
+										item.image
+											? `${config.public.apiUrl}${item.image}`
+											: '/placeholder.png'
+									"
+									:alt="item.title || 'Товар'"
+									class="item-image"
+									height="120"
+								/>
 								<div class="item-quantity">
 									{{ item.quantity }}
 								</div>
@@ -235,7 +351,11 @@ const submitOrder = async () => {
 				<div class="checkout__item payment-method">
 					<h2 class="h2">Способ оплаты</h2>
 					<div class="checkout__item-info options">
-						<UiTabs :tabsClass="'tabs-payment'" :tabs="paymentOptions" v-model="paymentOptionsActive" />
+						<UiTabs
+							:tabsClass="'tabs-payment'"
+							:tabs="paymentOptions"
+							v-model="paymentOptionsActive"
+						/>
 					</div>
 				</div>
 
@@ -243,7 +363,11 @@ const submitOrder = async () => {
 				<div class="checkout__item delivery-method">
 					<h2 class="h2">Способ доставки</h2>
 					<div class="checkout__item-info options">
-						<UiTabs :tabs-class="'tabs-delivery'" :tabs="deliveryOptions" v-model="deliveryOptionsActive" />
+						<UiTabs
+							:tabs-class="'tabs-delivery'"
+							:tabs="deliveryOptions"
+							v-model="deliveryOptionsActive"
+						/>
 						<Transition name="fade">
 							<div v-if="deliveryOptionsActive === 'pickup'" class="pickup">
 								<div class="info">
@@ -285,9 +409,17 @@ const submitOrder = async () => {
 					<div class="cart-promo">
 						<span>Применить промокод:</span>
 						<div class="cart-promo__input">
-							<input v-model="promoCodeInput" type="text" placeholder="Промокод" class="input"
-								:disabled="!!appliedPromoCode" @keyup.enter="applyPromoCode" />
-							<button v-if="!appliedPromoCode" @click="applyPromoCode">Применить</button>
+							<input
+								v-model="promoCodeInput"
+								type="text"
+								placeholder="Промокод"
+								class="input"
+								:disabled="!!appliedPromoCode"
+								@keyup.enter="applyPromoCode"
+							/>
+							<button v-if="!appliedPromoCode" @click="applyPromoCode">
+								Применить
+							</button>
 							<button v-else @click="resetPromoCode">Отменить</button>
 						</div>
 					</div>
@@ -302,7 +434,9 @@ const submitOrder = async () => {
 						<span class="total__price">
 							{{ finalPrice }} ₽
 							<Transition name="fade">
-								<span v-if="discount" class="original-price">{{ cartStore.totalPrice }} ₽</span>
+								<span v-if="discount" class="original-price">
+									{{ cartStore.totalPrice }} ₽
+								</span>
 							</Transition>
 						</span>
 					</div>
@@ -316,6 +450,38 @@ const submitOrder = async () => {
 </template>
 
 <style scoped lang="scss">
+.form-group {
+	margin-bottom: 1rem;
+}
+
+.form-group label {
+	display: block;
+	color: $color-gray;
+	padding: 0px 42px;
+	margin-bottom: 0.5rem;
+}
+
+.form-group input {
+	width: 100%;
+	padding: 26px 42px;
+	border: none;
+	background-color: #fcfcfc;
+	transition: $transition;
+}
+
+.form-group textarea {
+	width: 100%;
+	padding: 26px 42px;
+	border: none;
+	background-color: #fcfcfc;
+	transition: $transition;
+}
+
+.form-group input:focus {
+	outline: none;
+	border-color: $color-accent;
+	box-shadow: 0 0 5px $color-accent;
+}
 .cart-promo {
 	@include flex(column, flex-start, flex-start);
 
@@ -348,7 +514,6 @@ const submitOrder = async () => {
 		}
 	}
 }
-
 
 .checkout {
 	.checkout__item {
