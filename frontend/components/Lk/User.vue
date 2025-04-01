@@ -22,15 +22,13 @@ interface DaDataResponse {
 const authStore = useAuthStore()
 const config = useRuntimeConfig()
 
-// Состояние для названия компании
+
 const company = ref<string | null>(null)
 const isLoadingCompany = ref(false)
 const companyError = ref<string | null>(null)
 
-// API-ключ DaData из переменных окружения
-const dadataToken = config.public.dadataApiKey || 'a62e56a6bd46f35c62df5d8580a9747edef5fda4'
+const dadataToken = config.public.dadataApiKey
 
-// Функция для получения названия компании по ИНН
 const fetchCompanyByInn = async (inn: string) => {
     if (!inn) return
 

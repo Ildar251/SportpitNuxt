@@ -1,9 +1,22 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/authStore'
+import { useCartStore } from '@/stores/cartStore'
+import { useFavoriteStore } from '@/stores/favoritesStore'
+import type { Swiper as SwiperType } from 'swiper'
+import 'swiper/css'
+import 'swiper/css/effect-coverflow'
+import { EffectCoverflow } from 'swiper/modules'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const favoriteStore = useFavoriteStore()
+
 const cartItemCount = computed(() => cartStore.items.length)
 const favoriteItemCount = computed(() => favoriteStore.items.length)
+
 interface Order {
 	order_id: string
 	items: Array<{
@@ -26,22 +39,35 @@ const tabs = computed(() => [
 	{ id: 'personal-data', label: 'Личные данные', icon: 'user' },
 	{ id: 'order-history', label: 'История покупок', icon: 'history' },
 	{ id: 'loyalty-program', label: 'Программа лояльности', icon: 'loyalty' },
-	{
-		id: 'favorites',
-		label: `Избранное (${favoriteItemCount.value})`,
-		icon: 'favorites-head',
-	},
+	{ id: 'favorites', label: `Избранное (${favoriteItemCount.value})`, icon: 'favorites-head' },
 	{ id: 'cart', label: `Корзина (${cartItemCount.value})`, icon: 'cart' },
 	{ id: 'support', label: 'Поддержка', icon: 'support' },
 ])
 
-// Активная вкладка и высота контента
+// Активная вкладка
 const route = useRoute()
 const activeTab = ref(route.query.tab === 'cart' ? 'cart' : tabs.value[0].id)
-const contentRef = ref<HTMLElement | null>(null)
-const currentHeight = ref('auto')
 const isInitialized = ref(false)
 
+// Ref для экземпляра Swiper
+const swiperRef = ref<SwiperType | null>(null)
+
+// При изменении слайда обновляем activeTab
+const onSlideChange = (swiper: SwiperType) => {
+	const activeIndex = swiper.activeIndex
+	activeTab.value = tabs.value[activeIndex].id
+}
+
+// Функция для переключения слайда при клике на таб
+const setActiveTab = (tabId: string) => {
+	const index = tabs.value.findIndex(tab => tab.id === tabId)
+	if (index !== -1 && swiperRef.value) {
+		swiperRef.value.slideTo(index)
+		activeTab.value = tabId
+	}
+}
+
+// Загрузка заказов
 const orders = ref<Order[]>([])
 const isLoadingOrders = ref(false)
 
@@ -70,23 +96,18 @@ const fetchOrders = async () => {
 	}
 }
 
-const updateHeight = async () => {
-	await nextTick()
-	if (contentRef.value) {
-		currentHeight.value = `${contentRef.value.scrollHeight}px`
-	}
-}
-
 onMounted(async () => {
 	await authStore.initialize()
 	isInitialized.value = true
+	if (activeTab.value === 'order-history' && authStore.apiToken) {
+		await fetchOrders()
+	}
 })
 
-watch(activeTab, async newTab => {
+watch(activeTab, async (newTab) => {
 	if (newTab === 'order-history' && authStore.apiToken) {
 		await fetchOrders()
 	}
-	updateHeight()
 })
 </script>
 
@@ -94,57 +115,57 @@ watch(activeTab, async newTab => {
 	<section class="section section-lk" v-if="isInitialized">
 		<div class="container">
 			<div class="lk">
-				<UiTabs v-model="activeTab" :tabsClass="'tabs-lk'" :tabs="tabs" />
-
-				<div ref="contentRef" class="lk__content" :style="{ height: currentHeight }">
-					<Transition name="slide-right-absolute">
-						<div v-if="activeTab === 'personal-data'" class="lk__content-item active">
+				<UiTabs v-model="activeTab" :tabsClass="'tabs-lk'" :tabs="tabs" @update:model-value="setActiveTab" />
+				<Swiper :modules="[EffectCoverflow]" :slidesPerView="1" :spaceBetween="20" :effect="'coverflow'"
+					:coverflowEffect="{ rotate: 50, stretch: 0, depth: 100, modifier: 1, slideShadows: false }"
+					class="lk__content" :auto-height="true" @swiper="(swiper) => (swiperRef = swiper)"
+					@slideChange="onSlideChange" :speed="700">
+					<SwiperSlide>
+						<div class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">Личные данные</h2>
 								<LkUser />
 							</div>
 						</div>
-
-						<div v-else-if="activeTab === 'order-history'" class="lk__content-item">
+					</SwiperSlide>
+					<SwiperSlide>
+						<div class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">История покупок</h2>
-								<LkOrders :orders="orders" :is-loading="isLoadingOrders"
-									@height-changed="updateHeight" />
+								<LkOrders :orders="orders" :is-loading="isLoadingOrders" />
 							</div>
 						</div>
-
-						<div v-else-if="activeTab === 'loyalty-program'" class="lk__content-item">
+					</SwiperSlide>
+					<SwiperSlide>
+						<div class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">Программа лояльности</h2>
 								<LkLoyalty />
 							</div>
 						</div>
-
-						<div v-else-if="activeTab === 'favorites'" class="lk__content-item">
-							<div>
-								<h2 class="h2">Избранное</h2>
-								<LkFavorites />
-							</div>
+					</SwiperSlide>
+					<SwiperSlide>
+						<div class="lk__content-item">
+							<h2 class="h2">Избранное</h2>
+							<LkFavorites />
 						</div>
-
-						<div v-else-if="activeTab === 'cart'" class="lk__content-item">
-							<div>
-								<h2 class="h2">Корзина</h2>
-								<LkCart />
-							</div>
+					</SwiperSlide>
+					<SwiperSlide>
+						<div class="lk__content-item">
+							<h2 class="h2">Корзина</h2>
+							<LkCart />
 						</div>
-
-						<div v-else-if="activeTab === 'support'" class="lk__content-item">
-							<div>
-								<h2 class="h2">Поддержка</h2>
-								<LkHelp />
-							</div>
+					</SwiperSlide>
+					<SwiperSlide>
+						<div class="lk__content-item">
+							<h2 class="h2">Поддержка</h2>
+							<LkHelp />
 						</div>
-					</Transition>
-				</div>
+					</SwiperSlide>
+				</Swiper>
 			</div>
 		</div>
 	</section>
@@ -187,22 +208,5 @@ watch(activeTab, async newTab => {
 			}
 		}
 	}
-}
-
-.slide-right-absolute-enter-active,
-.slide-right-absolute-leave-active {
-	transition: transform 0.4s ease-in-out, opacity 0.3s ease;
-	position: absolute;
-}
-
-.slide-right-absolute-enter-from {
-	transform: translateX(100%);
-	opacity: 0;
-	position: absolute;
-}
-
-.slide-right-absolute-leave-to {
-	transform: translateX(100%);
-	opacity: 0;
 }
 </style>

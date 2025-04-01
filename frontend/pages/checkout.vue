@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '@/stores/cartStore'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
+import { useYandexMaps } from '~/composables/useYandexMaps'
+
+
+import type { Swiper as SwiperType } from 'swiper'
+import 'swiper/css'
+import 'swiper/css/effect-fade'
+import { EffectFade } from 'swiper/modules'
+import { Swiper, SwiperSlide } from 'swiper/vue'
 
 // Интерфейс для ответа сервера
 interface ApiResponse {
@@ -20,9 +28,20 @@ interface PromoCode {
 	expires?: string
 }
 
+interface DaDataResponse {
+	suggestions: DaDataSuggestion[]
+}
+
+interface DaDataSuggestion {
+	value: string
+	data: {
+		geo_lat: string
+		geo_lon: string
+	}
+}
+
 import { usePage } from '~/composables/usePage'
-const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } =
-	usePage('checkout')
+const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('checkout')
 useHead({
 	title: pageTitle,
 	meta: [
@@ -38,6 +57,27 @@ const cartStore = useCartStore()
 const router = useRouter()
 const config = useRuntimeConfig()
 
+// Загружаем Yandex Maps API
+const { loadYandexMaps, isYandexMapsLoaded } = useYandexMaps()
+onMounted(() => {
+	const apiKey = config.public.yandexMapsApiKey
+	if (!apiKey) {
+		console.error('Yandex Maps API ключ не найден в конфигурации!')
+		toast.error('Ошибка: API-ключ для карты отсутствует. Обратитесь к администратору.', { autoClose: 3000 })
+		return
+	}
+
+	const yandexMapsPromise = loadYandexMaps(apiKey)
+	if (yandexMapsPromise) {
+		yandexMapsPromise.catch((error) => {
+			console.error('Не удалось загрузить Yandex Maps API:', error)
+			toast.error('Ошибка загрузки карты. Попробуйте обновить страницу.', { autoClose: 3000 })
+		})
+	} else {
+		console.error('Yandex Maps API уже загружен или не может быть загружен.')
+	}
+})
+
 // Проверяем авторизацию
 if (!authStore.isAuthenticated) {
 	router.push('/login')
@@ -49,7 +89,7 @@ const userName = ref<string>(authStore.user?.name || '')
 const userEmail = ref<string>(authStore.user?.email || '')
 const userPhone = ref<string>(authStore.user?.phone || '')
 const company = ref<string>('')
-const orderComment = ref<string>('') // Добавляем переменную для комментария
+const orderComment = ref<string>('')
 
 // Реактивные переменные для выбора способа оплаты и доставки
 const paymentOptions = [
@@ -65,6 +105,70 @@ const deliveryOptions = [
 	{ id: 'transport', label: 'Транспортные компании' },
 ]
 const deliveryOptionsActive = ref(deliveryOptions[0].id)
+
+const swiperRef = ref<SwiperType | null>(null)
+
+// При изменении слайда обновляем deliveryOptionsActive
+const onSlideChange = (swiper: SwiperType) => {
+	const activeIndex = swiper.activeIndex
+	deliveryOptionsActive.value = deliveryOptions[activeIndex].id
+}
+
+// Функция для переключения слайда при клике на таб
+const setActiveTab = (tabId: string) => {
+	const index = deliveryOptions.findIndex(tab => tab.id === tabId)
+	if (index !== -1 && swiperRef.value) {
+		swiperRef.value.slideTo(index)
+		deliveryOptionsActive.value = tabId
+	}
+}
+
+// Реактивные переменные для адреса доставки
+const deliveryAddress = ref<string>('')
+const addressSuggestions = ref<DaDataSuggestion[]>([])
+
+// Функция для получения подсказок адреса через DaData
+const fetchAddressSuggestions = async (query: string) => {
+	if (!query) {
+		addressSuggestions.value = []
+		return
+	}
+
+	try {
+		const response = await $fetch<DaDataResponse>('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+				'Authorization': `Token ${config.public.dadataApiKey}`,
+			},
+			body: {
+				query,
+				count: 5,
+			},
+		})
+		addressSuggestions.value = response.suggestions || []
+	} catch (error) {
+		console.error('Ошибка при получении подсказок адреса:', error)
+		addressSuggestions.value = []
+	}
+}
+
+// Обработчик выбора адреса
+const selectAddress = (suggestion: DaDataSuggestion) => {
+	deliveryAddress.value = suggestion.value
+	const lat = parseFloat(suggestion.data.geo_lat)
+	const lon = parseFloat(suggestion.data.geo_lon)
+	if (lat && lon) {
+		deliveryCoordinates.value = [lat, lon]
+	}
+	addressSuggestions.value = []
+}
+
+// Следим за изменениями в поле адреса
+watch(deliveryAddress, (newValue) => {
+	fetchAddressSuggestions(newValue)
+})
 
 // Реактивные переменные для промокода
 const promoCodeInput = ref<string>('')
@@ -103,24 +207,18 @@ const applyPromoCode = () => {
 		return
 	}
 
-	const promo = availablePromoCodes.value.find(
-		p => p.promo.toLowerCase() === code
-	)
+	const promo = availablePromoCodes.value.find(p => p.promo.toLowerCase() === code)
 	if (!promo) {
 		toast.error(`Промокод недействителен`)
 		return
 	}
 
-	// Проверка минимальной суммы заказа
 	const minOrder = promo.minOrder ? parseFloat(promo.minOrder) : 0
 	if (minOrder > 0 && cartStore.totalPrice < minOrder) {
-		toast.error(
-			`Минимальная сумма заказа для этого промокода — ${minOrder} ₽. Текущая сумма: ${cartStore.totalPrice} ₽`
-		)
+		toast.error(`Минимальная сумма заказа для этого промокода — ${minOrder} ₽. Текущая сумма: ${cartStore.totalPrice} ₽`)
 		return
 	}
 
-	// Проверка срока действия
 	if (promo.expires) {
 		const expirationDate = new Date(promo.expires)
 		const currentDate = new Date()
@@ -130,7 +228,6 @@ const applyPromoCode = () => {
 		}
 	}
 
-	// Применяем промокод
 	appliedPromoCode.value = promo.promo
 	discount.value = parseFloat(promo.discount)
 	promoError.value = null
@@ -149,7 +246,6 @@ const resetPromoCode = () => {
 
 // Обработчик отправки заказа
 const submitOrder = async () => {
-	// Валидация полей
 	if (!userSurname.value.trim()) {
 		toast.error('Пожалуйста, укажите вашу фамилию', { autoClose: 3000 })
 		return
@@ -158,41 +254,38 @@ const submitOrder = async () => {
 		toast.error('Пожалуйста, укажите ваше имя', { autoClose: 3000 })
 		return
 	}
-	if (
-		!userEmail.value.trim() ||
-		!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail.value)
-	) {
+	if (!userEmail.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail.value)) {
 		toast.error('Пожалуйста, укажите корректный email', { autoClose: 3000 })
 		return
 	}
 	if (!userPhone.value.trim() || !/^\+?\d{10,15}$/.test(userPhone.value)) {
-		toast.error('Пожалуйста, укажите корректный номер телефона', {
-			autoClose: 3000,
-		})
+		toast.error('Пожалуйста, укажите корректный номер телефона', { autoClose: 3000 })
 		return
 	}
 	if (!company.value.trim()) {
 		toast.error('Пожалуйста, укажите название компании', { autoClose: 3000 })
 		return
 	}
+	if (deliveryOptionsActive.value === 'courier' && !deliveryAddress.value.trim()) {
+		toast.error('Пожалуйста, укажите адрес доставки', { autoClose: 3000 })
+		return
+	}
 
 	try {
 		const paymentMethodLabel =
-			paymentOptions.find(option => option.id === paymentOptionsActive.value)
-				?.label || paymentOptionsActive.value
+			paymentOptions.find(option => option.id === paymentOptionsActive.value)?.label || paymentOptionsActive.value
 		const deliveryMethodLabel =
-			deliveryOptions.find(option => option.id === deliveryOptionsActive.value)
-				?.label || deliveryOptionsActive.value
+			deliveryOptions.find(option => option.id === deliveryOptionsActive.value)?.label || deliveryOptionsActive.value
 
 		const orderData = {
 			user: {
-				surname: userSurname.value, // Добавляем фамилию
+				surname: userSurname.value,
 				name: userName.value,
 				email: userEmail.value,
 				phone: userPhone.value,
-				company: company.value, // Добавляем компанию
+				company: company.value,
 			},
-			comment: orderComment.value, // Добавляем комментарий
+			comment: orderComment.value,
 			items: cartStore.items,
 			totalPrice: cartStore.totalPrice,
 			finalPrice: finalPrice.value,
@@ -200,6 +293,8 @@ const submitOrder = async () => {
 			discount: discount.value,
 			paymentMethod: paymentMethodLabel,
 			deliveryMethod: deliveryMethodLabel,
+			deliveryAddress: deliveryOptionsActive.value === 'courier' ? deliveryAddress.value : undefined,
+			deliveryCoordinates: deliveryOptionsActive.value === 'courier' ? deliveryCoordinates.value : undefined,
 			createdAt: new Date().toISOString(),
 		}
 		console.log('Отправляемые данные:', orderData)
@@ -232,7 +327,30 @@ const submitOrder = async () => {
 		toast.error('Произошла ошибка. Попробуйте снова', { autoClose: 3000 })
 	}
 }
+
+const deliveryCoordinates = ref<[number, number] | null>(null)
+
+// Определяем mapCenter с явным типом
+const mapCenter = computed<[number, number]>(() => {
+	if (deliveryOptionsActive.value === 'pickup') {
+		return [55.766030, 37.594396]
+	} else if (deliveryOptionsActive.value === 'courier') {
+		return deliveryCoordinates.value || [55.7558, 37.6173]
+	}
+	return [55.7558, 37.6173] // дефолтное значение
+})
+
+// Определяем mapPlacemark с явным типом
+const mapPlacemark = computed<[number, number] | undefined>(() => {
+	if (deliveryOptionsActive.value === 'pickup') {
+		return [55.766030, 37.594396]
+	} else if (deliveryOptionsActive.value === 'courier') {
+		return deliveryCoordinates.value ?? undefined
+	}
+	return undefined
+})
 </script>
+
 <template>
 	<main>
 		<component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
@@ -282,10 +400,8 @@ const submitOrder = async () => {
 					<div v-else class="checkout__item-info items-list">
 						<div v-for="item in cartStore.items" :key="item.id" class="order-item">
 							<div class="item-wrap">
-								<NuxtImg :src="item.image
-										? `${config.public.apiUrl}${item.image}`
-										: '/placeholder.png'
-									" :alt="item.title || 'Товар'" class="item-image" height="120" />
+								<NuxtImg :src="item.image ? `${config.public.apiUrl}${item.image}` : '/placeholder.png'"
+									:alt="item.title || 'Товар'" class="item-image" height="120" />
 								<div class="item-quantity">
 									{{ item.quantity }}
 								</div>
@@ -309,41 +425,53 @@ const submitOrder = async () => {
 				<div class="checkout__item delivery-method">
 					<h2 class="h2">Способ доставки</h2>
 					<div class="checkout__item-info options">
-						<UiTabs :tabs-class="'tabs-delivery'" :tabs="deliveryOptions" v-model="deliveryOptionsActive" />
-						<Transition name="fade">
-							<div v-if="deliveryOptionsActive === 'pickup'" class="pickup">
-								<div class="info">
-									<span>Вы можете забрать заказ по адресу</span>
-									<h4 class="h4">
-										Ермолаевский переулок, 22-26с1, Москва, 123001
-									</h4>
+						<UiTabs :tabs-class="'tabs-delivery'" :tabs="deliveryOptions" v-model="deliveryOptionsActive"
+							@update:model-value="setActiveTab" />
+						<Swiper :modules="[EffectFade]" :slidesPerView="1" :spaceBetween="20" :effect="'fade'"
+							:fadeEffect="{ crossFade: true }" :auto-height="true" class="delivery-slider"
+							@swiper="(swiper) => (swiperRef = swiper)" @slideChange="onSlideChange" :speed="700">
+							<SwiperSlide>
+								<div class="pickup">
+									<div class="info">
+										<span>Вы можете забрать заказ по адресу</span>
+										<h4 class="h4">Ермолаевский переулок, 22-26с1, Москва, 123001</h4>
+									</div>
 								</div>
-								<YaMap />
-							</div>
-							<div v-else-if="deliveryOptionsActive === 'courier'">
-								<div class="info">
-									<span>Вы можете забрать заказ по адресу</span>
-									<h4 class="h4">
-										Ермолаевский переулок, 22-26с1, Москва, 123001
-									</h4>
+							</SwiperSlide>
+							<SwiperSlide>
+								<div class="courier">
+									<div class="info">
+										<span>Укажите Ваш адрес</span>
+										<div class="form-group">
+											<input v-model="deliveryAddress" type="text" class="input"
+												placeholder="Введите адрес доставки" required />
+											<ul v-if="addressSuggestions.length" class="suggestions">
+												<li v-for="suggestion in addressSuggestions" :key="suggestion.value"
+													@click="selectAddress(suggestion)">
+													{{ suggestion.value }}
+												</li>
+											</ul>
+										</div>
+									</div>
 								</div>
-								<YaMap />
-							</div>
-							<div v-else-if="deliveryOptionsActive === 'transport'">
-								<div class="info">
-									<span>Доставка по России:</span>
-									<p>
-										Стоимость доставки рассчитывается в зависимости от веса
-										товара и удаленности отправления. Если Вы не получили
-										извещение о посылке из отделения Почты России, сообщите
-										менеджеру магазина - выясним место нахождения посылки до
-										истечения срока хранения. Почта России хранит заказы 30
-										дней. Стоимость доставки рассчитывается в зависимости от
-										веса товара и удаленности отправления.
-									</p>
+							</SwiperSlide>
+							<SwiperSlide>
+								<div class="transport">
+									<div class="info">
+										<span>Доставка по России:</span>
+										<p>
+											Стоимость доставки рассчитывается в зависимости от веса товара и удаленности
+											отправления...
+										</p>
+									</div>
 								</div>
-							</div>
-						</Transition>
+							</SwiperSlide>
+						</Swiper>
+						<!-- Карта вне Swiper -->
+						<YaMap
+							v-if="isYandexMapsLoaded && (deliveryOptionsActive === 'pickup' || deliveryOptionsActive === 'courier')"
+							:center="mapCenter" :placemark="mapPlacemark" />
+						<div v-else-if="deliveryOptionsActive !== 'transport'">Загрузка карты...</div>
 					</div>
 				</div>
 
@@ -386,8 +514,47 @@ const submitOrder = async () => {
 </template>
 
 <style scoped lang="scss">
+.delivery-method {
+	.checkout__item-info {
+		max-width: 100%;
+		overflow: hidden;
+	}
+}
+
+
+
+.suggestions {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	z-index: 10;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	margin: 4px 0;
+	padding: 0;
+	list-style: none;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.suggestions li {
+	padding: 8px 12px;
+	cursor: pointer;
+	font-size: 14px;
+	color: #333;
+	transition: background 0.2s;
+}
+
+.suggestions li:hover {
+	background: #f5f5f5;
+}
+
 .form-group {
 	margin-bottom: 1rem;
+	position: relative;
 }
 
 .form-group label {
@@ -547,7 +714,6 @@ const submitOrder = async () => {
 	.info {
 		background-color: $color-light;
 		padding: 42px;
-
 		margin-bottom: 12px;
 
 		span {
