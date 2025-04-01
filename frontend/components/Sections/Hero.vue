@@ -73,6 +73,10 @@ onMounted(() => {
     background-image: url('@/assets/images/HeroImage-2.png');
     z-index: 2;
     background-position: right -50px bottom -50px;
+
+    @media screen and (max-width: 768px) {
+        background-size: 150%;
+    }
 }
 
 .layer3 {

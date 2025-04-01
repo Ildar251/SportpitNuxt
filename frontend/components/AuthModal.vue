@@ -157,16 +157,7 @@ const confirmRegistration = handleSubmit(async values => {
 	}
 
 	try {
-		console.log(
-			'Attempting to confirm email with code:',
-			values.confirmationCode
-		)
 		await authStore.confirmEmail(registeredEmail.value, values.confirmationCode)
-
-		toast.success('Email подтверждён! Теперь войдите в аккаунт.', {
-			autoClose: 3000,
-		})
-
 		// Переключаемся на авторизацию только при успешном подтверждении
 		authStep.value = 'login'
 		modalStore.close()
@@ -324,7 +315,7 @@ watch(
 	&.modal-auth {
 		background: $color-white;
 		color: $color-primary;
-		padding: auto-clamp(20px, 72px);
+		padding: auto-clamp(30px, 72px) auto-clamp(20px, 72px);
 		position: relative;
 		max-width: 1400px;
 		width: 90%;

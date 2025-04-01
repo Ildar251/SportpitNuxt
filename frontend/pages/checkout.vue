@@ -235,13 +235,8 @@ const submitOrder = async () => {
 </script>
 <template>
 	<main>
-		<component
-			v-for="section in sections"
-			:is="sectionMap[section]"
-			:key="section"
-			:data="sectionsData[section]"
-			:page="page"
-		/>
+		<component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
+			:page="page" />
 		<section class="section section-checkout">
 			<div class="container checkout">
 				<div class="checkout__item personal-data">
@@ -249,69 +244,34 @@ const submitOrder = async () => {
 					<div class="checkout__item-info">
 						<div class="form-group">
 							<label for="surname">Фамилия:</label>
-							<input
-								id="surname"
-								v-model="userSurname"
-								type="text"
-								class="input"
-								placeholder="Введите вашу фамилию"
-								required
-							/>
+							<input id="surname" v-model="userSurname" type="text" class="input"
+								placeholder="Введите вашу фамилию" required />
 						</div>
 						<div class="form-group">
 							<label for="name">Имя:</label>
-							<input
-								id="name"
-								v-model="userName"
-								type="text"
-								class="input"
-								placeholder="Введите ваше имя"
-								required
-							/>
+							<input id="name" v-model="userName" type="text" class="input" placeholder="Введите ваше имя"
+								required />
 						</div>
 						<div class="form-group">
 							<label for="email">Email:</label>
-							<input
-								id="email"
-								v-model="userEmail"
-								type="email"
-								class="input"
-								placeholder="Введите ваш email"
-								required
-							/>
+							<input id="email" v-model="userEmail" type="email" class="input"
+								placeholder="Введите ваш email" required />
 						</div>
 						<div class="form-group">
 							<label for="phone">Телефон:</label>
-							<input
-								id="phone"
-								v-model="userPhone"
-								type="tel"
-								class="input"
-								placeholder="Введите ваш телефон"
-								required
-							/>
+							<input id="phone" v-model="userPhone" type="tel" class="input"
+								placeholder="Введите ваш телефон" required />
 						</div>
 						<div class="form-group">
 							<label for="company">Компания:</label>
-							<input
-								id="company"
-								v-model="company"
-								type="text"
-								class="input"
-								placeholder="Введите название компании"
-								required
-							/>
+							<input id="company" v-model="company" type="text" class="input"
+								placeholder="Введите название компании" required />
 						</div>
 						<div class="form-group">
 							<label for="comment">Комментарий к заказу:</label>
-							<textarea
-								id="comment"
-								v-model="orderComment"
-								class="textarea"
-								placeholder="Введите ваш комментарий (необязательно)"
-								rows="4"
-								maxlength="500"
-							></textarea>
+							<textarea id="comment" v-model="orderComment" class="textarea"
+								placeholder="Введите ваш комментарий (необязательно)" rows="4"
+								maxlength="500"></textarea>
 						</div>
 					</div>
 				</div>
@@ -320,22 +280,12 @@ const submitOrder = async () => {
 					<h2 class="h2">Состав заказа</h2>
 					<div v-if="cartStore.items.length === 0">Корзина пуста</div>
 					<div v-else class="checkout__item-info items-list">
-						<div
-							v-for="item in cartStore.items"
-							:key="item.id"
-							class="order-item"
-						>
+						<div v-for="item in cartStore.items" :key="item.id" class="order-item">
 							<div class="item-wrap">
-								<NuxtImg
-									:src="
-										item.image
-											? `${config.public.apiUrl}${item.image}`
-											: '/placeholder.png'
-									"
-									:alt="item.title || 'Товар'"
-									class="item-image"
-									height="120"
-								/>
+								<NuxtImg :src="item.image
+										? `${config.public.apiUrl}${item.image}`
+										: '/placeholder.png'
+									" :alt="item.title || 'Товар'" class="item-image" height="120" />
 								<div class="item-quantity">
 									{{ item.quantity }}
 								</div>
@@ -351,11 +301,7 @@ const submitOrder = async () => {
 				<div class="checkout__item payment-method">
 					<h2 class="h2">Способ оплаты</h2>
 					<div class="checkout__item-info options">
-						<UiTabs
-							:tabsClass="'tabs-payment'"
-							:tabs="paymentOptions"
-							v-model="paymentOptionsActive"
-						/>
+						<UiTabs :tabsClass="'tabs-payment'" :tabs="paymentOptions" v-model="paymentOptionsActive" />
 					</div>
 				</div>
 
@@ -363,11 +309,7 @@ const submitOrder = async () => {
 				<div class="checkout__item delivery-method">
 					<h2 class="h2">Способ доставки</h2>
 					<div class="checkout__item-info options">
-						<UiTabs
-							:tabs-class="'tabs-delivery'"
-							:tabs="deliveryOptions"
-							v-model="deliveryOptionsActive"
-						/>
+						<UiTabs :tabs-class="'tabs-delivery'" :tabs="deliveryOptions" v-model="deliveryOptionsActive" />
 						<Transition name="fade">
 							<div v-if="deliveryOptionsActive === 'pickup'" class="pickup">
 								<div class="info">
@@ -409,14 +351,8 @@ const submitOrder = async () => {
 					<div class="cart-promo">
 						<span>Применить промокод:</span>
 						<div class="cart-promo__input">
-							<input
-								v-model="promoCodeInput"
-								type="text"
-								placeholder="Промокод"
-								class="input"
-								:disabled="!!appliedPromoCode"
-								@keyup.enter="applyPromoCode"
-							/>
+							<input v-model="promoCodeInput" type="text" placeholder="Промокод" class="input"
+								:disabled="!!appliedPromoCode" @keyup.enter="applyPromoCode" />
 							<button v-if="!appliedPromoCode" @click="applyPromoCode">
 								Применить
 							</button>
@@ -482,6 +418,7 @@ const submitOrder = async () => {
 	border-color: $color-accent;
 	box-shadow: 0 0 5px $color-accent;
 }
+
 .cart-promo {
 	@include flex(column, flex-start, flex-start);
 
@@ -501,6 +438,7 @@ const submitOrder = async () => {
 		transition: border-color 0.3s ease, box-shadow 0.3s ease;
 		background-color: #fcfcfc;
 		color: inherit;
+		@include flex(row, space-between, center);
 
 		input {
 			border: none;
