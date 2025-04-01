@@ -32,11 +32,11 @@ export default defineNuxtConfig({
 	plugins: ['~/plugins/auth.ts'],
 	image: {
 		provider: 'ipx',
-		domains: ['test.top-nnov.ru'], // Разрешённые внешние домены
+		domains: ['test.top-nnov.ru'],
+		dir: 'public/images',
 		ipx: {
-			// Убираем baseURL, чтобы ipx работал локально
 			modifiers: {
-				format: 'webp', // По умолчанию WebP
+				format: 'webp',
 			},
 		},
 	},
