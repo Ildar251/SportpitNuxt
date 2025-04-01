@@ -57,6 +57,7 @@ const toggleFavorite = () => {
 		image: product.image,
 		volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
 		taste: product.taste, // Добавляем вкус в данные избранного
+		alias: product.alias,
 	})
 }
 </script>
@@ -164,6 +165,9 @@ const toggleFavorite = () => {
 
 	.card__img {
 		max-height: 100%;
+		display: flex;
+		z-index: 1;
+		position: relative;
 	}
 
 	.card__volume {

@@ -18,7 +18,7 @@ const favoriteStore = useFavoriteStore()
                 content: '',
                 parent: 0,
                 category: null,
-                alias: `${product.id}`,
+                alias: product.alias || '',
             }" />
         </div>
     </div>

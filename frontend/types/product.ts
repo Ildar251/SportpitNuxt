@@ -15,6 +15,7 @@ export interface FavoriteProduct {
     image?: string
     volume?: number
     taste?: string
+    alias?: string
 }
 export interface DopCompound {
     MIGX_id: string
