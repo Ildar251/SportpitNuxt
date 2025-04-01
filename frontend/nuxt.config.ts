@@ -31,14 +31,13 @@ export default defineNuxtConfig({
 	},
 	plugins: ['~/plugins/auth.ts'],
 	image: {
-		provider: 'ipx',
 		domains: ['test.top-nnov.ru'],
 		dir: 'public',
-		ipx: {
+		provider: 'vercel',
+		vercel: {
 			modifiers: {
 				format: 'webp',
 			},
-
 		},
 	},
 })
