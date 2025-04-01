@@ -33,11 +33,12 @@ export default defineNuxtConfig({
 	image: {
 		provider: 'ipx',
 		domains: ['test.top-nnov.ru'],
-		dir: 'public/images',
+		dir: 'public',
 		ipx: {
 			modifiers: {
 				format: 'webp',
 			},
+
 		},
 	},
 })
