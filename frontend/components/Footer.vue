@@ -8,7 +8,7 @@ const settings = useSiteSettings()
 	<footer class="footer">
 		<div class="container">
 			<div class="footer__top">
-				<NuxtImg src="/images/logo_light.svg" alt="logo" width="260" />
+				<NuxtImg src="/images/logo_light.svg" alt="logo" sizes="200px  md:260px" />
 
 				<div class="footer__contacts">
 					<a :href="settings.telegram" class="footer__link">telegram</a>
@@ -76,24 +76,14 @@ const settings = useSiteSettings()
 					</ul>
 				</div>
 				<div class="footer__column">
-					<a
-						:href="'tel:' + settings.phone"
-						class="footer__phone footer__link"
-						>{{ settings.phone }}</a
-					>
-					<a
-						:href="'mailto:' + settings.email"
-						class="footer__email footer__link"
-						>{{ settings.email }}</a
-					>
+					<a :href="'tel:' + settings.phone" class="footer__phone footer__link">{{ settings.phone }}</a>
+					<a :href="'mailto:' + settings.email" class="footer__email footer__link">{{ settings.email }}</a>
 				</div>
 			</nav>
 
 			<div class="footer__bottom">
 				<div class="footer__bottom-left">
-					<NuxtLink to="/privacy-policy" class="footer__link"
-						>Политика конфиденциальности</NuxtLink
-					>
+					<NuxtLink to="/privacy-policy" class="footer__link">Политика конфиденциальности</NuxtLink>
 					<NuxtLink to="/sitemap" class="footer__link">Карта сайта</NuxtLink>
 				</div>
 
@@ -208,6 +198,7 @@ const settings = useSiteSettings()
 
 	.footer__contacts {
 		display: flex;
+		flex-wrap: wrap;
 		gap: auto-clamp(20px, 40px);
 
 		.footer__link {

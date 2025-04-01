@@ -9,7 +9,7 @@ const modalStore = useModalStore()
             <h4 class="h4">Для доступа к личному кабинету авторизуйтесь</h4>
         </div>
 
-        <div class="fill btn" @click.prevent="modalStore.open">
+        <div class="btn btn--fill" @click.prevent="modalStore.open">
             <NuxtIcon name="user" />
             <span>Авторизоваться</span>
         </div>
@@ -23,6 +23,10 @@ const modalStore = useModalStore()
     gap: 32px;
     background-color: #FCFCFC;
     padding: auto-clamp(16px, 42px);
+
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+    }
 
     .lk__noAuth-text {
         @include flex(row, flex-start, center);

@@ -96,16 +96,9 @@ watch(activeTab, async newTab => {
 			<div class="lk">
 				<UiTabs v-model="activeTab" :tabsClass="'tabs-lk'" :tabs="tabs" />
 
-				<div
-					ref="contentRef"
-					class="lk__content"
-					:style="{ height: currentHeight }"
-				>
+				<div ref="contentRef" class="lk__content" :style="{ height: currentHeight }">
 					<Transition name="slide-right-absolute">
-						<div
-							v-if="activeTab === 'personal-data'"
-							class="lk__content-item active"
-						>
+						<div v-if="activeTab === 'personal-data'" class="lk__content-item active">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">Личные данные</h2>
@@ -113,25 +106,16 @@ watch(activeTab, async newTab => {
 							</div>
 						</div>
 
-						<div
-							v-else-if="activeTab === 'order-history'"
-							class="lk__content-item"
-						>
+						<div v-else-if="activeTab === 'order-history'" class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">История покупок</h2>
-								<LkOrders
-									:orders="orders"
-									:is-loading="isLoadingOrders"
-									@height-changed="updateHeight"
-								/>
+								<LkOrders :orders="orders" :is-loading="isLoadingOrders"
+									@height-changed="updateHeight" />
 							</div>
 						</div>
 
-						<div
-							v-else-if="activeTab === 'loyalty-program'"
-							class="lk__content-item"
-						>
+						<div v-else-if="activeTab === 'loyalty-program'" class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
 							<div v-else>
 								<h2 class="h2">Программа лояльности</h2>
@@ -154,8 +138,7 @@ watch(activeTab, async newTab => {
 						</div>
 
 						<div v-else-if="activeTab === 'support'" class="lk__content-item">
-							<LkNoAuth v-if="!authStore.apiToken" />
-							<div v-else>
+							<div>
 								<h2 class="h2">Поддержка</h2>
 								<LkHelp />
 							</div>

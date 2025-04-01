@@ -17,6 +17,8 @@ import { useModalStore } from '~/stores/useModalStore'
 import VueEasyLightbox from 'vue-easy-lightbox'
 import 'vue-easy-lightbox/dist/external-css/vue-easy-lightbox.css' // Импортируем стили
 
+
+
 const modalStore = useModalStore()
 const route = useRoute()
 const router = useRouter()

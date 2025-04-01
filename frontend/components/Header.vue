@@ -130,7 +130,19 @@ const stocks = computed(() => apiStore.stocks)
 		<div class="container container__bottom">
 			<div class="header__logo">
 				<NuxtLink to="/">
-					<NuxtImg src="/images/logo.svg" alt="logo" />
+					<NuxtImg src="images/logo.svg" alt="logo" />
+				</NuxtLink>
+			</div>
+
+			<div class="header__items header__items-mobile">
+				<NuxtLink to="/lk?tab=favorites" class="header__favorites">
+					<NuxtIcon name="favorites-head" />
+					<span class="header__favorites-count" v-if="favoritesCount">{{ favoritesCount }}</span>
+				</NuxtLink>
+
+				<NuxtLink to="/lk?tab=cart" class="header__cart">
+					<NuxtIcon name="cart" />
+					<span class="header__cart-count" v-if="cartCount">{{ cartCount }}</span>
 				</NuxtLink>
 			</div>
 
@@ -223,42 +235,53 @@ const stocks = computed(() => apiStore.stocks)
 					<nav class="header__nav-mobile">
 						<ul class="header__menu">
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Бренды</span>
+								<NuxtLink to="/stocks" @click="mobileMenuStore.close"><span>Акции</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Акции</span>
+								<NuxtLink to="/about" @click="mobileMenuStore.close"><span>Компания</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Компания</span>
+								<NuxtLink to="/partners" @click="mobileMenuStore.close"><span>Партнёрам</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/catalog"><span>Партнёрам</span>
+								<NuxtLink to="/ctm" @click="mobileMenuStore.close"><span>CTM</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/ctm"><span>CTM</span>
+								<NuxtLink to="/delivery-and-payment" @click="mobileMenuStore.close"><span>Оплата</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
 							<li class="header__menu-item">
-								<NuxtLink to="/contacts"><span>Контакты</span>
+								<NuxtLink to="/contacts" @click="mobileMenuStore.close"><span>Контакты</span>
 									<NuxtIcon name="arrow-right" />
 								</NuxtLink>
 							</li>
-							<li class="header__menu-item">
-								<NuxtLink to="/delivery-and-payment"><span>Оплата</span>
-									<NuxtIcon name="arrow-right" />
-								</NuxtLink>
-							</li>
+
 						</ul>
 					</nav>
+
+					<div class="links">
+						<a :href="settings.telegram" class="link">telegram</a>
+						<a :href="settings.whatsapp" class="link">whatsapp</a>
+						<a :href="settings.vk" class="link">vk</a>
+					</div>
+
+					<a :href="'tel:' + settings.phone" class="header__link">
+						<NuxtIcon name="phone" />
+						<span>{{ settings.phone }}</span>
+					</a>
+
+					<a :href="'mailto:' + settings.email" class="header__link ">
+						{{ settings.email }}
+					</a>
 				</div>
 			</div>
 		</Transition>
@@ -274,7 +297,7 @@ const stocks = computed(() => apiStore.stocks)
 	z-index: 100;
 	white-space: nowrap;
 
-	@media screen and (max-width: 768px) {
+	@media screen and (max-width: 856px) {
 		top: 0;
 	}
 
@@ -314,7 +337,7 @@ const stocks = computed(() => apiStore.stocks)
 		}
 
 		&.header__top {
-			@media screen and (max-width: 768px) {
+			@media screen and (max-width: 856px) {
 				display: none;
 			}
 		}
@@ -367,6 +390,46 @@ const stocks = computed(() => apiStore.stocks)
 	.header__items {
 		display: flex;
 		font-size: auto-clamp(16px, 20px);
+		margin-right: 20px;
+
+		&.header__items-mobile {
+			display: none;
+
+			a {
+				padding: 10px;
+				font-size: 20px;
+				border: none !important;
+
+				.nuxt-icon {
+					font-size: 20px;
+				}
+			}
+
+			.header__favorites-count,
+			.header__cart-count {
+				width: 16px;
+				height: 16px;
+				font-size: 12px;
+				left: 24px;
+			}
+
+			@media screen and (max-width: 856px) {
+				display: flex;
+			}
+		}
+
+		@media screen and (max-width: 1024px) {
+			.header__lk {
+				.header__email {
+					text-overflow: ellipsis;
+					overflow: hidden;
+					white-space: nowrap;
+					max-width: 80px;
+				}
+
+			}
+		}
+
 
 		&>a {
 			display: flex;
@@ -417,7 +480,7 @@ const stocks = computed(() => apiStore.stocks)
 		@include flex(row, space-between, center);
 		flex: 1;
 
-		@media screen and (max-width: 768px) {
+		@media screen and (max-width: 856px) {
 			display: none;
 		}
 
@@ -456,16 +519,16 @@ const stocks = computed(() => apiStore.stocks)
 		.header__menu-item {
 			a {
 				@include flex(row, space-between, center);
-				font-size: 32px;
+				font-size: 28px;
 				font-weight: 700;
 				width: 100%;
 				border-bottom: 2px solid $color-border;
-				padding-bottom: 24px;
-				margin-bottom: 24px;
+				padding-bottom: 18px;
+				margin-bottom: 18px;
 			}
 
 			.nuxt-icon {
-				font-size: 21px;
+				font-size: 18px;
 				color: $color-accent;
 			}
 
@@ -485,7 +548,7 @@ const stocks = computed(() => apiStore.stocks)
 		&.burger_mobile {
 			display: none;
 
-			@media screen and (max-width: 768px) {
+			@media screen and (max-width: 856px) {
 				display: block;
 			}
 		}
@@ -593,7 +656,7 @@ const stocks = computed(() => apiStore.stocks)
 		padding: 0 auto-clamp(16px, 42px);
 		border-left: 2px solid $color-border;
 
-		@media screen and (max-width: 768px) {
+		@media screen and (max-width: 856px) {
 			display: none;
 		}
 	}
@@ -609,7 +672,10 @@ const stocks = computed(() => apiStore.stocks)
 	z-index: 100;
 	background-color: $color-white;
 	transition: $transition;
-	padding: 24px 0;
+	padding: 24px 0 90px;
+	overflow-x: hidden;
+	overflow-y: auto;
+
 
 	.menu__brands {
 		&-title {
@@ -629,11 +695,31 @@ const stocks = computed(() => apiStore.stocks)
 	}
 
 	&.menu-mobile {
-		height: 100vh;
+		height: calc(100svh - 60px);
 	}
 
 	.menu__container {
 		align-items: flex-start;
+		flex-direction: column;
+
+		.links {
+			@include flex(row, flex-start, center);
+			gap: 40px;
+			flex-wrap: wrap;
+
+			.link {
+				font-size: 22px;
+				color: $color-primary;
+			}
+
+
+		}
+
+		.header__link {
+			font-size: 22px;
+			color: $color-primary;
+			margin-top: 12px;
+		}
 	}
 
 	.menu__column {

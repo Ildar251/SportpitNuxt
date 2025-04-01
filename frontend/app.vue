@@ -14,6 +14,7 @@ onMounted(() => {
   favoriteStore.loadFavorites()
 })
 
+const mobileMenuStore = useMobileMenuStore()
 
 </script>
 
@@ -31,12 +32,12 @@ onMounted(() => {
 
     <div class="mobile-bar">
       <div class="mobile-bar__item">
-        <NuxtLink to="/">
+        <NuxtLink to="/" @click="mobileMenuStore.close">
           <NuxtIcon name="home" />
         </NuxtLink>
       </div>
       <div class="mobile-bar__item">
-        <NuxtLink to="/lk">
+        <NuxtLink to="/lk" @click="mobileMenuStore.close">
           <NuxtIcon name="lk" />
         </NuxtLink>
       </div>

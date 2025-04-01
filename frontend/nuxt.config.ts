@@ -6,6 +6,7 @@ export default defineNuxtConfig({
 		'nuxt-icons',
 		'@pinia/nuxt',
 		'@formkit/auto-animate/nuxt',
+		'@vueuse/motion/nuxt'
 	],
 
 	runtimeConfig: {

@@ -18,9 +18,11 @@ const settings = useSiteSettings()
 	color: $color-primary;
 	font-weight: bold;
 }
+
 .links {
 	@include flex(row, flex-start, center);
 	gap: 40px;
+	flex-wrap: wrap;
 
 	.link {
 		font-size: auto-clamp(22px, 32px);

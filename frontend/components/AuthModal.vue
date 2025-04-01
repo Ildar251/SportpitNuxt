@@ -407,12 +407,20 @@ watch(
 				grid-template-columns: repeat(2, 1fr);
 				gap: auto-clamp(24px, 42px);
 				margin-bottom: auto-clamp(24px, 42px);
+
+				@media screen and (max-width: 768px) {
+					grid-template-columns: 1fr;
+				}
 			}
 
 			.modal__bottom {
 				@include flex(row, space-between, center);
 				margin-top: auto;
 				gap: auto-clamp(24px, 42px);
+
+				@media screen and (max-width: 768px) {
+					flex-direction: column;
+				}
 			}
 		}
 	}

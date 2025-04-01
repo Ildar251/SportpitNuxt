@@ -165,11 +165,19 @@ watch(
 	background-color: #fcfcfc;
 	padding: 24px;
 
+	@media screen and (max-width: 375px) {
+		flex-direction: column;
+	}
+
 	.cart-item__image {
 		@include flex(row, center, center);
 		background-color: $color-light;
 		width: auto-clamp(120px, 196px);
 		height: auto-clamp(120px, 196px);
+
+		@media screen and (max-width: 375px) {
+			width: 100%;
+		}
 
 		img {
 			height: 80%;
