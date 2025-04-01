@@ -130,7 +130,7 @@ const stocks = computed(() => apiStore.stocks)
 		<div class="container container__bottom">
 			<div class="header__logo">
 				<NuxtLink to="/">
-					<NuxtImg src="images/logo.svg" alt="logo" />
+					<img src="/images/logo.svg" alt="logo" />
 				</NuxtLink>
 			</div>
 
