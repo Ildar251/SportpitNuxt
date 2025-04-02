@@ -29,6 +29,29 @@ const product = ref<ProductFull | null>(null)
 const relatedTastes = ref<ProductFull[]>([])
 const stickers = computed(() => (product.value?.sticker ? product.value.sticker.split('||') : []))
 
+// Установка мета-тегов
+useHead({
+	title: computed(() => product.value ? `${product.value.title}${product.value.taste ? ` - ${product.value.taste}` : ''}` : 'Продукт не найден'),
+	meta: [
+		{
+			name: 'description',
+			content: computed(() => product.value?.description || 'Описание товара отсутствует'),
+		},
+		{
+			property: 'og:title',
+			content: computed(() => product.value ? `${product.value.title}${product.value.taste ? ` - ${product.value.taste}` : ''}` : 'Продукт не найден'),
+		},
+		{
+			property: 'og:description',
+			content: computed(() => product.value?.description || 'Описание товара отсутствует'),
+		},
+		{
+			property: 'og:type',
+			content: 'product',
+		},
+	],
+})
+
 // Лайтбокс
 const lightboxVisible = ref(false)
 const lightboxIndex = ref(0)
@@ -95,9 +118,9 @@ const addToCart = () => {
 			price: product.value.price ? parseFloat(product.value.price) : 0,
 			image: product.value.image,
 			volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
-			quantity: minQuantity.value, // Устанавливаем минимальное количество при первом добавлении
+			quantity: minQuantity.value,
 			taste: product.value.taste,
-			minQuantity: minQuantity.value, // Передаем minQuantity в корзину
+			minQuantity: minQuantity.value,
 		})
 	}
 }
@@ -127,7 +150,7 @@ const toggleFavorite = () => {
 const increaseQuantity = () => {
 	if (product.value) {
 		const currentQuantity = cartStore.getQuantity(product.value.id)
-		cartStore.updateQuantity(product.value.id, currentQuantity + 1) // Шаг 1
+		cartStore.updateQuantity(product.value.id, currentQuantity + 1)
 	}
 }
 
@@ -135,9 +158,9 @@ const decreaseQuantity = () => {
 	if (product.value) {
 		const currentQuantity = cartStore.getQuantity(product.value.id)
 		if (currentQuantity > minQuantity.value) {
-			cartStore.updateQuantity(product.value.id, currentQuantity - 1) // Шаг 1
+			cartStore.updateQuantity(product.value.id, currentQuantity - 1)
 		} else {
-			removeFromCart() // Удаляем, если меньше или равно minQuantity
+			removeFromCart()
 		}
 	}
 }
@@ -321,7 +344,8 @@ const accordions = computed(() => [
 							512: { slidesPerView: 3 },
 							768: { slidesPerView: 4 },
 							1440: { slidesPerView: 6 },
-						}" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }" :speed="1000" class="taste-slider">
+						}" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }" :speed="1000"
+							class="taste-slider">
 							<SwiperSlide v-for="(taste, index) in tastes" :key="taste.MIGX_id" class="taste__item"
 								:class="{ 'taste__item--active': index === activeTasteIndex }"
 								@click="onTasteClick(index)">
@@ -426,14 +450,12 @@ const accordions = computed(() => [
 		</section>
 
 		<SectionsMb />
-
 		<SectionsBrands />
 
 		<VueEasyLightbox :visible="lightboxVisible" :imgs="lightboxImages" :index="lightboxIndex" @hide="hideLightbox"
 			:escDisabled="false" :scrollDisabled="true" :moveDisabled="false" />
 	</main>
 </template>
-
 <style lang="scss" scoped>
 @media screen and (max-width: 768px) {
 	.section-product {

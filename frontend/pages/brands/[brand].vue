@@ -9,19 +9,52 @@ const brandAlias = computed(() => route.params.brand as string)
 const config = useRuntimeConfig()
 const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('brands')
 
-useHead({
-  title: pageTitle,
-  meta: [
-    { name: 'description', content: pageDescription },
-    { property: 'og:title', content: pageTitle },
-    { property: 'og:description', content: pageDescription },
-    { property: 'og:type', content: 'website' },
-  ],
-})
-
 // Получаем бренд по alias
 const brand = computed(() => {
   return apiStore.brands.find((b) => b.alias === brandAlias.value)
+})
+
+// Установка мета-тегов с использованием данных бренда
+useHead({
+  title: computed(() => {
+    if (brand.value) {
+      return `${brand.value.title} - ${pageTitle.value || 'Бренды'}` // Например: "Red Bull - Бренды"
+    }
+    return 'Бренд не найден'
+  }),
+  meta: [
+    {
+      name: 'description',
+      content: computed(() => {
+        if (brand.value) {
+          return brand.value.description || pageDescription.value || 'Описание бренда отсутствует'
+        }
+        return 'Бренд не найден'
+      }),
+    },
+    {
+      property: 'og:title',
+      content: computed(() => {
+        if (brand.value) {
+          return `${brand.value.title} - ${pageTitle.value || 'Бренды'}`
+        }
+        return 'Бренд не найден'
+      }),
+    },
+    {
+      property: 'og:description',
+      content: computed(() => {
+        if (brand.value) {
+          return brand.value.description || pageDescription.value || 'Описание бренда отсутствует'
+        }
+        return 'Бренд не найден'
+      }),
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+  ],
 })
 
 // Подсчитываем количество продуктов для текущего бренда
@@ -30,7 +63,7 @@ const productsCount = computed(() => {
   return apiStore.products.filter((product) => product.brand === brand.value?.title).length
 })
 
-// 🚨 Если бренд не найден — выбрасываем 404
+// Если бренд не найден — выбрасываем 404
 watchEffect(() => {
   if (apiStore.brands.length && !brand.value) {
     throw createError({
