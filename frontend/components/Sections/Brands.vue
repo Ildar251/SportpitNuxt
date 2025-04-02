@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { motion } from "motion-v"
 import 'swiper/css'
 import 'swiper/css/pagination'
 import { Autoplay, Pagination } from 'swiper/modules'
@@ -20,7 +21,12 @@ const brands = computed(() => apiStore.brands)
 	<section class="section section-brands">
 		<div class="container line-top">
 			<div class="section__header">
-				<h2 class="h2">{{ data?.brands_title || 'Бренды' }}</h2>
+				<motion.div :initial="{ opacity: 0, x: -60, scale: 0.8 }" :whileInView="{ opacity: 1, x: 0, scale: 1 }"
+					:transition="{ duration: 0.6, ease: 'easeOut', delay: 0.2 }"
+					:viewport="{ once: true, margin: '0px 0px -100px 0px' }" :inViewOptions="{ once: true }">
+					<h2 class="h2">{{ data?.brands_title || 'Бренды' }}</h2>
+				</motion.div>
+
 
 				<NuxtLink to="/catalog" class="btn btn-more">
 					<span>Смотреть все</span>
@@ -37,12 +43,18 @@ const brands = computed(() => apiStore.brands)
 			}" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }"
 				:autoplay="{ delay: 2500, disableOnInteraction: false }" :speed="1000" class="brands-slider">
 				<SwiperSlide v-for="brand in brands" :key="brand.id">
-					<NuxtLink :to="`/brands/${brand.alias}`" class="brands__item">
-						<h3 class="h3 brands__title">{{ brand.title }}</h3>
-						<div class="brands__logo">
-							<NuxtImg :src="config.public.apiUrl + brand.tvFields.info_logo" :alt="brand.title" />
-						</div>
-					</NuxtLink>
+					<motion.div :initial="{ opacity: 0, y: -60, scale: 0.8 }"
+						:whileInView="{ opacity: 1, y: 0, scale: 1 }"
+						:transition="{ duration: 0.6, ease: 'easeOut', delay: 0.2 }"
+						:viewport="{ once: true, margin: '0px 0px -100px 0px' }" :inViewOptions="{ once: true }">
+						<NuxtLink :to="`/brands/${brand.alias}`" class="brands__item">
+							<h3 class="h3 brands__title">{{ brand.title }}</h3>
+							<div class="brands__logo">
+								<NuxtImg :src="config.public.apiUrl + brand.tvFields.info_logo" :alt="brand.title" />
+							</div>
+						</NuxtLink>
+					</motion.div>
+
 				</SwiperSlide>
 			</Swiper>
 		</div>

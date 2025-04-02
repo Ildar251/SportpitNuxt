@@ -47,61 +47,68 @@ const toggleFavorite = () => {
 		alias: product.alias,
 	})
 }
+
+import { motion } from "motion-v"
 </script>
 
 <template>
-	<NuxtLink :to="'/products/' + product.alias" :class="'card' + (isHovered ? ' card--hover' : '')"
-		@mouseover="isHovered = true" @mouseleave="isHovered = false">
-		<div class="card__image">
-			<Transition name="fade">
-				<div class="card__sticker" v-if="stickers">
-					<div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
-						<NuxtIcon name="new" v-if="sticker === 'new'" />
-						<NuxtIcon name="hit" v-if="sticker === 'hit'" />
-						<NuxtIcon name="hit" v-if="sticker === 'sale'" />
-						<span>{{ sticker }}</span>
-					</div>
-				</div>
-			</Transition>
-			<Transition name="fade">
-				<div :class="'card__favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
-					@click.prevent.stop="toggleFavorite">
-					<NuxtIcon name="favorites" />
-				</div>
-			</Transition>
-			<NuxtImg :src="config.public.apiUrl + (product.image || '/images/box.svg')" :alt="product.title"
-				loading="lazy" class="card__img" placeholder="/images/box.svg" />
-		</div>
-		<div class="card__content">
-			<div class="card__brand">{{ product.brand || 'Товар' }}</div>
-			<h3 class="card__title">{{ product.title }}</h3>
-			<div class="card__taste">{{ product.taste || 'Без вкуса' }}</div>
-			<span class="card__price">{{ product.price ? `${product.price} ₽` : 'Цена не указана' }}</span>
-			<Transition name="fade">
-				<div class="card__hovered" v-if="isHovered">
-					<div class="card__volume">
-						<div :class="'card__volume--item' + (index === activeIndex ? ' card__volume--active' : '')"
-							v-for="(vol, index) in volume" :key="index" @click.prevent.stop="onVolumeClick(index)">
-							{{ vol }} мл
+	<motion.div :initial="{ opacity: 0, y: 60, scale: 0.8 }" :whileInView="{ opacity: 1, y: 0, scale: 1 }"
+		:transition="{ duration: 0.6, ease: 'easeOut', delay: 0.2 }"
+		:viewport="{ once: true, margin: '0px 0px -100px 0px' }" :inViewOptions="{ once: true }">
+		<NuxtLink :to="'/products/' + product.alias" :class="'card' + (isHovered ? ' card--hover' : '')"
+			@mouseover="isHovered = true" @mouseleave="isHovered = false">
+			<div class="card__image">
+				<Transition name="fade">
+					<div class="card__sticker" v-if="stickers">
+						<div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
+							<NuxtIcon name="new" v-if="sticker === 'new'" />
+							<NuxtIcon name="hit" v-if="sticker === 'hit'" />
+							<NuxtIcon name="hit" v-if="sticker === 'sale'" />
+							<span>{{ sticker }}</span>
 						</div>
 					</div>
-					<div class="button-wrapper">
-						<Transition name="slide-up">
-							<button v-if="!cartStore.isInCart(product.id)" class="btn btn--fill"
-								@click.prevent.stop="addToCart">
-								<span class="span-text">В корзину</span>
-								<NuxtIcon name="plus" />
-							</button>
-							<button v-else class="btn delete-from-cart"
-								@click.prevent.stop="cartStore.removeFromCart(product.id)">
-								<NuxtIcon name="delete" />
-							</button>
-						</Transition>
+				</Transition>
+				<Transition name="fade">
+					<div :class="'card__favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
+						@click.prevent.stop="toggleFavorite">
+						<NuxtIcon name="favorites" />
 					</div>
-				</div>
-			</Transition>
-		</div>
-	</NuxtLink>
+				</Transition>
+				<NuxtImg :src="config.public.apiUrl + (product.image || '/images/box.svg')" :alt="product.title"
+					loading="lazy" class="card__img" placeholder="/images/box.svg" />
+			</div>
+			<div class="card__content">
+				<div class="card__brand">{{ product.brand || 'Товар' }}</div>
+				<h3 class="card__title">{{ product.title }}</h3>
+				<div class="card__taste">{{ product.taste || 'Без вкуса' }}</div>
+				<span class="card__price">{{ product.price ? `${product.price} ₽` : 'Цена не указана' }}</span>
+				<Transition name="fade">
+					<div class="card__hovered" v-if="isHovered">
+						<div class="card__volume">
+							<div :class="'card__volume--item' + (index === activeIndex ? ' card__volume--active' : '')"
+								v-for="(vol, index) in volume" :key="index" @click.prevent.stop="onVolumeClick(index)">
+								{{ vol }} мл
+							</div>
+						</div>
+						<div class="button-wrapper">
+							<Transition name="slide-up">
+								<button v-if="!cartStore.isInCart(product.id)" class="btn btn--fill"
+									@click.prevent.stop="addToCart">
+									<span class="span-text">В корзину</span>
+									<NuxtIcon name="plus" />
+								</button>
+								<button v-else class="btn delete-from-cart"
+									@click.prevent.stop="cartStore.removeFromCart(product.id)">
+									<NuxtIcon name="delete" />
+								</button>
+							</Transition>
+						</div>
+					</div>
+				</Transition>
+			</div>
+		</NuxtLink>
+	</motion.div>
+
 </template>
 
 <style lang="scss" scoped>

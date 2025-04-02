@@ -6,12 +6,15 @@ const baseUrl = config.public.apiUrl
 
 
 const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : '#'
+import { motion } from "motion-v"
 </script>
 
 <template>
     <section class="section section-about">
         <div class="container">
-            <div class="about">
+            <motion.div class="about" :initial="{ opacity: 0, y: -60 }" :whileInView="{ opacity: 1, y: 0 }"
+                :transition="{ duration: 0.6, ease: 'easeOut', delay: 0.2 }"
+                :viewport="{ once: true, margin: '0px 0px -100px 0px' }" :inViewOptions="{ once: true }">
                 <div class="about__top">
                     <NuxtImg src="/images/about_bloomit.svg" class="about__bloomit" />
                     <NuxtImg src="/images/about_planet.png" class="about__planet" />
@@ -61,7 +64,7 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
                     <NuxtIcon name="nlo" />
                     <span>Скачать оптовый каталог</span>
                 </a>
-            </div>
+            </motion.div>
         </div>
     </section>
 </template>
