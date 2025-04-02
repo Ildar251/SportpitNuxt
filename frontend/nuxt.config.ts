@@ -33,8 +33,8 @@ export default defineNuxtConfig({
 	image: {
 		domains: ['test.top-nnov.ru'],
 		dir: 'public',
-		provider: 'vercel',
-		vercel: {
+		provider: 'ipx',
+		ipx: {
 			modifiers: {
 				format: 'webp',
 			},

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useApiStore } from '@/stores/api'
+import { useRoute } from 'vue-router'
+import { usePage } from '~/composables/usePage'
 
 const route = useRoute()
 const apiStore = useApiStore()
 const brandAlias = computed(() => route.params.brand as string)
 const config = useRuntimeConfig()
 const { sections, sectionMap, sectionsData, pageTitle, pageDescription, page } = usePage('brands')
-
 
 useHead({
   title: pageTitle,
@@ -17,9 +18,26 @@ useHead({
     { property: 'og:type', content: 'website' },
   ],
 })
+
 // Получаем бренд по alias
 const brand = computed(() => {
   return apiStore.brands.find((b) => b.alias === brandAlias.value)
+})
+
+// Подсчитываем количество продуктов для текущего бренда
+const productsCount = computed(() => {
+  if (!brand.value) return 0
+  return apiStore.products.filter((product) => product.brand === brand.value?.title).length
+})
+
+// 🚨 Если бренд не найден — выбрасываем 404
+watchEffect(() => {
+  if (apiStore.brands.length && !brand.value) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Бренд не найден',
+    })
+  }
 })
 
 // Устанавливаем текущий бренд
@@ -27,7 +45,7 @@ watch(
   brand,
   (newBrand) => {
     if (newBrand) {
-      apiStore.setCurrentBrand(newBrand.title) // Устанавливаем текущий бренд
+      apiStore.setCurrentBrand(newBrand.title)
     }
   },
   { immediate: true }
@@ -35,17 +53,17 @@ watch(
 
 // Очищаем фильтр при выходе со страницы
 onUnmounted(() => {
-  apiStore.setCurrentBrand(null) // Сбрасываем текущий бренд
-  apiStore.setSelectedCategories([]) // Сбрасываем фильтр по категориям
+  apiStore.setCurrentBrand(null)
+  apiStore.setSelectedCategories([])
 })
 
 // Загружаем данные, если они ещё не загружены
-onMounted(() => {
+onMounted(async () => {
   if (!apiStore.brands.length) {
-    apiStore.fetchBrands()
+    await apiStore.fetchBrands()
   }
   if (!apiStore.products.length) {
-    apiStore.fetchProducts()
+    await apiStore.fetchProducts()
   }
 })
 </script>
@@ -61,6 +79,7 @@ onMounted(() => {
             <div class="text">
               {{ brand.description }}
             </div>
+            <div class="quantity">{{ productsCount }} товаров</div>
           </div>
           <div class="brand__logo">
             <NuxtImg :src="config.public.apiUrl + brand.tvFields.info_logo" :alt="brand.title" />
@@ -78,7 +97,6 @@ onMounted(() => {
 
 
 
-
 <style lang="scss" scoped>
 .section-hero {
   margin-top: auto-clamp(25px, 50px);
@@ -93,25 +111,50 @@ onMounted(() => {
   background-repeat: no-repeat;
   background-color: $color-primary;
 
+  @media screen and (max-width: 768px) {
+    margin: -24px;
+    height: calc(100svh - 120px);
+    display: flex;
+    flex-direction: column;
+  }
+
   .h1 {
-    font-size: auto-clamp(80px, 140px);
+    font-size: auto-clamp(50px, 140px);
   }
 
   .brand__description {
     font-size: auto-clamp(14px, 16px);
-
+    @include flex(row, space-between, flex-start);
     margin: auto-clamp(20px, 40px) 0;
     padding: auto-clamp(20px, 40px) 0;
     width: 100%;
     border-top: 2px solid $color-border;
 
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+      position: relative;
+      margin-top: 100px;
+
+      .quantity {
+        position: absolute;
+        top: -90px;
+      }
+    }
+
     .text {
       max-width: 700px;
+      letter-spacing: 0;
+      line-height: 1.4;
     }
   }
 
   .brand__logo {
     filter: brightness(0) invert(1);
+
+    @media screen and (max-width: 768px) {
+      margin-top: auto;
+    }
+
   }
 }
 </style>

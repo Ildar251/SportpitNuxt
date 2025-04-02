@@ -394,6 +394,14 @@ input[type="checkbox"]:checked::after {
     font-size: auto-clamp(18px, 27px);
     font-weight: 700;
 
+    .nuxt-icon {
+        cursor: default;
+
+        &:hover {
+            color: currentColor;
+        }
+    }
+
     &--item {
         @include flex(row, center, center);
         gap: 6px;
@@ -467,6 +475,7 @@ input[type="checkbox"]:checked::after {
             width: calc(100% - 48px);
             height: 2px;
             background-color: #F1F3F6;
+            z-index: 11;
         }
     }
 }
@@ -668,10 +677,10 @@ a {
         @include flex(row, space-between, center);
         width: 100%;
         color: $color-primary;
-        cursor: pointer;
 
         .link {
             font-size: 16px;
+            cursor: pointer;
 
             &:not(:hover) {
                 color: inherit;

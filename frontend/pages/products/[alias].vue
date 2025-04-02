@@ -7,17 +7,13 @@ import 'swiper/css/effect-fade'
 import 'swiper/css/pagination'
 import { Autoplay, EffectFade, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
+import VueEasyLightbox from 'vue-easy-lightbox'
+import 'vue-easy-lightbox/dist/external-css/vue-easy-lightbox.css'
 import { useApiStore } from '~/stores/api'
 import { useAuthStore } from '~/stores/authStore'
 import { useCartStore } from '~/stores/cartStore'
 import { useFavoriteStore } from '~/stores/favoritesStore'
 import { useModalStore } from '~/stores/useModalStore'
-
-// Импортируем Vue Easy Lightbox
-import VueEasyLightbox from 'vue-easy-lightbox'
-import 'vue-easy-lightbox/dist/external-css/vue-easy-lightbox.css' // Импортируем стили
-
-
 
 const modalStore = useModalStore()
 const route = useRoute()
@@ -28,7 +24,7 @@ const favoriteStore = useFavoriteStore()
 const authStore = useAuthStore()
 const config = useRuntimeConfig()
 
-// Загрузка данных о продукте
+// Данные продукта
 const product = ref<ProductFull | null>(null)
 const relatedTastes = ref<ProductFull[]>([])
 const stickers = computed(() => (product.value?.sticker ? product.value.sticker.split('||') : []))
@@ -38,12 +34,8 @@ const lightboxVisible = ref(false)
 const lightboxIndex = ref(0)
 const lightboxImages = computed(() => {
 	if (!product.value) return []
-	// Формируем массив изображений: текущее + изображения других вкусов
 	return [
-		{
-			src: config.public.apiUrl + product.value.image,
-			title: `${product.value.title} - ${product.value.taste}`,
-		},
+		{ src: config.public.apiUrl + product.value.image, title: `${product.value.title} - ${product.value.taste}` },
 		...relatedTastes.value.map(p => ({
 			src: config.public.apiUrl + p.image,
 			title: `${p.title} - ${p.taste}`,
@@ -55,21 +47,15 @@ const showLightbox = (index: number) => {
 	lightboxIndex.value = index
 	lightboxVisible.value = true
 }
-
 const hideLightbox = () => {
 	lightboxVisible.value = false
 }
 
 onMounted(async () => {
-	if (apiStore.products.length === 0) {
-		await apiStore.fetchProducts()
-	}
-	if (apiStore.brands.length === 0) {
-		await apiStore.fetchBrands()
-	}
+	if (apiStore.products.length === 0) await apiStore.fetchProducts()
+	if (apiStore.brands.length === 0) await apiStore.fetchBrands()
 
 	product.value = apiStore.products.find(p => p.alias === route.params.alias) || null
-
 	if (!product.value) {
 		console.error(`Продукт с alias "${route.params.alias}" не найден`)
 		return
@@ -92,11 +78,15 @@ onMounted(async () => {
 // Обработка объема
 const activeIndex = ref(0)
 const volume = computed(() => (product.value?.volume ? product.value.volume.split('||') : []))
+
+// Минимальное количество из quantity
+const minQuantity = computed(() => (product.value?.quantity ? parseInt(product.value.quantity) : 1))
+
 const onVolumeClick = (index: number) => {
 	activeIndex.value = index
 }
 
-// Добавление в корзину
+// Добавление в корзину с учетом minQuantity только для первого раза
 const addToCart = () => {
 	if (product.value) {
 		cartStore.addToCart({
@@ -105,8 +95,9 @@ const addToCart = () => {
 			price: product.value.price ? parseFloat(product.value.price) : 0,
 			image: product.value.image,
 			volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
-			quantity: 1,
+			quantity: minQuantity.value, // Устанавливаем минимальное количество при первом добавлении
 			taste: product.value.taste,
+			minQuantity: minQuantity.value, // Передаем minQuantity в корзину
 		})
 	}
 }
@@ -132,23 +123,26 @@ const toggleFavorite = () => {
 	}
 }
 
-// Увеличение количества
+// Увеличение и уменьшение количества с шагом 1 после первого добавления
 const increaseQuantity = () => {
 	if (product.value) {
 		const currentQuantity = cartStore.getQuantity(product.value.id)
-		cartStore.updateQuantity(product.value.id, currentQuantity + 1)
+		cartStore.updateQuantity(product.value.id, currentQuantity + 1) // Шаг 1
 	}
 }
 
-// Уменьшение количества
 const decreaseQuantity = () => {
 	if (product.value) {
 		const currentQuantity = cartStore.getQuantity(product.value.id)
-		cartStore.updateQuantity(product.value.id, currentQuantity - 1)
+		if (currentQuantity > minQuantity.value) {
+			cartStore.updateQuantity(product.value.id, currentQuantity - 1) // Шаг 1
+		} else {
+			removeFromCart() // Удаляем, если меньше или равно minQuantity
+		}
 	}
 }
 
-// Проверка, есть ли товар в корзине, и получение количества
+// Проверка наличия в корзине и количества
 const isInCart = computed(() => (product.value ? cartStore.isInCart(product.value.id) : false))
 const cartQuantity = computed(() => (product.value ? cartStore.getQuantity(product.value.id) : 0))
 
@@ -160,7 +154,6 @@ const textHeight = ref('200px')
 
 const toggleText = async () => {
 	if (!textRef.value) return
-
 	const fullHeight = `${textRef.value.scrollHeight}px`
 	if (!isTextExpanded.value) {
 		textHeight.value = fullHeight
@@ -175,13 +168,8 @@ const toggleText = async () => {
 const activeTasteIndex = ref(0)
 const tastes = computed(() => {
 	if (!product.value) return []
-	const allTastes = [
-		{
-			MIGX_id: product.value.id.toString(),
-			taste: product.value.taste,
-			image: product.value.image,
-			alias: product.value.alias,
-		},
+	return [
+		{ MIGX_id: product.value.id.toString(), taste: product.value.taste, image: product.value.image, alias: product.value.alias },
 		...relatedTastes.value.map(p => ({
 			MIGX_id: p.id.toString(),
 			taste: p.taste,
@@ -189,7 +177,6 @@ const tastes = computed(() => {
 			alias: p.alias,
 		})),
 	]
-	return allTastes
 })
 
 const tasteTextRef = ref<HTMLElement | null>(null)
@@ -197,7 +184,6 @@ const imageSliderRef = ref<SwiperType | null>(null)
 
 const onTasteClick = (index: number) => {
 	if (index === activeTasteIndex.value) return
-
 	const selectedTaste = tastes.value[index]
 	if (selectedTaste.alias !== product.value!.alias) {
 		router.push(`/products/${selectedTaste.alias}`)
@@ -206,17 +192,14 @@ const onTasteClick = (index: number) => {
 
 const animateTasteText = (text: string) => {
 	if (!tasteTextRef.value) return
-
 	const chars = text.split('')
 	tasteTextRef.value.innerHTML = ''
-
 	chars.forEach((char, i) => {
 		const charSpan = document.createElement('span')
 		charSpan.className = 'taste-char'
 		charSpan.textContent = char
 		tasteTextRef.value?.appendChild(charSpan)
 	})
-
 	gsap.fromTo(
 		tasteTextRef.value.querySelectorAll('.taste-char'),
 		{ opacity: 0, y: 20, rotation: 10 },
@@ -228,22 +211,17 @@ watch(
 	() => route.params.alias,
 	async (newAlias) => {
 		product.value = apiStore.products.find(p => p.alias === newAlias) || null
-
 		if (!product.value) {
 			console.error(`Продукт с alias "${newAlias}" не найден`)
 			return
 		}
-
 		relatedTastes.value = apiStore.products.filter(
 			p => p.title === product.value!.title && p.alias !== product.value!.alias
 		)
-
 		activeTasteIndex.value = tastes.value.findIndex(t => t.alias === newAlias)
-
 		if (product.value.taste && tasteTextRef.value) {
 			animateTasteText(product.value.taste)
 		}
-
 		await nextTick()
 		if (textRef.value) {
 			isTextLong.value = textRef.value.scrollHeight > 200
@@ -252,7 +230,6 @@ watch(
 )
 
 const dop_compound = computed(() => product.value?.dop_compound || [])
-
 const accordions = computed(() => [
 	{ title: 'Рекомендации по применению', content: product.value?.recommendations || '' },
 	{ title: 'Состав', content: product.value?.compound || '' },
@@ -285,14 +262,11 @@ const accordions = computed(() => [
 					<Transition name="fade">
 						<div class="card__sticker" v-if="stickers">
 							<div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
-								<NuxtIcon name="new" v-if="sticker === 'new'" />
-								<NuxtIcon name="hit" v-if="sticker === 'hit'" />
-								<NuxtIcon name="hit" v-if="sticker === 'sale'" />
+								<NuxtIcon :name="sticker === 'new' ? 'new' : sticker === 'hit' ? 'hit' : 'hit'" />
 								<span>{{ sticker }}</span>
 							</div>
 						</div>
 					</Transition>
-
 					<div :class="'favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
 						@click.stop="toggleFavorite">
 						<NuxtIcon name="favorites" />
@@ -302,11 +276,9 @@ const accordions = computed(() => [
 					<div class="container breadcrumbs">
 						<NuxtLink to="/" class="breadcrumbs__item">Главная страница</NuxtLink>
 						<NuxtLink to="/catalog" class="breadcrumbs__item">Продукты</NuxtLink>
-						<div class="breadcrumbs__item">{{ product?.title }}</div>
+						<div class="breadcrumbs__item">{{ product.title }}</div>
 					</div>
-					<NuxtLink to="#" class="product__brand link">
-						{{ product.brand || 'Без бренда' }}
-					</NuxtLink>
+					<NuxtLink to="#" class="product__brand link">{{ product.brand || 'Без бренда' }}</NuxtLink>
 					<div class="product__info-main">
 						<div class="product__info-left">
 							<h1 class="h1">
@@ -357,9 +329,7 @@ const accordions = computed(() => [
 									<NuxtImg :src="config.public.apiUrl + taste.image" :alt="taste.taste" height="120"
 										width="auto" format="webp" placeholder="/images/box.svg" />
 								</div>
-								<div class="taste__text">
-									{{ taste.taste }}
-								</div>
+								<div class="taste__text">{{ taste.taste }}</div>
 							</SwiperSlide>
 						</Swiper>
 					</div>
@@ -389,7 +359,7 @@ const accordions = computed(() => [
 							<div class="btn-wrapper">
 								<Transition name="button-swap" mode="out-in">
 									<button v-if="!isInCart" class="btn btn--fill" @click.stop="addToCart">
-										<span class="span-text">В корзину</span>
+										<span class="span-text">В корзину ({{ minQuantity }} шт.)</span>
 										<NuxtIcon name="plus" />
 									</button>
 									<button v-else class="btn delete-from-cart" @click.stop="removeFromCart">
@@ -406,9 +376,7 @@ const accordions = computed(() => [
 								<span class="h4">Стоимость оптовой закупки</span>
 							</div>
 							<div class="product__price-info">
-								<div class="minimal">
-									Минимальная сумма<br />заказа 10 000 ₽
-								</div>
+								<div class="minimal">Минимальная сумма<br />заказа 10 000 ₽</div>
 								<div class="warning">
 									<NuxtIcon name="warning" />
 									<div>
@@ -457,34 +425,27 @@ const accordions = computed(() => [
 			</div>
 		</section>
 
-		<!-- Добавляем компонент VueEasyLightbox -->
+		<SectionsMb />
+
+		<SectionsBrands />
+
 		<VueEasyLightbox :visible="lightboxVisible" :imgs="lightboxImages" :index="lightboxIndex" @hide="hideLightbox"
 			:escDisabled="false" :scrollDisabled="true" :moveDisabled="false" />
 	</main>
 </template>
-
-<style scoped>
-/* Стили для кликабельного изображения */
-.clickable-image {
-	cursor: pointer;
-	transition: opacity 0.3s ease;
-}
-
-.clickable-image:hover {
-	opacity: 0.9;
-}
-
-/* Убираем стандартное поведение Swiper для кликов */
-.image-slider {
-	pointer-events: auto;
-}
-</style>
 
 <style lang="scss" scoped>
 @media screen and (max-width: 768px) {
 	.section-product {
 		margin-top: 0px
 	}
+}
+
+.package-info {
+	display: block;
+	font-size: 0.9em;
+	color: #666;
+	margin-top: 5px;
 }
 
 .product {
@@ -627,7 +588,7 @@ const accordions = computed(() => [
 		}
 
 		span:not(.nuxt-icon) {
-			font-size: 20px;
+			font-size: auto-clamp(16px, 20px);
 			max-width: 160px;
 			line-height: 1;
 			margin-top: 8px;
@@ -724,7 +685,7 @@ const accordions = computed(() => [
 		}
 
 		.product__info-block {
-			margin-top: auto-clamp(60px, 120px);
+			margin-top: auto-clamp(30px, 72px);
 			border-top: 2px solid $color-border;
 			padding-top: 15px;
 
@@ -759,6 +720,7 @@ const accordions = computed(() => [
 	.product__price {
 		display: flex;
 		align-items: flex-end;
+
 		font-size: auto-clamp(32px, 70px);
 		font-weight: 700;
 		white-space: nowrap;
@@ -775,24 +737,23 @@ const accordions = computed(() => [
 
 		&-info {
 			@include flex(row, space-between, center);
+			flex-wrap: wrap;
 			background-color: #FCFCFC;
-			padding: 12px 40px;
+			padding: 12px auto-clamp(20px, 40px);
 			gap: 30px;
 			font-size: 18px;
-
-			.minimal {
-				color: $color-red;
-			}
 
 			.warning {
 				flex: 1;
 				@include flex(row, space-between, flex-start);
 				gap: 12px;
 				max-width: 360px;
+				font-size: auto-clamp(14px, 18px);
 
 				.btn-more {
 					margin-top: 10px;
 					color: $color-accent;
+					font-size: auto-clamp(16px, 22px);
 				}
 			}
 		}
@@ -802,7 +763,7 @@ const accordions = computed(() => [
 		@include flex(row, flex-end, center);
 		margin-left: auto;
 		color: $color-red;
-		font-size: 18px;
+		font-size: auto-clamp(16px, 18px);
 		margin-top: 32px;
 	}
 
@@ -887,6 +848,10 @@ const accordions = computed(() => [
 		font-size: auto-clamp(16px, 26px);
 		opacity: 0;
 		transition: $transition;
+
+		@media screen and (max-width: 768px) {
+			width: 100%;
+		}
 
 		&--active {
 			opacity: 1;

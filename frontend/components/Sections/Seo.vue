@@ -1,4 +1,23 @@
-<script lang="ts" setup>
+<script setup lang="ts">
+const props = defineProps<{ page?: any }>()
+const config = useRuntimeConfig()
+
+// Вычисляемые свойства для SEO данных
+const seoSubtitle = computed(() => props.page?.tvFields?.seo_subtitle || 'Энергетики')
+const seoTitle = computed(() => props.page?.tvFields?.seo_title || 'Seo описание в несколько строк')
+const seoText = computed(() => props.page?.tvFields?.seo_text || '')
+
+// Обработка seo_images как массива
+const seoImages = computed(() => {
+    try {
+        return props.page?.tvFields?.seo_images
+            ? JSON.parse(props.page.tvFields.seo_images)
+            : []
+    } catch (error) {
+        console.error('❌ Ошибка парсинга seo_images:', error)
+        return []
+    }
+})
 </script>
 
 <template>
@@ -6,40 +25,18 @@
         <div class="container">
             <div class="seo">
                 <div class="seo__left">
-                    <div class="seo__subtitle">Энергетики</div>
-                    <h2 class="h2 seo__title">
-                        Seo описание в несколько строк
-                    </h2>
+                    <div class="seo__subtitle">{{ seoSubtitle }}</div>
+                    <h2 class="h2 seo__title">{{ seoTitle }}</h2>
                 </div>
-                <div class="seo__text">
-                    <p>Многие думают, что Lorem Ipsum - взятый с потолка псевдо-латинский набор слов, но это не совсем
-                        так.
-                        Его корни уходят в один фрагмент классической латыни 45 года н.э., то есть более двух
-                        тысячелетий
-                        назад. Ричард МакКлинток, профессор латыни из колледжа Hampden-Sydney, штат Вирджиния, взял одно
-                        из
-                        самых странных слов в Lorem Ipsum, "consectetur", и занялся его поисками в классической
-                        латинской
-                        литературе.</p>
-                    <p>Многие думают, что Lorem Ipsum - взятый с потолка псевдо-латинский набор слов, но это не совсем
-                        так.
-                        Его корни уходят в один фрагмент классической латыни 45 года н.э., то есть более двух
-                        тысячелетий
-                        назад. Ричард МакКлинток, профессор латыни из колледжа Hampden-Sydney, штат Вирджиния, взял одно
-                        из
-                        самых странных слов в Lorem Ipsum, "consectetur", и занялся его поисками в классической
-                        латинской
-                        литературе.</p>
-                </div>
-                <div class="seo__images">
-                    <NuxtImg src="/images/seo_img1.jpg" alt="seo" sizes="400px" />
-                    <NuxtImg src="/images/seo_img2.jpg" alt="seo" sizes="400px" />
+                <div class="seo__text" v-html="seoText"></div>
+                <div class="seo__images" v-if="seoImages.length">
+                    <NuxtImg v-for="image in seoImages" :key="image.MIGX_id" :src="config.public.apiUrl + image.img"
+                        :alt="image.alt" sizes="400px" loading="lazy" />
                 </div>
             </div>
         </div>
     </section>
 </template>
-
 <style lang="scss" scoped>
 .seo {
     display: grid;
@@ -69,13 +66,11 @@
     .seo__text {
         position: relative;
         font-size: auto-clamp(16px, 18px);
+        color: $color-gray;
+        letter-spacing: 0;
+        padding-right: auto-clamp(0px, 90px);
 
 
-        p {
-            color: $color-gray;
-            letter-spacing: 0;
-            padding-right: auto-clamp(0px, 90px);
-        }
 
         &::before {
             content: '';

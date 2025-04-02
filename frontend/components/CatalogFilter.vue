@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApiStore } from '~/stores/api'
 
@@ -48,21 +48,35 @@ const toggleDropdown = (type: 'brands' | 'categories') => {
     }
 }
 
-// Загружаем фильтры из query-параметров при монтировании
-onMounted(() => {
-    // Загружаем продукты, если они ещё не загружены
-    if (!apiStore.products.length) {
-        apiStore.fetchProducts()
-    }
-
-    // Считываем query-параметр category
+// Синхронизация фильтров с query-параметрами
+const syncFiltersFromQuery = () => {
     const categoryFromQuery = route.query.category
     if (typeof categoryFromQuery === 'string' && uniqueCategories.value.includes(categoryFromQuery)) {
         selectedCategories.value = [categoryFromQuery]
         isCategoriesOpen.value = true // Открываем dropdown категорий
         applyFilters() // Применяем фильтр
+    } else if (!categoryFromQuery) {
+        selectedCategories.value = []
+        apiStore.setSelectedCategories([])
     }
+}
+
+// Загружаем фильтры при монтировании
+onMounted(async () => {
+    if (!apiStore.products.length) {
+        await apiStore.fetchProducts()
+    }
+    syncFiltersFromQuery()
 })
+
+// Реагируем на изменения query-параметров
+watch(
+    () => route.query.category,
+    (newCategory) => {
+        syncFiltersFromQuery()
+    },
+    { immediate: true } // Вызываем сразу при инициализации
+)
 
 // Синхронизируем query-параметр с выбранными категориями
 watch(selectedCategories, (newCategories) => {
@@ -182,6 +196,7 @@ watch(selectedCategories, (newCategories) => {
     width: 100%;
     border-right: 2px solid $color-border;
     height: auto-clamp(60px, 120px);
+    font-weight: 700;
 
     @media screen and (max-width: 768px) {
         border-right: 0;
@@ -208,6 +223,7 @@ watch(selectedCategories, (newCategories) => {
     display: flex;
     align-items: center;
     cursor: pointer;
+    color: $color-gray;
 }
 
 .catalog-filter__label input {

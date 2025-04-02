@@ -15,6 +15,7 @@ onMounted(() => {
 })
 
 const mobileMenuStore = useMobileMenuStore()
+const route = useRoute()
 
 </script>
 
@@ -57,7 +58,7 @@ const mobileMenuStore = useMobileMenuStore()
   left: 50%;
   transform: translateX(-50%);
   background-color: #2E334699;
-  z-index: 100;
+  z-index: 99;
   max-width: 380px;
   padding: 4px;
   gap: 4px;

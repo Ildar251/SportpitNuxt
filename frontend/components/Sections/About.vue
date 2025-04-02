@@ -57,7 +57,7 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
                     </div>
                 </div>
 
-                <a :href="fileUrl" download class="about__download">
+                <a :href="fileUrl" target="_blank" download class="about__download">
                     <NuxtIcon name="nlo" />
                     <span>Скачать оптовый каталог</span>
                 </a>
@@ -87,7 +87,7 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
         background-position: top;
         background-repeat: no-repeat;
         padding: auto-clamp(30px, 67px);
-        height: auto-clamp(500px, 1000px);
+        height: auto-clamp(340px, 1000px);
 
 
         .about__planet {
@@ -124,6 +124,7 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
 
         .text {
             font-size: auto-clamp(18px, 30px);
+            line-height: 1.4;
         }
 
         .btn {
@@ -160,6 +161,7 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
                 display: inline-block;
                 font-size: auto-clamp(20px, 34px);
                 margin-top: 20px;
+                color: $color-white;
 
                 @media screen and (max-width: 768px) {
                     font-size: 30px;
@@ -170,6 +172,11 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
             .about__image {
                 position: relative;
                 padding: 20px;
+
+                @media screen and (max-width: 768px) {
+                    padding: 0;
+                }
+
 
                 &::before {
                     content: '';
@@ -191,6 +198,12 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
                 font-size: 16px;
                 margin-top: 30px;
                 color: $color-gray;
+                line-height: 1.4;
+                letter-spacing: 0;
+
+                @media screen and (max-width: 768px) {
+                    margin-top: 0;
+                }
             }
         }
     }
@@ -204,7 +217,7 @@ const fileUrl = props.data?.about_file ? `${baseUrl}${props.data.about_file}` : 
         overflow: hidden;
         transition: 0.3s ease;
         text-align: center;
-        max-height: auto-clamp(140px, 280px);
+        max-height: auto-clamp(180px, 290px);
         padding-top: 35px;
 
         .nuxt-icon {

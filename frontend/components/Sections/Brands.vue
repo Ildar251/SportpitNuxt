@@ -30,28 +30,17 @@ const brands = computed(() => apiStore.brands)
 		</div>
 
 		<div class="container brands">
-			<Swiper
-				:modules="[Pagination, Autoplay]"
-				:breakpoints="{
-					512: { slidesPerView: 2 },
-					768: { slidesPerView: 3 },
-					1440: { slidesPerView: 4 },
-				}"
-				:spaceBetween="20"
-				:slidesPerView="1.4"
-				:pagination="{ clickable: true }"
-				:autoplay="{ delay: 2500, disableOnInteraction: false }"
-				:speed="1000"
-				class="brands-slider"
-			>
+			<Swiper :modules="[Pagination, Autoplay]" :breakpoints="{
+				512: { slidesPerView: 2 },
+				768: { slidesPerView: 3 },
+				1440: { slidesPerView: 4 },
+			}" :spaceBetween="20" :slidesPerView="1.4" :pagination="{ clickable: true }"
+				:autoplay="{ delay: 2500, disableOnInteraction: false }" :speed="1000" class="brands-slider">
 				<SwiperSlide v-for="brand in brands" :key="brand.id">
-					<NuxtLink :to="`${brand.alias}`" class="brands__item">
+					<NuxtLink :to="`/brands/${brand.alias}`" class="brands__item">
 						<h3 class="h3 brands__title">{{ brand.title }}</h3>
 						<div class="brands__logo">
-							<NuxtImg
-								:src="config.public.apiUrl + brand.tvFields.info_logo"
-								:alt="brand.title"
-							/>
+							<NuxtImg :src="config.public.apiUrl + brand.tvFields.info_logo" :alt="brand.title" />
 						</div>
 					</NuxtLink>
 				</SwiperSlide>

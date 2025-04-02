@@ -63,7 +63,6 @@ onMounted(() => {
 	const apiKey = config.public.yandexMapsApiKey
 	if (!apiKey) {
 		console.error('Yandex Maps API ключ не найден в конфигурации!')
-		toast.error('Ошибка: API-ключ для карты отсутствует. Обратитесь к администратору.', { autoClose: 3000 })
 		return
 	}
 
@@ -71,7 +70,6 @@ onMounted(() => {
 	if (yandexMapsPromise) {
 		yandexMapsPromise.catch((error) => {
 			console.error('Не удалось загрузить Yandex Maps API:', error)
-			toast.error('Ошибка загрузки карты. Попробуйте обновить страницу.', { autoClose: 3000 })
 		})
 	} else {
 		console.error('Yandex Maps API уже загружен или не может быть загружен.')
@@ -400,7 +398,7 @@ const mapPlacemark = computed<[number, number] | undefined>(() => {
 					<div v-else class="checkout__item-info items-list">
 						<div v-for="item in cartStore.items" :key="item.id" class="order-item">
 							<div class="item-wrap">
-								<NuxtImg :src="item.image ? `${config.public.apiUrl}${item.image}` : '/placeholder.png'"
+								<NuxtImg :src="item.image ? `${config.public.apiUrl}${item.image}` : 'images/box.svg'"
 									:alt="item.title || 'Товар'" class="item-image" height="120" />
 								<div class="item-quantity">
 									{{ item.quantity }}
@@ -570,6 +568,7 @@ const mapPlacemark = computed<[number, number] | undefined>(() => {
 	border: none;
 	background-color: #fcfcfc;
 	transition: $transition;
+	color: $color-primary;
 }
 
 .form-group textarea {
@@ -594,6 +593,10 @@ const mapPlacemark = computed<[number, number] | undefined>(() => {
 		color: $color-gray;
 		font-weight: bold;
 		margin-left: 42px;
+
+		@media screen and (max-width: 768px) {
+			margin-left: 10px;
+		}
 	}
 
 	&__input {
@@ -606,6 +609,11 @@ const mapPlacemark = computed<[number, number] | undefined>(() => {
 		background-color: #fcfcfc;
 		color: inherit;
 		@include flex(row, space-between, center);
+
+
+		@media screen and (max-width: 768px) {
+			padding: 26px 10px;
+		}
 
 		input {
 			border: none;
@@ -664,7 +672,7 @@ const mapPlacemark = computed<[number, number] | undefined>(() => {
 
 	.items-list {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(116px, 116px));
+		grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
 		gap: 20px;
 
 		.order-item {

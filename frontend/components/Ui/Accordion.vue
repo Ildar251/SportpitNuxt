@@ -93,6 +93,10 @@ const toggleAccordion = async () => {
     &__content>p {
         margin: 0;
         padding: 16px 15%;
+
+        @media (max-width: 768px) {
+            padding: 16px 0;
+        }
     }
 }
 

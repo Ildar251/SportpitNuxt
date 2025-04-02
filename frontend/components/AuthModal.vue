@@ -272,8 +272,11 @@ watch(
 							<button type="submit">Зарегистрироваться</button>
 							<span class="modal__policy">
 								Создавая аккаунт, принимаю условия
-								<NuxtLink to="/policy">политики</NuxtLink> и
-								<NuxtLink to="/policy">пользовательского соглашения</NuxtLink>
+								<NuxtLink to="/privacy-policy">политики
+								</NuxtLink> и
+								<NuxtLink to="/privacy-policy">пользовательского
+									соглашения
+								</NuxtLink>
 							</span>
 						</div>
 

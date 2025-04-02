@@ -20,7 +20,7 @@ const settings = useSiteSettings()
 const favoritesCount = computed(() => favoriteStore.items.length)
 
 const cartCount = computed(() => {
-	return cartStore.items.reduce((total, item) => total + item.quantity, 0)
+	return cartStore.items.length
 })
 
 onMounted(() => {
@@ -197,22 +197,23 @@ const stocks = computed(() => apiStore.stocks)
 							Бренды
 						</div>
 						<div v-for="brand in brands" :key="brand.id">
-							<NuxtLink :to="`${brand.alias}`" class="link">
+							<NuxtLink :to="`/brands/${brand.alias}`" class="link" @click="menuStore.close">
 								{{ brand.title }}
 							</NuxtLink>
 						</div>
 					</div>
 					<div class="menu__column">
-						<NuxtLink :to="{ path: '/catalog', query: { category: 'Напитки' } }" class="menu__column-title">
+						<NuxtLink :to="{ path: '/catalog', query: { category: 'Напитки' } }" class="menu__column-title"
+							@click="menuStore.close">
 							Напитки</NuxtLink>
 					</div>
 					<div class="menu__column">
 						<NuxtLink :to="{ path: '/catalog', query: { category: 'Энергетики' } }"
-							class="menu__column-title">Энергетики</NuxtLink>
+							class="menu__column-title" @click="menuStore.close">Энергетики</NuxtLink>
 					</div>
 					<div class="menu__column">
 						<NuxtLink :to="{ path: '/catalog', query: { category: 'Батончики' } }"
-							class="menu__column-title">Батончики</NuxtLink>
+							class="menu__column-title" @click="menuStore.close">Батончики</NuxtLink>
 					</div>
 
 					<div class="menu__stocks">
@@ -220,7 +221,7 @@ const stocks = computed(() => apiStore.stocks)
 							:key="stock.id" :style="{
 								backgroundImage: `url(${config.public.apiUrl + stock.tvFields.stock_image
 									})`,
-							}">
+							}" @click="menuStore.close">
 							<div class="stocks__item-date">{{ stock.tvFields.stock_date }}</div>
 							<h3 class="h3">{{ stock.title }}</h3>
 						</NuxtLink>
@@ -231,7 +232,7 @@ const stocks = computed(() => apiStore.stocks)
 
 		<Transition name="slide-right">
 			<div class="menu menu-mobile" v-if="mobileMenuStore.isOpen">
-				<div class="container menu__container">
+				<div class="container menu__container-mobile">
 					<nav class="header__nav-mobile">
 						<ul class="header__menu">
 							<li class="header__menu-item">
@@ -698,7 +699,7 @@ const stocks = computed(() => apiStore.stocks)
 		height: calc(100svh - 60px);
 	}
 
-	.menu__container {
+	.menu__container-mobile {
 		align-items: flex-start;
 		flex-direction: column;
 
@@ -740,7 +741,7 @@ const stocks = computed(() => apiStore.stocks)
 	}
 
 	.menu__stocks {
-		@include flex(column, center, flex-start);
+		@include flex(column, flex-start, flex-start);
 		gap: 8px;
 
 

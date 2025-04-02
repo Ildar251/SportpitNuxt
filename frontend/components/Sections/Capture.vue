@@ -174,6 +174,7 @@ const submitForm = async (event: Event) => {
             .input-field {
                 margin-bottom: 20px;
                 width: 100%;
+                color: $color-gray;
             }
 
             button {

@@ -1,26 +1,13 @@
 <script lang="ts" setup>
 import { useCartStore } from '@/stores/cartStore'
 import { useFavoriteStore } from '@/stores/favoritesStore'
+import type { ProductFull } from '@/types/product'
 
 const cartStore = useCartStore()
 const favoriteStore = useFavoriteStore()
 
 const props = defineProps<{
-	product: {
-		id: number
-		title: string
-		description: string
-		content: string
-		parent: number
-		category: string | null
-		alias: string
-		price?: string
-		brand?: string
-		taste?: string // Теперь строка, а не массив
-		sticker?: string
-		image?: string
-		volume?: string
-	}
+	product: ProductFull
 }>()
 
 const product = props.product
@@ -45,7 +32,7 @@ const addToCart = () => {
 		image: product.image,
 		volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
 		quantity: 1,
-		taste: product.taste, // Добавляем вкус в данные корзины
+		taste: product.taste,
 	})
 }
 
@@ -56,7 +43,7 @@ const toggleFavorite = () => {
 		price: product.price ? parseFloat(product.price) : 0,
 		image: product.image,
 		volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
-		taste: product.taste, // Добавляем вкус в данные избранного
+		taste: product.taste,
 		alias: product.alias,
 	})
 }
@@ -82,8 +69,8 @@ const toggleFavorite = () => {
 					<NuxtIcon name="favorites" />
 				</div>
 			</Transition>
-			<NuxtImg :src="config.public.apiUrl + product.image" :alt="product.title" loading="lazy" class="card__img"
-				placeholder="/images/box.svg" />
+			<NuxtImg :src="config.public.apiUrl + (product.image || '/images/box.svg')" :alt="product.title"
+				loading="lazy" class="card__img" placeholder="/images/box.svg" />
 		</div>
 		<div class="card__content">
 			<div class="card__brand">{{ product.brand || 'Товар' }}</div>
@@ -94,7 +81,7 @@ const toggleFavorite = () => {
 				<div class="card__hovered" v-if="isHovered">
 					<div class="card__volume">
 						<div :class="'card__volume--item' + (index === activeIndex ? ' card__volume--active' : '')"
-							v-for="(vol, index) in volume" :key="index" @click="onVolumeClick(index)">
+							v-for="(vol, index) in volume" :key="index" @click.prevent.stop="onVolumeClick(index)">
 							{{ vol }} мл
 						</div>
 					</div>

@@ -17,6 +17,7 @@ useHead({
 <template>
     <main>
         <SectionsPageInfo :page="page" />
-        <component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]" />
+        <component v-for="section in sections" :is="sectionMap[section]" :key="section" :data="sectionsData[section]"
+            :page="page" />
     </main>
 </template>

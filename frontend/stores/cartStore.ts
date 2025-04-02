@@ -1,9 +1,8 @@
 import { useAuthStore } from '@/stores/authStore'
+import type { Product } from '@/types/product'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { toast } from 'vue3-toastify'
-
-import type { Product } from '@/types/product'
 
 export const useCartStore = defineStore('cart', {
     state: () => ({
@@ -31,49 +30,49 @@ export const useCartStore = defineStore('cart', {
         },
         addToCart(product: Product) {
             const existing = this.items.find((item) => item.id === product.id)
+            const minQty = product.minQuantity || 1
             if (existing) {
-                existing.quantity++
+                existing.quantity += 1 // После первого добавления увеличиваем по 1
             } else {
-                this.items.push({ ...product, quantity: 1 })
+                this.items.push({ ...product, quantity: minQty }) // Первое добавление с minQuantity
             }
             this.saveCart()
+            toast.success(`Добавлено ${existing ? 1 : minQty} шт. в корзину`, { autoClose: 2000 })
         },
         removeFromCart(productId: number) {
             this.items = this.items.filter((item) => item.id !== productId)
             this.saveCart()
+            toast.success('Товар удален из корзины', { autoClose: 2000 })
         },
         updateQuantity(productId: number, quantity: number) {
             const item = this.items.find((item) => item.id === productId)
-            if (item && quantity > 0) {
-                item.quantity = quantity
+            if (!item) return
+
+            const minQty = item.minQuantity || 1
+            if (quantity >= minQty) {
+                item.quantity = quantity // Устанавливаем новое количество (шаг 1 после minQuantity)
                 this.saveCart()
-            } else if (item && quantity <= 0) {
-                this.removeFromCart(productId) // Удаляем товар, если количество становится 0
+            } else {
+                this.removeFromCart(productId) // Удаляем, если меньше minQuantity
             }
         },
-
         isInCart(productId: number) {
             return this.items.some((item) => item.id === productId)
         },
-
         getQuantity(productId: number) {
             const item = this.items.find((item) => item.id === productId)
             return item ? item.quantity : 0
         },
-
         async syncCart() {
             const authStore = useAuthStore()
             if (!authStore.apiToken) return
 
             try {
                 const localCart = [...this.items]
-
                 const serverResponse = await axios.get('https://test.top-nnov.ru/api/cart', {
                     headers: { Authorization: `Bearer ${authStore.apiToken}` },
                 })
-                console.log('Server cart response:', serverResponse.data)
                 const serverCart = serverResponse.data.cart || []
-
                 const mergedCart = this.mergeCarts(serverCart, localCart)
 
                 await axios.post(
@@ -89,7 +88,6 @@ export const useCartStore = defineStore('cart', {
                 toast.error('Не удалось синхронизировать корзину', { autoClose: 3000 })
             }
         },
-
         mergeCarts(serverCart: any, localCart: Product[]): Product[] {
             let serverItems: Product[] = []
             if (Array.isArray(serverCart)) {
@@ -100,6 +98,7 @@ export const useCartStore = defineStore('cart', {
                     price: item.price || 0,
                     image: item.image || '',
                     volume: item.volume || 0,
+                    minQuantity: item.minQuantity || 1,
                 }))
             } else if (serverCart && typeof serverCart === 'object') {
                 serverItems = Object.entries(serverCart).map(([id, quantity]) => ({
@@ -109,6 +108,7 @@ export const useCartStore = defineStore('cart', {
                     price: 0,
                     image: '',
                     volume: 0,
+                    minQuantity: 1,
                 }))
             }
 
@@ -129,10 +129,9 @@ export const useCartStore = defineStore('cart', {
 
             return merged
         },
-
         clearCart() {
             this.items = []
             this.saveCart()
-        }
+        },
     },
 })

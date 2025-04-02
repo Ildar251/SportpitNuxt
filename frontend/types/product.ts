@@ -4,8 +4,9 @@ export interface Product {
     price?: number
     image?: string
     volume?: number
-    quantity: number // Только для корзины
+    quantity: number
     taste?: string
+    minQuantity?: number
 }
 
 export interface FavoriteProduct {
@@ -17,6 +18,7 @@ export interface FavoriteProduct {
     taste?: string
     alias?: string
 }
+
 export interface DopCompound {
     MIGX_id: string
     title: string
@@ -35,7 +37,7 @@ export interface ProductFull {
     price: string
     price_old: string
     sticker: string
-    taste: string // Теперь строка, а не массив
+    taste: string
     volume: string
     product_text: string
     sugar: string
@@ -48,4 +50,5 @@ export interface ProductFull {
         title: string
         value: string
     }>
+    quantity: string
 }

@@ -67,6 +67,10 @@ onMounted(() => {
     background-image: url('@/assets/images/HeroImage-1.jpg');
     z-index: 1;
     background-size: cover;
+
+    @media screen and (max-width: 768px) {
+        background-image: url('@/assets/images/HeroImage-1-mob.jpg');
+    }
 }
 
 .layer2 {
@@ -75,7 +79,9 @@ onMounted(() => {
     background-position: right -50px bottom -50px;
 
     @media screen and (max-width: 768px) {
-        background-size: 150%;
+        background-size: 100%;
+        background-position: right -10px bottom -10px;
+        background-image: url('@/assets/images/HeroImage-2-mob.png');
     }
 }
 
@@ -84,6 +90,12 @@ onMounted(() => {
     z-index: 3;
     background-position: right -50px bottom -50px;
     background-size: 50%;
+
+    @media screen and (max-width: 768px) {
+        background-position: right 0px bottom 0px;
+        background-size: 100%;
+        background-image: url('@/assets/images/HeroImage-3-mob.png');
+    }
 }
 
 .container {

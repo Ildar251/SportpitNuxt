@@ -1,6 +1,35 @@
 <script setup lang="ts">
 import { useSiteSettings } from '~/composables/useSiteSettings'
 const settings = useSiteSettings()
+
+const config = useRuntimeConfig()
+
+const { loadYandexMaps, isYandexMapsLoaded } = useYandexMaps()
+onMounted(() => {
+    const apiKey = config.public.yandexMapsApiKey
+    if (!apiKey) {
+        console.error('Yandex Maps API ключ не найден в конфигурации!')
+        return
+    }
+
+    const yandexMapsPromise = loadYandexMaps(apiKey)
+    if (yandexMapsPromise) {
+        yandexMapsPromise.catch((error) => {
+            console.error('Не удалось загрузить Yandex Maps API:', error)
+        })
+    } else {
+        console.error('Yandex Maps API уже загружен или не может быть загружен.')
+    }
+})
+
+
+const mapCenter = computed<[number, number]>(() => {
+    return [55.7558, 37.6173]
+})
+
+const mapPlacemark = computed<[number, number] | undefined>(() => {
+    return undefined
+})
 </script>
 
 <template>
@@ -30,7 +59,7 @@ const settings = useSiteSettings()
                 </div>
 
                 <div class="contacts__map">
-                    <YaMap />
+                    <YaMap v-if="isYandexMapsLoaded" :center="mapCenter" :placemark="mapPlacemark" />
 
                     <div class="contacts__bottom">
                         <div class="contacts__item contacts__item-address">

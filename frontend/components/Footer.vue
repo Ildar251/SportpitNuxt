@@ -87,7 +87,7 @@ const settings = useSiteSettings()
 					<NuxtLink to="/sitemap" class="footer__link">Карта сайта</NuxtLink>
 				</div>
 
-				<NuxtLink to="/" class="footer__info">
+				<NuxtLink to="https://topmarka1.ru/" target="_blank" class="footer__info">
 					<NuxtImg src="/images/topmarka.svg" alt="topmarka" />
 					<span>Создание сайта</span>
 				</NuxtLink>

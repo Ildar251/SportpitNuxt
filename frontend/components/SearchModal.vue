@@ -63,7 +63,7 @@ const closeModal = () => {
     </Transition>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .modal-enter-active,
 .modal-leave-active {
     transition: opacity 0.3s ease;
@@ -76,15 +76,17 @@ const closeModal = () => {
 
 .search-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 120;
-    /* Выше оверлея */
+    width: fit-content;
+    height: fit-content;
+    width: auto-clamp(300px, 900px);
+    max-width: 90%;
+    transform: translate(-50%, -50%);
 }
 
 .search-modal__content {

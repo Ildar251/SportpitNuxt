@@ -10,12 +10,8 @@ const config = useRuntimeConfig()
 <template>
 	<section class="section section-hero-2">
 		<div class="container">
-			<div
-				class="hero"
-				:style="`background-image: url(${
-					config.public.apiUrl + page.tvFields?.info_bg
-				});`"
-			>
+			<div class="hero" :style="`background-image: url(${config.public.apiUrl + page.tvFields?.info_bg
+				});`">
 				<h1 class="h1">{{ page.title }}</h1>
 				<div class="brand__description">
 					<div class="text">
@@ -23,10 +19,7 @@ const config = useRuntimeConfig()
 					</div>
 				</div>
 				<div class="brand__logo">
-					<NuxtImg
-						:src="config.public.apiUrl + page.tvFields?.info_logo"
-						:alt="page.title"
-					/>
+					<NuxtImg :src="config.public.apiUrl + page.tvFields?.info_logo" :alt="page.title" />
 				</div>
 			</div>
 		</div>
@@ -47,6 +40,8 @@ const config = useRuntimeConfig()
 	background-repeat: no-repeat;
 	background-color: $color-primary;
 
+
+
 	.h1 {
 		font-size: auto-clamp(80px, 140px);
 	}
@@ -61,6 +56,7 @@ const config = useRuntimeConfig()
 
 		.text {
 			max-width: 700px;
+			letter-spacing: 0;
 		}
 	}
 

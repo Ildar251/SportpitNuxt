@@ -76,14 +76,14 @@ const setActiveTab = (tabId: string) => {
             flex-wrap: wrap;
 
             .tabs__item {
-                width: calc(100% / 3 - 8px);
+                width: calc(100% / 2 - 6px);
                 border-right: none;
                 border-bottom: 4px solid $color-border;
                 gap: 10px;
                 padding: 7px 14px;
 
                 span:not(.nuxt-icon) {
-                    font-size: 10px;
+                    font-size: 12px;
                 }
 
                 &.active {
