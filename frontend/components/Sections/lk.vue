@@ -39,7 +39,11 @@ const tabs = computed(() => [
 	{ id: 'personal-data', label: 'Личные данные', icon: 'user' },
 	{ id: 'order-history', label: 'История покупок', icon: 'history' },
 	{ id: 'loyalty-program', label: 'Программа лояльности', icon: 'loyalty' },
-	{ id: 'favorites', label: `Избранное (${favoriteItemCount.value})`, icon: 'favorites-head' },
+	{
+		id: 'favorites',
+		label: `Избранное (${favoriteItemCount.value})`,
+		icon: 'favorites-head',
+	},
 	{ id: 'cart', label: `Корзина (${cartItemCount.value})`, icon: 'cart' },
 	{ id: 'support', label: 'Поддержка', icon: 'support' },
 ])
@@ -104,7 +108,7 @@ onMounted(async () => {
 	}
 })
 
-watch(activeTab, async (newTab) => {
+watch(activeTab, async newTab => {
 	if (newTab === 'order-history' && authStore.apiToken) {
 		await fetchOrders()
 	}
@@ -115,11 +119,30 @@ watch(activeTab, async (newTab) => {
 	<section class="section section-lk" v-if="isInitialized">
 		<div class="container">
 			<div class="lk">
-				<UiTabs v-model="activeTab" :tabsClass="'tabs-lk'" :tabs="tabs" @update:model-value="setActiveTab" />
-				<Swiper :modules="[EffectCoverflow]" :slidesPerView="1" :spaceBetween="20" :effect="'coverflow'"
-					:coverflowEffect="{ rotate: 50, stretch: 0, depth: 100, modifier: 1, slideShadows: false }"
-					class="lk__content" :auto-height="true" @swiper="(swiper) => (swiperRef = swiper)"
-					@slideChange="onSlideChange" :speed="700">
+				<UiTabs
+					v-model="activeTab"
+					:tabsClass="'tabs-lk'"
+					:tabs="tabs"
+					@update:model-value="setActiveTab"
+				/>
+				<Swiper
+					:modules="[EffectCoverflow]"
+					:slidesPerView="1"
+					:spaceBetween="20"
+					:effect="'coverflow'"
+					:coverflowEffect="{
+						rotate: 50,
+						stretch: 0,
+						depth: 100,
+						modifier: 1,
+						slideShadows: false,
+					}"
+					class="lk__content"
+					:auto-height="true"
+					@swiper="swiper => (swiperRef = swiper)"
+					@slideChange="onSlideChange"
+					:speed="700"
+				>
 					<SwiperSlide>
 						<div class="lk__content-item">
 							<LkNoAuth v-if="!authStore.apiToken" />
@@ -201,6 +224,7 @@ watch(activeTab, async (newTab) => {
 		.lk__content-item {
 			margin: 42px 0px 0px 42px;
 			width: calc(100% - 45px);
+			padding-bottom: 150px;
 
 			@media screen and (max-width: 768px) {
 				margin: 20px 0px;

@@ -69,6 +69,7 @@ const seoImages = computed(() => {
         color: $color-gray;
         letter-spacing: 0;
         padding-right: auto-clamp(0px, 90px);
+      font-family: Roboto;
 
 
 

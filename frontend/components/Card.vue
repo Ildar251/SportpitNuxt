@@ -14,8 +14,12 @@ const product = props.product
 const config = useRuntimeConfig()
 const isHovered = ref(false)
 
-const stickers = computed(() => (product.sticker ? product.sticker.split('||') : []))
-const volume = computed(() => (product.volume ? product.volume.split('||') : []))
+const stickers = computed(() =>
+	product.sticker ? product.sticker.split('||') : []
+)
+const volume = computed(() =>
+	product.volume ? product.volume.split('||') : []
+)
 
 // Индекс активного объёма
 const activeIndex = ref(0)
@@ -30,7 +34,9 @@ const addToCart = () => {
 		title: product.title,
 		price: product.price ? parseFloat(product.price) : 0,
 		image: product.image,
-		volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
+		volume: volume.value[activeIndex.value]
+			? parseInt(volume.value[activeIndex.value])
+			: 0,
 		quantity: 1,
 		taste: product.taste,
 	})
@@ -42,25 +48,36 @@ const toggleFavorite = () => {
 		title: product.title,
 		price: product.price ? parseFloat(product.price) : 0,
 		image: product.image,
-		volume: volume.value[activeIndex.value] ? parseInt(volume.value[activeIndex.value]) : 0,
+		volume: volume.value[activeIndex.value]
+			? parseInt(volume.value[activeIndex.value])
+			: 0,
 		taste: product.taste,
 		alias: product.alias,
 	})
 }
 
-import { motion } from "motion-v"
+import { motion } from 'motion-v'
 </script>
 
 <template>
-	<motion.div :initial="{ opacity: 0, y: 60, scale: 0.8 }" :whileInView="{ opacity: 1, y: 0, scale: 1 }"
+	<motion.div
+		:initial="{ opacity: 0, y: 60, scale: 0.8 }"
+		:whileInView="{ opacity: 1, y: 0, scale: 1 }"
 		:transition="{ duration: 0.6, ease: 'easeOut', delay: 0.2 }"
-		:viewport="{ once: true, margin: '0px 0px -100px 0px' }" :inViewOptions="{ once: true }">
-		<NuxtLink :to="'/products/' + product.alias" :class="'card' + (isHovered ? ' card--hover' : '')"
-			@mouseover="isHovered = true" @mouseleave="isHovered = false">
+		:viewport="{ once: true, margin: '0px 0px -100px 0px' }"
+		:inViewOptions="{ once: true }"
+		:class="'card' + (isHovered ? ' card--hover' : '')"
+		@mouseover="isHovered = true"
+		@mouseleave="isHovered = false"
+	>
+		<NuxtLink :to="'/products/' + product.alias">
 			<div class="card__image">
 				<Transition name="fade">
 					<div class="card__sticker" v-if="stickers">
-						<div v-for="sticker in stickers" :class="'card__sticker--item ' + sticker">
+						<div
+							v-for="sticker in stickers"
+							:class="'card__sticker--item ' + sticker"
+						>
 							<NuxtIcon name="new" v-if="sticker === 'new'" />
 							<NuxtIcon name="hit" v-if="sticker === 'hit'" />
 							<NuxtIcon name="hit" v-if="sticker === 'sale'" />
@@ -69,36 +86,61 @@ import { motion } from "motion-v"
 					</div>
 				</Transition>
 				<Transition name="fade">
-					<div :class="'card__favorite favorite' + (favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')"
-						@click.prevent.stop="toggleFavorite">
+					<div
+						:class="
+							'card__favorite favorite' +
+							(favoriteStore.isFavorite(product.id) ? ' favorite--active' : '')
+						"
+						@click.prevent.stop="toggleFavorite"
+					>
 						<NuxtIcon name="favorites" />
 					</div>
 				</Transition>
-				<NuxtImg :src="config.public.apiUrl + (product.image || '/images/box.svg')" :alt="product.title"
-					loading="lazy" class="card__img" placeholder="/images/box.svg" />
+				<NuxtImg
+					:src="config.public.apiUrl + (product.image || '/images/box.svg')"
+					:alt="product.title"
+					loading="lazy"
+					class="card__img"
+					placeholder="/images/box.svg"
+				/>
 			</div>
 			<div class="card__content">
 				<div class="card__brand">{{ product.brand || 'Товар' }}</div>
 				<h3 class="card__title">{{ product.title }}</h3>
 				<div class="card__taste">{{ product.taste || 'Без вкуса' }}</div>
-				<span class="card__price">{{ product.price ? `${product.price} ₽` : 'Цена не указана' }}</span>
+				<span class="card__price">{{
+					product.price ? `${product.price} ₽` : 'Цена не указана'
+				}}</span>
 				<Transition name="fade">
-					<div class="card__hovered" v-if="isHovered">
+					<div class="card__hovered" v-show="isHovered">
 						<div class="card__volume">
-							<div :class="'card__volume--item' + (index === activeIndex ? ' card__volume--active' : '')"
-								v-for="(vol, index) in volume" :key="index" @click.prevent.stop="onVolumeClick(index)">
+							<div
+								:class="
+									'card__volume--item' +
+									(index === activeIndex ? ' card__volume--active' : '')
+								"
+								v-for="(vol, index) in volume"
+								:key="index"
+								@click.prevent.stop="onVolumeClick(index)"
+							>
 								{{ vol }} мл
 							</div>
 						</div>
 						<div class="button-wrapper">
 							<Transition name="slide-up">
-								<button v-if="!cartStore.isInCart(product.id)" class="btn btn--fill"
-									@click.prevent.stop="addToCart">
+								<button
+									v-if="!cartStore.isInCart(product.id)"
+									class="btn btn--fill"
+									@click.prevent.stop="addToCart"
+								>
 									<span class="span-text">В корзину</span>
 									<NuxtIcon name="plus" />
 								</button>
-								<button v-else class="btn delete-from-cart"
-									@click.prevent.stop="cartStore.removeFromCart(product.id)">
+								<button
+									v-else
+									class="btn delete-from-cart"
+									@click.prevent.stop="cartStore.removeFromCart(product.id)"
+								>
 									<NuxtIcon name="delete" />
 								</button>
 							</Transition>
@@ -108,7 +150,6 @@ import { motion } from "motion-v"
 			</div>
 		</NuxtLink>
 	</motion.div>
-
 </template>
 
 <style lang="scss" scoped>
@@ -123,11 +164,8 @@ import { motion } from "motion-v"
 		position: absolute;
 		top: 0;
 		margin-top: 0;
-
 	}
 }
-
-
 
 .slide-up-enter-active,
 .slide-up-leave-active {
@@ -145,16 +183,22 @@ import { motion } from "motion-v"
 }
 
 .card {
-	@include flex(column, center, center);
-	gap: 25px;
-	padding: 20px;
-	position: relative;
-	transition: $transition;
+	a {
+		@include flex(column, center, center);
+		gap: 25px;
+		padding: 20px;
+		position: relative;
+		transition: $transition;
+	}
+
 	z-index: 1;
 
 	&--hover {
-		background-color: $color-light;
 		z-index: 2;
+
+		a {
+			background-color: $color-light;
+		}
 	}
 
 	.card__img {
@@ -194,8 +238,6 @@ import { motion } from "motion-v"
 		@include flex(column, flex-end, center);
 		height: auto-clamp(260px, 320px);
 	}
-
-
 
 	.card__content {
 		@include flex(column, flex-start, flex-start);
@@ -237,12 +279,14 @@ import { motion } from "motion-v"
 		left: -20px;
 		padding: 0 20px 20px;
 		width: calc(100% + 40px);
+		z-index: 1;
 	}
 
 	.card__favorite {
 		position: absolute;
 		right: 20px;
 		top: 20px;
+		z-index: 10;
 	}
 }
 </style>

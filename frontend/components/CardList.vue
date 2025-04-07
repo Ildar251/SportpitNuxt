@@ -152,5 +152,6 @@ onUnmounted(() => {
 
     flex: 1;
     margin-top: 0px;
+    width: 100%;
 }
 </style>

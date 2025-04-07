@@ -88,6 +88,7 @@ const toggleAccordion = async () => {
         max-height: 0;
         padding: 0;
         transition: max-height 0.5s ease, padding 0.5s ease;
+      font-family: Roboto;
     }
 
     &__content>p {

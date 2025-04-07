@@ -82,15 +82,15 @@ const stocks = computed(() => apiStore.stocks)
 	<header class="header">
 		<div class="container header__top">
 			<div class="header__contacts">
-				<NuxtLink :to="settings.telegram" target="_blank" class="header__link link">
+				<a :href="settings.telegram" target="_blank" class="header__link link">
 					telegram
-				</NuxtLink>
-				<NuxtLink :to="settings.whatsapp" target="_blank" class="header__link link">
+				</a>
+				<a :href="settings.whatsapp" target="_blank" class="header__link link">
 					whatsapp
-				</NuxtLink>
-				<NuxtLink :to="settings.vk" target="_blank" class="header__link link">
+				</a>
+				<a :href="settings.vk" target="_blank" class="header__link link">
 					vk
-				</NuxtLink>
+				</a>
 				<a :href="'mailto:' + settings.email" class="header__link link">
 					{{ settings.email }}
 				</a>

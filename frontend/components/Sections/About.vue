@@ -203,6 +203,7 @@ import { motion } from "motion-v"
                 color: $color-gray;
                 line-height: 1.4;
                 letter-spacing: 0;
+              font-family: Roboto;
 
                 @media screen and (max-width: 768px) {
                     margin-top: 0;

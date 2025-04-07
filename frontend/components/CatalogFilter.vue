@@ -138,7 +138,7 @@ watch(selectedCategories, (newCategories) => {
     position: sticky;
     top: 80px;
     background-color: $color-white;
-    z-index: 10;
+    z-index: 13;
 
     @media screen and (max-width: 768px) {
         width: calc(100% + 68px);

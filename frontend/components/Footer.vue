@@ -11,67 +11,53 @@ const settings = useSiteSettings()
 				<NuxtImg src="/images/logo_light.svg" alt="logo" sizes="200px  md:260px" />
 
 				<div class="footer__contacts">
-					<a :href="settings.telegram" class="footer__link">telegram</a>
-					<a :href="settings.whatsapp" class="footer__link">whatsapp</a>
-					<a :href="settings.vk" class="footer__link">vk</a>
+					<a :href="settings.telegram" target="_blank" class="footer__link">telegram</a>
+					<a :href="settings.whatsapp" target="_blank" class="footer__link">whatsapp</a>
+					<a :href="settings.vk" target="_blank" class="footer__link">vk</a>
 				</div>
 			</div>
 
 			<nav class="footer__nav">
 				<div class="footer__column">
-					<h3 class="h3">Каталог</h3>
+					<h3 class="h3"><NuxtLink to="/catalog">Каталог</NuxtLink></h3>
 					<ul class="footer__list">
 						<li class="footer__list-item">
-							<NuxtLink to="/">Спортивное питание</NuxtLink>
+              <NuxtLink :to="{ path: '/catalog', query: { category: 'Напитки' } }">
+                Напитки</NuxtLink>
+						</li>
+
+						<li class="footer__list-item">
+              <NuxtLink :to="{ path: '/catalog', query: { category: 'Энергетики' } }"
+                        >Энергетики</NuxtLink>
 						</li>
 						<li class="footer__list-item">
-							<NuxtLink to="/">Напитки</NuxtLink>
-						</li>
-						<li class="footer__list-item">
-							<NuxtLink to="/">Энергетики</NuxtLink>
-						</li>
-						<li class="footer__list-item">
-							<NuxtLink to="/">Батончики</NuxtLink>
+              <NuxtLink :to="{ path: '/catalog', query: { category: 'Батончики' } }"
+                       >Батончики</NuxtLink>
 						</li>
 					</ul>
 				</div>
 				<div class="footer__column">
-					<h3 class="h3">Инфо</h3>
+					<h3 class="h3"><NuxtLink to="/about">О нас</NuxtLink></h3>
 					<ul class="footer__list">
 						<li class="footer__list-item">
-							<NuxtLink to="/">О нас</NuxtLink>
+							<NuxtLink to="/delivery-and-payment">Способы доставки</NuxtLink>
 						</li>
 						<li class="footer__list-item">
-							<NuxtLink to="/">Вакансии</NuxtLink>
-						</li>
-						<li class="footer__list-item">
-							<NuxtLink to="/">Способы доставки</NuxtLink>
-						</li>
-						<li class="footer__list-item">
-							<NuxtLink to="/">Новости</NuxtLink>
-						</li>
-						<li class="footer__list-item">
-							<NuxtLink to="/">Контакты</NuxtLink>
+							<NuxtLink to="/contacts">Контакты</NuxtLink>
 						</li>
 					</ul>
 				</div>
 				<div class="footer__column">
-					<h3 class="h3">Партнёрам</h3>
+					<h3 class="h3"><NuxtLink to="/partners">Партнёрам</NuxtLink></h3>
 					<ul class="footer__list">
 						<li class="footer__list-item">
-							<NuxtLink to="/">Оптовым клиентам</NuxtLink>
+							<NuxtLink to="/partners">Поставщикам</NuxtLink>
 						</li>
 						<li class="footer__list-item">
-							<NuxtLink to="/">Поставщикам</NuxtLink>
+							<NuxtLink to="/partners">Спорстменам</NuxtLink>
 						</li>
 						<li class="footer__list-item">
-							<NuxtLink to="/">Спорстменам</NuxtLink>
-						</li>
-						<li class="footer__list-item">
-							<NuxtLink to="/">Блогерам</NuxtLink>
-						</li>
-						<li class="footer__list-item">
-							<NuxtLink to="/">Амбассадорам</NuxtLink>
+							<NuxtLink to="/partners">Блогерам</NuxtLink>
 						</li>
 					</ul>
 				</div>
@@ -101,6 +87,10 @@ const settings = useSiteSettings()
 	padding: auto-clamp(40px, 72px) 0;
 	background-color: $color-primary;
 	color: $color-white;
+
+  @media screen and (max-width: 768px) {
+    padding-bottom: 120px;
+  }
 
 	.footer__top {
 		@include flex(row, space-between, center);
@@ -159,7 +149,7 @@ const settings = useSiteSettings()
 			}
 
 			.footer__link {
-				font-size: auto-clamp(22px, 32px);
+				font-size: auto-clamp(18px, 32px);
 			}
 
 			&:not(:first-child)::before {
@@ -179,7 +169,7 @@ const settings = useSiteSettings()
 			}
 
 			.h3 {
-				font-size: auto-clamp(22px, 38px);
+				font-size: auto-clamp(18px, 38px);
 				font-weight: 700;
 				margin-bottom: auto-clamp(24px, 42px);
 			}
@@ -201,8 +191,12 @@ const settings = useSiteSettings()
 		flex-wrap: wrap;
 		gap: auto-clamp(20px, 40px);
 
+    @media screen and (max-width: 768px) {
+      align-items: flex-start;
+    }
+
 		.footer__link {
-			font-size: auto-clamp(22px, 38px);
+			font-size: auto-clamp(18px, 38px);
 			position: relative;
 
 			&::after {

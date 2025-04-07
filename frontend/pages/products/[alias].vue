@@ -645,6 +645,7 @@ const accordions = computed(() => [
 				color: $color-gray;
 				transition: max-height 0.5s ease;
 				overflow: hidden;
+        font-family: Roboto;
 
 				&--collapsed {
 					position: relative;

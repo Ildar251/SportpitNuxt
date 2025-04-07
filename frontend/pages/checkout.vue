@@ -244,30 +244,32 @@ const resetPromoCode = () => {
 
 // Обработчик отправки заказа
 const submitOrder = async () => {
-	if (!userSurname.value.trim()) {
-		toast.error('Пожалуйста, укажите вашу фамилию', { autoClose: 3000 })
-		return
-	}
-	if (!userName.value.trim()) {
-		toast.error('Пожалуйста, укажите ваше имя', { autoClose: 3000 })
-		return
-	}
-	if (!userEmail.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail.value)) {
-		toast.error('Пожалуйста, укажите корректный email', { autoClose: 3000 })
-		return
-	}
-	if (!userPhone.value.trim() || !/^\+?\d{10,15}$/.test(userPhone.value)) {
-		toast.error('Пожалуйста, укажите корректный номер телефона', { autoClose: 3000 })
-		return
-	}
-	if (!company.value.trim()) {
-		toast.error('Пожалуйста, укажите название компании', { autoClose: 3000 })
-		return
-	}
-	if (deliveryOptionsActive.value === 'courier' && !deliveryAddress.value.trim()) {
-		toast.error('Пожалуйста, укажите адрес доставки', { autoClose: 3000 })
-		return
-	}
+  const normalizedPhone = userPhone.value.replace(/[^\d+]/g, '')
+
+  if (!userSurname.value.trim()) {
+    toast.error('Пожалуйста, укажите вашу фамилию', { autoClose: 3000 })
+    return
+  }
+  if (!userName.value.trim()) {
+    toast.error('Пожалуйста, укажите ваше имя', { autoClose: 3000 })
+    return
+  }
+  if (!userEmail.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail.value)) {
+    toast.error('Пожалуйста, укажите корректный email', { autoClose: 3000 })
+    return
+  }
+  if (!normalizedPhone.trim() || !/^\+?\d{10,15}$/.test(normalizedPhone)) {
+    toast.error('Пожалуйста, укажите корректный номер телефона', { autoClose: 3000 })
+    return
+  }
+  if (!company.value.trim()) {
+    toast.error('Пожалуйста, укажите название компании', { autoClose: 3000 })
+    return
+  }
+  if (deliveryOptionsActive.value === 'courier' && !deliveryAddress.value.trim()) {
+    toast.error('Пожалуйста, укажите адрес доставки', { autoClose: 3000 })
+    return
+  }
 
 	try {
 		const paymentMethodLabel =
@@ -280,7 +282,7 @@ const submitOrder = async () => {
 				surname: userSurname.value,
 				name: userName.value,
 				email: userEmail.value,
-				phone: userPhone.value,
+				phone: normalizedPhone,
 				company: company.value,
 			},
 			comment: orderComment.value,
