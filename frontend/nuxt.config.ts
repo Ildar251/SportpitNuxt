@@ -9,9 +9,12 @@ export default defineNuxtConfig({
 		'motion-v/nuxt'
 	],
 
+	ssr: true,
+
+
 	runtimeConfig: {
 		public: {
-			apiUrl: process.env.apiUrl || 'http://localhost:1337',
+			apiUrl: process.env.apiUrl,
 			yandexMapsApiKey: process.env.YANDEX_MAPS_API_KEY,
 			dadataApiKey: process.env.DADATA_API_KEY,
 		},
